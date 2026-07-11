@@ -32,6 +32,16 @@ def get_conn() -> Iterator[sqlite3.Connection]:
         conn.close()
 
 
+def _table_columns(conn: sqlite3.Connection, table: str) -> set[str]:
+    rows = conn.execute(f"PRAGMA table_info({table})").fetchall()
+    return {str(row["name"]) for row in rows}
+
+
+def _ensure_column(conn: sqlite3.Connection, table: str, column: str, ddl: str) -> None:
+    if column not in _table_columns(conn, table):
+        conn.execute(f"ALTER TABLE {table} ADD COLUMN {ddl}")
+
+
 def init_db() -> None:
     schema = """
     CREATE TABLE IF NOT EXISTS projects (
@@ -59,6 +69,7 @@ def init_db() -> None:
         expected_label TEXT,
         requirements_json TEXT NOT NULL DEFAULT '{}',
         metadata_json TEXT NOT NULL DEFAULT '{}',
+        external_case_id TEXT,
         created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
     );
@@ -70,6 +81,7 @@ def init_db() -> None:
         model TEXT NOT NULL,
         status TEXT NOT NULL,
         metrics_json TEXT NOT NULL DEFAULT '{}',
+        config_json TEXT NOT NULL DEFAULT '{}',
         created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
         completed_at TEXT,
         FOREIGN KEY(project_id) REFERENCES projects(id) ON DELETE CASCADE
@@ -88,15 +100,63 @@ def init_db() -> None:
         claims_json TEXT NOT NULL DEFAULT '[]',
         rule_findings_json TEXT NOT NULL DEFAULT '[]',
         needs_human_review INTEGER NOT NULL DEFAULT 0,
+        review_status TEXT NOT NULL DEFAULT 'PENDING',
+        final_label TEXT,
         raw_json TEXT NOT NULL DEFAULT '{}',
         created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY(run_id) REFERENCES runs(id) ON DELETE CASCADE,
         FOREIGN KEY(case_id) REFERENCES eval_cases(id) ON DELETE CASCADE,
         UNIQUE(run_id, case_id)
     );
+
+    CREATE TABLE IF NOT EXISTS review_decisions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        result_id INTEGER NOT NULL,
+        reviewer TEXT NOT NULL,
+        final_label TEXT NOT NULL,
+        comment TEXT,
+        status TEXT NOT NULL,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(result_id) REFERENCES results(id) ON DELETE CASCADE,
+        UNIQUE(result_id, reviewer)
+    );
     """
     with get_conn() as conn:
         conn.executescript(schema)
+        migrate_schema(conn)
+
+
+def migrate_schema(conn: sqlite3.Connection) -> None:
+    """Non-destructive upgrades for existing SQLite databases."""
+    _ensure_column(conn, "eval_cases", "external_case_id", "external_case_id TEXT")
+    _ensure_column(conn, "runs", "config_json", "config_json TEXT NOT NULL DEFAULT '{}'")
+    _ensure_column(
+        conn,
+        "results",
+        "review_status",
+        "review_status TEXT NOT NULL DEFAULT 'PENDING'",
+    )
+    _ensure_column(conn, "results", "final_label", "final_label TEXT")
+
+    conn.executescript(
+        """
+        CREATE INDEX IF NOT EXISTS idx_documents_project_id ON documents(project_id);
+        CREATE INDEX IF NOT EXISTS idx_eval_cases_project_id ON eval_cases(project_id);
+        CREATE INDEX IF NOT EXISTS idx_eval_cases_external_case_id
+            ON eval_cases(project_id, external_case_id);
+        CREATE INDEX IF NOT EXISTS idx_runs_project_id ON runs(project_id);
+        CREATE INDEX IF NOT EXISTS idx_runs_created_at ON runs(created_at);
+        CREATE INDEX IF NOT EXISTS idx_results_run_id ON results(run_id);
+        CREATE INDEX IF NOT EXISTS idx_results_case_id ON results(case_id);
+        CREATE INDEX IF NOT EXISTS idx_results_review_status ON results(review_status);
+        CREATE INDEX IF NOT EXISTS idx_results_severity ON results(severity);
+        CREATE INDEX IF NOT EXISTS idx_results_needs_human_review ON results(needs_human_review);
+        CREATE INDEX IF NOT EXISTS idx_results_created_at ON results(created_at);
+        CREATE INDEX IF NOT EXISTS idx_review_decisions_result_id ON review_decisions(result_id);
+        CREATE INDEX IF NOT EXISTS idx_eval_cases_expected_label ON eval_cases(expected_label);
+        """
+    )
 
 
 def row_to_dict(row: sqlite3.Row | None) -> dict[str, Any] | None:

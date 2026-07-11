@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EvalForge</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">LOCAL-FIRST EVALUATION</div>
+      <h1>EvalForge</h1>
+    </div>
+    <div class="status" id="healthStatus">Checking service…</div>
+  </header>
+
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="panel compact">
+        <div class="panel-title-row">
+          <h3>Projects</h3>
+          <button class="secondary" id="refreshProjects" type="button">Refresh</button>
+        </div>
+        <form id="createProjectForm" class="stack">
+          <input id="projectName" placeholder="Project name" required maxlength="120" />
+          <textarea id="projectDescription" placeholder="Description (optional)" rows="2"></textarea>
+          <button type="submit">Create project</button>
+        </form>
+        <div class="project-list" id="projectList"></div>
+      </div>
+      <div class="notice">
+        <strong>Human review</strong>
+        <p>Low-confidence and unsupported claims are queued for adjudication. LLM grades are not authoritative.</p>
+        <button class="secondary" id="openReviewQueue" type="button">Open review queue</button>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <section class="hero panel" id="emptyState">
+        <div>
+          <div class="eyebrow">GET STARTED</div>
+          <h2>Build repeatable AI evaluation runs</h2>
+          <p>Create a project, load the sample accounting benchmark, import JSONL/CSV cases, run graders, export reports, and adjudicate uncertain results.</p>
+        </div>
+      </section>
+
+      <section class="hidden" id="projectView">
+        <div class="project-heading">
+          <div>
+            <div class="eyebrow">ACTIVE PROJECT</div>
+            <h2 id="activeProjectName"></h2>
+            <p id="activeProjectDescription"></p>
+          </div>
+          <div class="stack">
+            <button id="seedSample" type="button">Load sample data</button>
+            <button class="secondary" id="openReviewsForProject" type="button">Review queue</button>
+          </div>
+        </div>
+
+        <div class="stats-grid" id="projectStats"></div>
+
+        <div class="grid two">
+          <div class="panel">
+            <div class="panel-title-row"><h3>Add reference document</h3></div>
+            <form id="documentForm" class="stack">
+              <input id="docTitle" placeholder="Title" required />
+              <textarea id="docContent" placeholder="Approved evidence content" rows="5" required></textarea>
+              <button type="submit">Add document</button>
+            </form>
+            <div class="record-list" id="documentList"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-title-row"><h3>Add evaluation case</h3></div>
+            <form id="caseForm" class="stack">
+              <div class="form-grid">
+                <input id="caseName" placeholder="Case name" required />
+                <input id="caseExternalId" placeholder="External case_id (optional)" />
+              </div>
+              <textarea id="casePrompt" placeholder="Prompt" rows="3" required></textarea>
+              <textarea id="caseResponse" placeholder="Candidate response" rows="3" required></textarea>
+              <select id="caseExpected">
+                <option value="">Expected label (optional)</option>
+                <option value="no_issue">no_issue</option>
+                <option value="minor">minor</option>
+                <option value="major">major</option>
+              </select>
+              <button type="submit">Add case</button>
+            </form>
+            <form id="importForm" class="stack" style="margin-top:1rem">
+              <div class="panel-title-row"><h3>Import cases</h3></div>
+              <input id="importFile" type="file" accept=".jsonl,.csv" required />
+              <label class="checkbox"><input id="importDryRun" type="checkbox" /> Dry run</label>
+              <label class="checkbox"><input id="importAtomic" type="checkbox" checked /> Atomic import</label>
+              <button class="secondary" type="submit">Upload JSONL / CSV</button>
+            </form>
+            <div class="record-list" id="caseList"></div>
+          </div>
+        </div>
+
+        <div class="panel run-panel">
+          <div class="panel-title-row">
+            <h3>Run evaluation</h3>
+            <div id="exportLinks"></div>
+          </div>
+          <form id="runForm" class="run-controls">
+            <label>Provider
+              <select id="runProvider">
+                <option value="heuristic">Heuristic (offline)</option>
+                <option value="openai">OpenAI structured grader</option>
+              </select>
+            </label>
+            <label>Model
+              <input id="runModel" value="offline" />
+            </label>
+            <label>Top-k
+              <input id="runTopK" type="number" min="1" max="12" value="4" />
+            </label>
+            <button type="submit">Start run</button>
+          </form>
+          <div id="runConfig" class="meta" style="margin-top:.8rem"></div>
+          <div class="metrics" id="runMetrics"></div>
+          <div class="results" id="runResults"></div>
+        </div>
+      </section>
+
+      <section class="hidden" id="reviewView">
+        <div class="project-heading">
+          <div>
+            <div class="eyebrow">HUMAN REVIEW</div>
+            <h2>Review queue</h2>
+            <p>Inspect evidence, rule findings, and claim verdicts before assigning a final label.</p>
+          </div>
+          <button class="secondary" id="backToProject" type="button">Back</button>
+        </div>
+        <div class="grid two">
+          <div class="panel">
+            <div class="panel-title-row"><h3>Queue</h3></div>
+            <div class="form-grid">
+              <select id="reviewStatusFilter">
+                <option value="">Any status</option>
+                <option value="PENDING">PENDING</option>
+                <option value="REVIEWED">REVIEWED</option>
+                <option value="DISAGREEMENT">DISAGREEMENT</option>
+                <option value="ADJUDICATED">ADJUDICATED</option>
+              </select>
+              <select id="reviewSort">
+                <option value="confidence:asc">Confidence ↑</option>
+                <option value="confidence:desc">Confidence ↓</option>
+                <option value="created_at:desc">Newest</option>
+                <option value="created_at:asc">Oldest</option>
+              </select>
+            </div>
+            <button class="secondary" id="refreshReviews" type="button" style="margin-top:.7rem">Refresh queue</button>
+            <div class="record-list" id="reviewList"></div>
+          </div>
+          <div class="panel" id="reviewDetail">
+            <div class="empty-inline">Select a result to review.</div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>
