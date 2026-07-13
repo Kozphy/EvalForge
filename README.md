@@ -1,28 +1,107 @@
-# EvalForge
+<p align="center">
+  <img src="docs/assets/evalforge-banner.jpg" alt="EvalForge — local-first AI evaluation engineering" width="100%">
+</p>
 
-Local-first AI evaluation engineering platform for building repeatable benchmarks, grounding graders in approved evidence, checking deterministic requirements, measuring regressions, and routing uncertain cases to humans.
+<h1 align="center">EvalForge</h1>
 
-**Current version: v0.2.0**
+<p align="center">
+  <strong>Local-first AI evaluation engineering</strong><br>
+  Build repeatable benchmarks. Ground graders in approved evidence.<br>
+  Catch instruction failures deterministically. Route uncertainty to humans.
+</p>
 
-## v0.2 feature summary
+<p align="center">
+  <a href="#quick-start"><img src="https://img.shields.io/badge/quick%20start-2%20commands-6ee7c8?style=flat-square" alt="Quick start"></a>
+  <a href="#why-evalforge"><img src="https://img.shields.io/badge/version-v0.2.0-8ab4ff?style=flat-square" alt="Version"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="MIT License"></a>
+  <a href="#stack"><img src="https://img.shields.io/badge/python-3.11%2B-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python"></a>
+  <a href="#stack"><img src="https://img.shields.io/badge/FastAPI-SQLite-009688?style=flat-square" alt="FastAPI"></a>
+  <a href="#tests"><img src="https://img.shields.io/badge/tests-33%20passing-success?style=flat-square" alt="Tests"></a>
+</p>
 
-- CSV and JSONL case import (dry-run, atomic, and partial modes)
-- Evaluation report export (JSON / JSONL / CSV) with filters
-- Expanded deterministic graders (words, sentences, regex, JSON Schema, citations, Python/SQL syntax, and more)
-- Human-review queue with multi-reviewer decisions and adjudication
-- Immutable per-run grader configuration snapshots (including Git SHA when available)
-- Non-destructive SQLite schema upgrades and indexes
+<p align="center">
+  <a href="#quick-start">Quick start</a> ·
+  <a href="#demo-in-60-seconds">Demo</a> ·
+  <a href="#what-you-get">Features</a> ·
+  <a href="#architecture">Architecture</a> ·
+  <a href="#api-overview">API</a> ·
+  <a href="#limitations">Limitations</a>
+</p>
 
-## What is included
+---
 
-- **Projects** for separating benchmarks and evidence collections
-- **Reference documents** stored locally and retrieved with TF-IDF RAG
-- **Evaluation cases** with prompts, candidate responses, expected labels, and requirements
-- **Deterministic graders** that never call an LLM
-- **Heuristic factuality grader** that works offline and routes weak evidence to review
-- **Optional OpenAI structured grader** using the Responses API and a Pydantic output schema
-- **Run history, metrics, exports, and human adjudication**
-- Minimal web UI, REST API, SQLite persistence, Docker support, and tests
+## Why EvalForge?
+
+Most AI demos grade models with another model and call it done.
+
+EvalForge treats evaluation like **engineering**:
+
+| Problem in the wild | What EvalForge does |
+|---|---|
+| Prompt regressions are hard to reproduce | Versioned cases, runs, and immutable config snapshots |
+| LLM judges invent confidence | Deterministic rules first; LLM grader is optional |
+| "Unsupported" gets treated as "false" | Explicit claim verdicts + human review queue |
+| Evidence lives in someone's chat history | Local TF-IDF retrieval over approved documents |
+| Teams cannot audit why a grade happened | Rule findings, evidence IDs, claim verdicts, exports |
+
+**Positioning:** an engineering workbench for evaluation — not a production truth engine.
+
+Built for portfolio depth in **AI evaluation**, **RAG grounding**, **human-in-the-loop review**, and **local-first product design**.
+
+---
+
+## Demo in 60 seconds
+
+```bash
+python -m venv .venv
+# Windows: .venv\Scripts\Activate.ps1
+# macOS/Linux: source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
+
+Open [http://localhost:8000](http://localhost:8000) → create a project → **Load sample data** → run the offline heuristic grader.
+
+You get:
+
+1. An accounting reference document retrieved locally  
+2. Three evaluation cases with expected labels  
+3. Deterministic format checks + evidence-backed claim signals  
+4. Metrics, exportable reports, and a human-review queue for weak evidence  
+
+Or with Docker:
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+---
+
+## What you get
+
+### Core loop
+- **Projects** — separate benchmarks and evidence collections
+- **Reference documents** — approved local evidence for retrieval
+- **Evaluation cases** — prompt, candidate response, expected label, requirements
+- **Runs** — repeatable offline heuristic grading or optional OpenAI structured grading
+- **Metrics** — accuracy, precision/recall/F1, confusion matrix when labels exist
+
+### v0.2 capabilities
+- **CSV / JSONL import** — dry-run, atomic, or partial modes (up to 10k cases)
+- **Report export** — JSON, JSONL, CSV with review / label / incorrect filters
+- **Deterministic graders** — words, sentences, phrases, regex, JSON Schema, citations, Python/`ast` syntax, conservative SQL checks, and more
+- **Human review** — multi-reviewer decisions, disagreement preservation, adjudication
+- **Config snapshots** — provider, model, prompt version, retrieval settings, Git SHA, app version per run
+
+### Product principles
+- Local-first by default  
+- Deterministic checks never call an LLM  
+- OpenAI is used only when explicitly selected  
+- Unsupported ≠ false  
+- Humans adjudicate uncertain / high-risk outcomes  
+
+---
 
 ## Architecture
 
@@ -40,20 +119,45 @@ Evaluation cases
  claims + evidence + severity + confidence
                     │
                     ▼
- metrics, exports, regression history, human-review queue
+ metrics · exports · review queue · adjudication
 ```
 
-The platform keeps evidence local. The OpenAI provider sends the prompt, candidate response, configured rules, and retrieved evidence to the API only when explicitly selected.
+```mermaid
+flowchart LR
+  A[Cases + requirements] --> B[Deterministic rules]
+  A --> C[TF-IDF retrieval]
+  C --> D[Heuristic / OpenAI grader]
+  B --> D
+  D --> E[Results + metrics]
+  E --> F[Export reports]
+  E --> G[Human review queue]
+  G --> H[Adjudication]
+```
+
+---
+
+## Stack
+
+| Layer | Choice |
+|---|---|
+| API | FastAPI |
+| Validation | Pydantic |
+| Storage | SQLite (local, WAL) |
+| Retrieval | scikit-learn TF-IDF |
+| Optional LLM grader | OpenAI Responses API + structured output |
+| UI | Minimal vanilla JS (no heavy frontend framework) |
+| Packaging | Docker Compose |
+| Tests | pytest |
+
+---
 
 ## Quick start
 
-Requires Python 3.11 or newer.
+Requires **Python 3.11+**.
 
 ```bash
 python -m venv .venv
 ```
-
-Activate the environment:
 
 ```bash
 # Windows PowerShell
@@ -63,47 +167,30 @@ Activate the environment:
 source .venv/bin/activate
 ```
 
-Install and run:
-
 ```bash
 pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-Open `http://localhost:8000`.
-
-Create a project and select **Load sample data** to run the included accounting benchmark.
-
-## Optional OpenAI grader
+Optional OpenAI grader:
 
 ```bash
-cp .env.example .env
+cp .env.example .env   # PowerShell: Copy-Item .env.example .env
 ```
 
-Windows PowerShell:
+Set `OPENAI_API_KEY`, restart, and choose **OpenAI structured grader** in the UI.
 
-```powershell
-Copy-Item .env.example .env
-```
-
-Set `OPENAI_API_KEY`, restart the service, and choose **OpenAI structured grader** in the UI.
-
-## Docker
-
-```bash
-cp .env.example .env
-docker compose up --build
-```
-
-The SQLite database is persisted in `./data`.
-
-## Tests
+### Tests
 
 ```bash
 pytest -q
 ```
 
-## JSONL import example
+---
+
+## Examples that recruiters can skim
+
+### Import cases
 
 ```bash
 curl -X POST "http://localhost:8000/api/projects/1/cases/import" \
@@ -112,148 +199,116 @@ curl -X POST "http://localhost:8000/api/projects/1/cases/import" \
   -F "atomic=true"
 ```
 
-Each JSONL row:
+Sample fixtures:
 
-```json
-{
-  "case_id": "ACC-001",
-  "name": "Land depreciation error",
-  "prompt": "Explain depreciation in exactly two sentences.",
-  "response": "Depreciation allocates an asset's cost over its useful life. Land is normally depreciated over an estimated useful life.",
-  "expected_label": "major",
-  "requirements": {
-    "exact_sentences": 2,
-    "max_words": null,
-    "min_words": null,
-    "required_phrases": [],
-    "forbidden_phrases": [],
-    "required_regex": [],
-    "forbidden_regex": [],
-    "require_json": false,
-    "json_schema": null,
-    "required_json_keys": [],
-    "forbidden_json_keys": []
-  },
-  "metadata": {
-    "domain": "accounting",
-    "difficulty": "easy",
-    "source": "IAS 16"
-  }
-}
-```
+- [`examples/accounting_cases_v02.jsonl`](examples/accounting_cases_v02.jsonl)
+- [`examples/accounting_cases.csv`](examples/accounting_cases.csv)
+- [`examples/grader_config.json`](examples/grader_config.json)
+- [`examples/accounting_reference.md`](examples/accounting_reference.md)
 
-`expected_label` accepts `pass`, `no_issue`, `minor`, or `major`. `pass` is normalized to `no_issue`.
-
-## CSV import example
-
-Nested `requirements` and `metadata` cells must be JSON-encoded strings. See `examples/accounting_cases.csv`.
+### Export a run
 
 ```bash
-curl -X POST "http://localhost:8000/api/projects/1/cases/import-csv" \
-  -F "file=@examples/accounting_cases.csv" \
-  -F "atomic=true"
+curl -L "http://localhost:8000/api/runs/1/export?format=json" -o run.json
+curl -L "http://localhost:8000/api/runs/1/export?format=jsonl&review_required=true" -o review.jsonl
+curl -L "http://localhost:8000/api/runs/1/export?format=csv&predicted_label=major" -o major.csv
 ```
 
-Import limits (configurable via environment):
+### Review workflow
+
+1. Run evaluation → weak evidence sets `needs_human_review`
+2. Open the UI review queue or `GET /api/reviews`
+3. Reviewers submit labels via `POST /api/reviews/{result_id}/decisions`
+4. Disagreement is preserved as `DISAGREEMENT`
+5. Adjudicator finalizes via `POST /api/reviews/{result_id}/adjudicate`
+
+States: `PENDING` → `REVIEWED` → `DISAGREEMENT` → `ADJUDICATED`
+
+---
+
+## API overview
+
+Interactive docs: [http://localhost:8000/docs](http://localhost:8000/docs)
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| GET | `/api/health` | Health check |
+| GET/POST | `/api/projects` | List / create projects |
+| GET | `/api/projects/{id}` | Project detail |
+| POST | `/api/projects/{id}/documents` | Add evidence |
+| POST | `/api/projects/{id}/cases` | Add a case |
+| POST | `/api/projects/{id}/cases/batch` | JSON batch create |
+| POST | `/api/projects/{id}/cases/import` | CSV / JSONL import |
+| POST | `/api/projects/{id}/seed` | Load sample benchmark |
+| POST | `/api/projects/{id}/runs` | Execute evaluation |
+| GET | `/api/runs/{id}` | Run detail |
+| GET | `/api/runs/{id}/export` | Download report |
+| GET | `/api/reviews` | Review queue |
+| POST | `/api/reviews/{result_id}/decisions` | Submit decision |
+| POST | `/api/reviews/{result_id}/adjudicate` | Final adjudication |
+
+Import limits (env-configurable):
 
 | Variable | Default |
 |---|---|
 | `EVAL_MAX_IMPORT_CASES` | `10000` |
 | `EVAL_MAX_IMPORT_FILE_BYTES` | `20971520` (20 MB) |
 
-Modes:
+---
 
-- **dry_run**: validate only
-- **atomic=true**: write nothing if any row fails
-- **atomic=false**: import valid rows and return errors for rejected rows
+## Database notes
 
-## Export examples
+SQLite schema is created with `CREATE TABLE IF NOT EXISTS`, then upgraded non-destructively by `migrate_schema()` on startup.
 
-```bash
-curl -L "http://localhost:8000/api/runs/1/export?format=json" -o run.json
-curl -L "http://localhost:8000/api/runs/1/export?format=jsonl&review_required=true" -o review.jsonl
-curl -L "http://localhost:8000/api/runs/1/export?format=csv&predicted_label=major" -o major.csv
-curl -L "http://localhost:8000/api/runs/1/export?format=jsonl&incorrect_only=true" -o incorrect.jsonl
-```
+1. Stop the server  
+2. Back up `./data/evals.db`  
+3. Upgrade code / dependencies  
+4. Start the server — columns and indexes are added safely  
+5. Do not delete the DB unless you intentionally reset (`make clean`)
 
-Exports include case content, labels, confidence, rule findings, evidence IDs, claim verdicts, reviewer decisions when present, and the run configuration snapshot.
+---
 
-## Human-review workflow
+## Limitations
 
-1. Run an evaluation. Low-confidence / unsupported claims set `needs_human_review`.
-2. Open the review queue in the UI or call `GET /api/reviews`.
-3. Inspect prompt, response, evidence, rule findings, and claim verdicts.
-4. Submit reviewer decisions with `POST /api/reviews/{result_id}/decisions`.
-5. If reviewers disagree, status becomes `DISAGREEMENT`.
-6. An adjudicator sets the final label with `POST /api/reviews/{result_id}/adjudicate`.
+EvalForge is an **engineering platform**, not a production oracle.
 
-Review states: `PENDING`, `REVIEWED`, `DISAGREEMENT`, `ADJUDICATED`.
+1. Offline factuality is heuristic — lexical overlap ≠ real-world truth  
+2. **Unsupported is not false**  
+3. LLM graders are not authoritative — calibrate with human gold labels  
+4. Human adjudication is required for uncertain or high-risk decisions  
+5. SQL syntax checks are conservative and never execute SQL  
+6. TF-IDF retrieval is intentionally simple  
+7. No auth, multi-tenant isolation, async workers, or rate limiting yet  
+8. Runs are synchronous  
 
-## Grader configuration
+### Security
 
-Every run stores an immutable `config` snapshot (see `examples/grader_config.json`), including provider, model, prompt version, retrieval settings, rule-set version, dataset version, app version, and Git commit SHA when available. Historical runs remain interpretable after configuration changes.
+- Do not send confidential assessment content to OpenAI unless policy allows it  
+- Imports reject bad extensions, enforce size limits, sanitize filenames, and never execute uploads  
+- Keep secrets in `.env` — never commit them  
 
-## Database migration instructions
+---
 
-EvalForge uses SQLite with `CREATE TABLE IF NOT EXISTS` plus a non-destructive `migrate_schema()` step that adds missing columns and indexes on startup.
+## Roadmap hints
 
-Upgrade steps:
+- Inter-annotator agreement metrics  
+- Embedding retrieval + citation entailment  
+- Async workers, cost/token tracking, tracing  
+- RBAC, audit hashing, dataset versioning, CI regression gates  
 
-1. Stop the server.
-2. Back up `./data/evals.db` (and `-wal` / `-shm` if present).
-3. Pull the new version and install dependencies.
-4. Start the server. Schema upgrades apply automatically.
-5. Do **not** delete the database unless you intentionally want a reset (`make clean`).
+---
 
-## Main API endpoints
+## Why this repo is portfolio-ready
 
-| Method | Endpoint | Purpose |
-|---|---|---|
-| GET | `/api/health` | Health check |
-| GET/POST | `/api/projects` | List or create projects |
-| GET | `/api/projects/{id}` | Project detail |
-| POST | `/api/projects/{id}/documents` | Add evidence |
-| POST | `/api/projects/{id}/cases` | Add a case |
-| POST | `/api/projects/{id}/cases/batch` | JSON batch create |
-| POST | `/api/projects/{id}/cases/import` | CSV/JSONL import |
-| POST | `/api/projects/{id}/cases/import-jsonl` | JSONL import |
-| POST | `/api/projects/{id}/cases/import-csv` | CSV import |
-| POST | `/api/projects/{id}/seed` | Load sample benchmark |
-| POST | `/api/projects/{id}/runs` | Execute evaluation |
-| GET | `/api/runs/{id}` | Run detail |
-| GET | `/api/runs/{id}/export` | Download report |
-| GET | `/api/reviews` | Review queue |
-| GET | `/api/reviews/{result_id}` | Review detail |
-| POST | `/api/reviews/{result_id}/decisions` | Submit decision |
-| POST | `/api/reviews/{result_id}/adjudicate` | Final adjudication |
-| GET | `/docs` | OpenAPI docs |
+- End-to-end product: API + UI + Docker + tests + docs  
+- Clear evaluation philosophy (deterministic → retrieval → optional LLM → humans)  
+- Audit-friendly artifacts (config snapshots, exports, review decisions)  
+- Honest limitations instead of hype  
 
-## Important limitations
+If you are hiring for **AI evaluation / LLMOps / applied RAG**, this is designed to show systems thinking — not just a chat wrapper.
 
-EvalForge is an engineering platform, not a production truth engine.
-
-1. Offline factuality remains heuristic. Lexical overlap is not real-world truth.
-2. **Unsupported is not the same as false.** Missing evidence means review, not automatic contradiction.
-3. LLM graders are not authoritative. Calibrate against human-labeled gold data.
-4. Human adjudication is required for uncertain or high-risk decisions.
-5. SQL syntax checks are conservative and do **not** execute SQL.
-6. TF-IDF retrieval is intentionally simple.
-7. No authentication, tenant isolation, background job queue, or rate limiting is included.
-8. The run endpoint is synchronous.
-
-## Security notes
-
-- Never upload confidential material whose rules prohibit external tools when using the OpenAI grader.
-- Import endpoints reject unsupported extensions, enforce size limits, sanitize filenames, and never execute uploaded content.
-- Keep `OPENAI_API_KEY` in `.env`; do not commit secrets.
-
-## Sensible next milestones
-
-- Inter-annotator agreement metrics
-- Embedding-based retrieval and citation entailment checks
-- Async workers, retries, cost/token tracking, and tracing
-- RBAC, audit-log hashing, dataset versioning, and CI regression gates
+---
 
 ## License
 
-MIT
+[MIT](LICENSE)
