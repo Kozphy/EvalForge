@@ -1,0 +1,17 @@
+{
+  "provider": "heuristic",
+  "model": "offline",
+  "model_version": null,
+  "prompt_version": "1",
+  "system_prompt": null,
+  "grader_prompt": null,
+  "temperature": 0,
+  "max_output_tokens": null,
+  "retrieval_method": "tfidf",
+  "retrieval_top_k": 4,
+  "evidence_threshold": 0.25,
+  "rule_set_version": "1",
+  "dataset_version": "accounting-sample-v1",
+  "git_commit_sha": null,
+  "app_version": "0.2.0"
+}

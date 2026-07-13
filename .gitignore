@@ -1,7 +1,185 @@
+# =============================================================================
+# EvalForge .gitignore
+# -----------------------------------------------------------------------------
+# Ignore local runtime artifacts, secrets, caches, and machine-specific files.
+# Keep tracked templates and placeholders such as:
+#   - .env.example
+#   - data/.gitkeep
+#   - examples/*
+# Do not commit API keys, SQLite databases, or virtual environments.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Python bytecode and interpreter caches
+# Generated automatically; safe to delete and regenerate.
+# -----------------------------------------------------------------------------
 __pycache__/
-.pytest_cache/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+
+# -----------------------------------------------------------------------------
+# Virtual environments
+# Local dependency installs created by `python -m venv` or similar tools.
+# -----------------------------------------------------------------------------
 .venv/
+venv/
+ENV/
+env/
+.env/
+.venv.bak/
+venv.bak/
+
+# -----------------------------------------------------------------------------
+# Environment variables and secrets
+# Keep `.env.example` as the public template. Never commit real credentials.
+# -----------------------------------------------------------------------------
 .env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+credentials.json
+
+# -----------------------------------------------------------------------------
+# Distribution and packaging build outputs
+# Created by setuptools, pip, build, and related packaging tools.
+# -----------------------------------------------------------------------------
+build/
+dist/
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+pip-wheel-metadata/
+
+# -----------------------------------------------------------------------------
+# Installer and packaging logs
+# -----------------------------------------------------------------------------
+pip-log.txt
+pip-delete-this-directory.txt
+
+# -----------------------------------------------------------------------------
+# Unit tests, coverage, and property-based testing caches
+# Includes pytest temporary cache directories created during local runs.
+# -----------------------------------------------------------------------------
+.pytest_cache/
+pytest-cache-files-*/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.tox/
+.nox/
+.cache/
+nosetests.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# -----------------------------------------------------------------------------
+# Type checkers and linters
+# Local analysis caches from mypy, ruff, pyright, and similar tools.
+# -----------------------------------------------------------------------------
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.ruff_cache/
+.pytype/
+.pyre/
+.pyright/
+
+# -----------------------------------------------------------------------------
+# Jupyter Notebook checkpoints
+# -----------------------------------------------------------------------------
+.ipynb_checkpoints/
+
+# -----------------------------------------------------------------------------
+# Local SQLite databases
+# EvalForge persists evaluation data under ./data by default.
+# Keep the empty `data/.gitkeep` so the directory exists in a fresh clone.
+# -----------------------------------------------------------------------------
 data/*.db
 data/*.db-shm
 data/*.db-wal
+data/*.sqlite
+data/*.sqlite3
+*.db
+*.db-shm
+*.db-wal
+!data/.gitkeep
+
+# -----------------------------------------------------------------------------
+# Logs and local runtime / upload scratch space
+# -----------------------------------------------------------------------------
+logs/
+*.log
+*.out
+*.pid
+tmp/
+temp/
+.temp/
+.upload/
+uploads/
+
+# -----------------------------------------------------------------------------
+# Operating system metadata
+# macOS Finder and Windows Explorer junk files.
+# -----------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# -----------------------------------------------------------------------------
+# Editors and IDEs
+# Personal editor settings should stay local unless the team agrees otherwise.
+# -----------------------------------------------------------------------------
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+.project
+.pydevproject
+.settings/
+
+# -----------------------------------------------------------------------------
+# Cursor and local agent artifacts
+# -----------------------------------------------------------------------------
+.cursor/
+.understand-anything/
+
+# -----------------------------------------------------------------------------
+# Docker local overrides
+# Use docker-compose.override.yml for machine-specific compose settings only.
+# -----------------------------------------------------------------------------
+*.local
+docker-compose.override.yml
+
+# -----------------------------------------------------------------------------
+# Miscellaneous temporary and local version pins
+# -----------------------------------------------------------------------------
+*.bak
+*.tmp
+*.orig
+.python-version
