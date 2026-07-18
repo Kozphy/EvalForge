@@ -32,6 +32,16 @@ class GraderConfig(BaseModel):
     evidence_threshold: float = 0.25
     rule_set_version: str = "1"
     dataset_version: str | None = None
+
+    # Deterministic v0.3 release controls.
+    min_groundedness: float = Field(default=0.75, ge=0.0, le=1.0)
+    min_citation_coverage: float = Field(default=0.75, ge=0.0, le=1.0)
+    control_min_confidence: float = Field(default=0.65, ge=0.0, le=1.0)
+    block_on_contradiction: bool = True
+    block_on_invalid_citation: bool = True
+    block_on_major_rule_failure: bool = True
+    trace_enabled: bool = True
+
     git_commit_sha: str | None = None
     app_version: str = APP_VERSION
 
@@ -70,6 +80,13 @@ def build_grader_config(
     evidence_threshold: float = 0.25,
     rule_set_version: str = "1",
     model_version: str | None = None,
+    min_groundedness: float = 0.75,
+    min_citation_coverage: float = 0.75,
+    control_min_confidence: float = 0.65,
+    block_on_contradiction: bool = True,
+    block_on_invalid_citation: bool = True,
+    block_on_major_rule_failure: bool = True,
+    trace_enabled: bool = True,
 ) -> GraderConfig:
     return GraderConfig(
         provider=provider,
@@ -85,6 +102,13 @@ def build_grader_config(
         evidence_threshold=evidence_threshold,
         rule_set_version=rule_set_version,
         dataset_version=dataset_version,
+        min_groundedness=min_groundedness,
+        min_citation_coverage=min_citation_coverage,
+        control_min_confidence=control_min_confidence,
+        block_on_contradiction=block_on_contradiction,
+        block_on_invalid_citation=block_on_invalid_citation,
+        block_on_major_rule_failure=block_on_major_rule_failure,
+        trace_enabled=trace_enabled,
         git_commit_sha=detect_git_commit_sha(),
         app_version=APP_VERSION,
     )
