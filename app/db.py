@@ -99,6 +99,7 @@ def init_db() -> None:
         evidence_json TEXT NOT NULL DEFAULT '[]',
         claims_json TEXT NOT NULL DEFAULT '[]',
         rule_findings_json TEXT NOT NULL DEFAULT '[]',
+        controls_json TEXT NOT NULL DEFAULT '{}',
         needs_human_review INTEGER NOT NULL DEFAULT 0,
         review_status TEXT NOT NULL DEFAULT 'PENDING',
         final_label TEXT,
@@ -121,6 +122,18 @@ def init_db() -> None:
         FOREIGN KEY(result_id) REFERENCES results(id) ON DELETE CASCADE,
         UNIQUE(result_id, reviewer)
     );
+
+    CREATE TABLE IF NOT EXISTS trace_events (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        run_id INTEGER NOT NULL,
+        result_id INTEGER,
+        stage TEXT NOT NULL,
+        status TEXT NOT NULL,
+        payload_json TEXT NOT NULL DEFAULT '{}',
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY(run_id) REFERENCES runs(id) ON DELETE CASCADE,
+        FOREIGN KEY(result_id) REFERENCES results(id) ON DELETE CASCADE
+    );
     """
     with get_conn() as conn:
         conn.executescript(schema)
@@ -138,9 +151,27 @@ def migrate_schema(conn: sqlite3.Connection) -> None:
         "review_status TEXT NOT NULL DEFAULT 'PENDING'",
     )
     _ensure_column(conn, "results", "final_label", "final_label TEXT")
+    _ensure_column(
+        conn,
+        "results",
+        "controls_json",
+        "controls_json TEXT NOT NULL DEFAULT '{}'",
+    )
 
     conn.executescript(
         """
+        CREATE TABLE IF NOT EXISTS trace_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            run_id INTEGER NOT NULL,
+            result_id INTEGER,
+            stage TEXT NOT NULL,
+            status TEXT NOT NULL,
+            payload_json TEXT NOT NULL DEFAULT '{}',
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(run_id) REFERENCES runs(id) ON DELETE CASCADE,
+            FOREIGN KEY(result_id) REFERENCES results(id) ON DELETE CASCADE
+        );
+
         CREATE INDEX IF NOT EXISTS idx_documents_project_id ON documents(project_id);
         CREATE INDEX IF NOT EXISTS idx_eval_cases_project_id ON eval_cases(project_id);
         CREATE INDEX IF NOT EXISTS idx_eval_cases_external_case_id
@@ -155,6 +186,9 @@ def migrate_schema(conn: sqlite3.Connection) -> None:
         CREATE INDEX IF NOT EXISTS idx_results_created_at ON results(created_at);
         CREATE INDEX IF NOT EXISTS idx_review_decisions_result_id ON review_decisions(result_id);
         CREATE INDEX IF NOT EXISTS idx_eval_cases_expected_label ON eval_cases(expected_label);
+        CREATE INDEX IF NOT EXISTS idx_trace_events_run_id ON trace_events(run_id);
+        CREATE INDEX IF NOT EXISTS idx_trace_events_result_id ON trace_events(result_id);
+        CREATE INDEX IF NOT EXISTS idx_trace_events_stage ON trace_events(stage);
         """
     )
 
