@@ -27,6 +27,11 @@ CSV_FIELDS = [
     "confidence",
     "needs_human_review",
     "review_status",
+    "control_action",
+    "release_allowed",
+    "groundedness",
+    "citation_coverage",
+    "retrieval_max_score",
     "reviewer_final_label",
     "reviewer_comment",
     "grader_provider",
@@ -40,6 +45,7 @@ CSV_FIELDS = [
     "deterministic_findings",
     "retrieved_evidence_ids",
     "claim_verdicts",
+    "control_findings",
 ]
 
 
@@ -62,6 +68,7 @@ def _serialize_result(run: dict[str, Any], result: dict[str, Any], decisions: li
     evidence = result.get("evidence") or []
     claims = result.get("claims") or []
     findings = result.get("rule_findings") or []
+    controls = result.get("controls") or {}
     latest = _latest_decision(decisions)
     adjudicated = next((d for d in decisions if d.get("status") == "ADJUDICATED"), None)
     final_decision = adjudicated or latest
@@ -82,8 +89,16 @@ def _serialize_result(run: dict[str, Any], result: dict[str, Any], decisions: li
         "needs_human_review": bool(result.get("needs_human_review")),
         "review_status": result.get("review_status"),
         "human_review_flag": bool(result.get("needs_human_review")),
+        "control_action": controls.get("action"),
+        "release_allowed": controls.get("release_allowed"),
+        "groundedness": controls.get("groundedness"),
+        "citation_coverage": controls.get("citation_coverage"),
+        "retrieval_max_score": controls.get("retrieval_max_score"),
+        "control_findings": controls.get("findings") or [],
+        "controls": controls,
         "deterministic_findings": findings,
         "retrieved_evidence_ids": [item.get("chunk_id") for item in evidence if isinstance(item, dict)],
+        "retrieval_context": [item.get("text") for item in evidence if isinstance(item, dict)],
         "claim_verdicts": claims,
         "grader_provider": run.get("provider"),
         "model": run.get("model"),
@@ -190,6 +205,7 @@ def export_run_csv(rows: list[dict[str, Any]]) -> str:
         flat["deterministic_findings"] = json.dumps(row.get("deterministic_findings") or [], ensure_ascii=False)
         flat["retrieved_evidence_ids"] = json.dumps(row.get("retrieved_evidence_ids") or [], ensure_ascii=False)
         flat["claim_verdicts"] = json.dumps(row.get("claim_verdicts") or [], ensure_ascii=False)
+        flat["control_findings"] = json.dumps(row.get("control_findings") or [], ensure_ascii=False)
         writer.writerow({key: flat.get(key) for key in CSV_FIELDS})
     return buffer.getvalue()
 
