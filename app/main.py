@@ -9,6 +9,7 @@ from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 from . import export_service, import_service, review_service, service
+from .async_runs import ensure_async_job_schema, router as async_runs_router
 from .db import init_db
 from .schemas import (
     AdjudicationCreate,
@@ -27,6 +28,7 @@ STATIC_DIR = Path(__file__).resolve().parent / "static"
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     init_db()
+    ensure_async_job_schema()
     yield
 
 
@@ -36,6 +38,7 @@ app = FastAPI(
     description="Local-first AI evaluation engineering platform",
     lifespan=lifespan,
 )
+app.include_router(async_runs_router)
 
 
 @app.get("/api/health")
