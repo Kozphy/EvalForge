@@ -123,6 +123,15 @@ class RunCreate(BaseModel):
     dataset_version: str | None = None
     model_version: str | None = None
 
+    # v0.3 runtime release controls. These are deterministic and snapshotted.
+    min_groundedness: float = Field(default=0.75, ge=0.0, le=1.0)
+    min_citation_coverage: float = Field(default=0.75, ge=0.0, le=1.0)
+    control_min_confidence: float = Field(default=0.65, ge=0.0, le=1.0)
+    block_on_contradiction: bool = True
+    block_on_invalid_citation: bool = True
+    block_on_major_rule_failure: bool = True
+    trace_enabled: bool = True
+
 
 class EvidenceItem(BaseModel):
     document_id: int

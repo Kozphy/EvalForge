@@ -8,7 +8,7 @@ from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
-from . import export_service, import_service, review_service, service
+from . import export_service, import_service, observability, review_service, service
 from .db import init_db
 from .schemas import (
     AdjudicationCreate,
@@ -160,6 +160,32 @@ def get_run(run_id: int) -> dict[str, Any]:
     if run is None:
         raise HTTPException(status_code=404, detail="Run not found")
     return run
+
+
+@app.get("/api/runs/{run_id}/controls")
+def get_run_controls(run_id: int) -> dict[str, Any]:
+    run = service.get_run(run_id)
+    if run is None:
+        raise HTTPException(status_code=404, detail="Run not found")
+    return {
+        "run_id": run_id,
+        "controls": (run.get("metrics") or {}).get("controls") or {},
+        "results": [
+            {
+                "result_id": item.get("id"),
+                "case_id": item.get("case_id"),
+                "controls": item.get("controls") or {},
+            }
+            for item in run.get("results") or []
+        ],
+    }
+
+
+@app.get("/api/runs/{run_id}/trace")
+def get_run_trace(run_id: int) -> list[dict[str, Any]]:
+    if service.get_run(run_id) is None:
+        raise HTTPException(status_code=404, detail="Run not found")
+    return observability.list_trace_events(run_id)
 
 
 @app.get("/api/runs/{run_id}/export")
