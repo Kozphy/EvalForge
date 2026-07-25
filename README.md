@@ -13,7 +13,7 @@
 <p align="center">
   <a href="#quick-start"><img src="https://img.shields.io/badge/quick%20start-2%20commands-6ee7c8?style=flat-square" alt="Quick start"></a>
   <a href="#why-evalforge"><img src="https://img.shields.io/badge/version-v0.2.0-8ab4ff?style=flat-square" alt="Version"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="MIT License"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Proprietary-red?style=flat-square" alt="Proprietary License"></a>
   <a href="#stack"><img src="https://img.shields.io/badge/python-3.11%2B-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python"></a>
   <a href="#stack"><img src="https://img.shields.io/badge/FastAPI-SQLite-009688?style=flat-square" alt="FastAPI"></a>
   <a href="#tests"><img src="https://img.shields.io/badge/tests-33%20passing-success?style=flat-square" alt="Tests"></a>
@@ -311,4 +311,4 @@ If you are hiring for **AI evaluation / LLMOps / applied RAG**, this is designed
 
 ## License
 
-[MIT](LICENSE)
+Copyright (c) 2026 Kozphy. All rights reserved. This project is proprietary; viewing the repository does not grant permission to copy, modify, distribute, or reuse its contents. See the [proprietary license](LICENSE).
