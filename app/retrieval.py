@@ -23,8 +23,8 @@ def chunk_text(document_id: int, title: str, content: str, max_chars: int = 900)
     Long paragraphs are split on sentence boundaries. Empty content is ignored and
     chunk IDs remain deterministic for the same document and content ordering.
     """
-    if max_chars < 100:
-        raise ValueError("max_chars must be at least 100")
+    if max_chars < 20:
+        raise ValueError("max_chars must be at least 20")
 
     paragraphs = [p.strip() for p in re.split(r"\n\s*\n", content) if p.strip()]
     chunks: list[Chunk] = []
