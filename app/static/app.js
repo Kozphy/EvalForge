@@ -117,6 +117,29 @@ function renderProject() {
   `).join("") || `<div class="meta">No evaluation cases.</div>`;
 
   renderRun();
+  renderApiTarget();
+}
+
+function renderApiTarget() {
+  const target = state.activeProject?.api_target;
+  const summary = $("apiTargetSummary");
+  if (!target) {
+    summary.textContent = "No API target configured.";
+    $("apiTargetUrl").value = "";
+    $("apiTargetBody").value = '{"input": "{{prompt}}"}';
+    $("apiTargetPath").value = "data.answer";
+    $("apiTargetTimeout").value = "30";
+    $("apiTargetAuthHeader").value = "Authorization";
+    $("apiTargetAuthEnv").value = "";
+    return;
+  }
+  $("apiTargetUrl").value = target.url || "";
+  $("apiTargetBody").value = target.body_template || '{"input": "{{prompt}}"}';
+  $("apiTargetPath").value = target.response_field_path || "data.answer";
+  $("apiTargetTimeout").value = String(target.timeout_seconds ?? 30);
+  $("apiTargetAuthHeader").value = target.auth_header || "Authorization";
+  $("apiTargetAuthEnv").value = target.auth_env_var || "";
+  summary.textContent = `Configured: ${target.url} · path=${target.response_field_path} · timeout=${target.timeout_seconds}s${target.auth_env_var ? ` · auth env=${target.auth_env_var}` : ""}`;
 }
 
 function renderRun() {
@@ -161,6 +184,7 @@ function renderRun() {
       </div>
       <p>${escapeHtml(item.reason || "")}</p>
       <div class="meta">confidence ${escapeHtml(String(item.confidence))} · expected ${escapeHtml(item.expected_label || "—")} · ${escapeHtml(item.review_status || "PENDING")}</div>
+      ${item.raw?.api_call ? `<div class="meta">API: status ${escapeHtml(String(item.raw.api_call.http_status ?? "—"))} · ${escapeHtml(String(item.raw.api_call.latency_ms ?? "—"))} ms${item.raw.api_call.error ? ` · error: ${escapeHtml(item.raw.api_call.error)}` : ""}</div>` : ""}
       <details class="details">
         <summary>Evidence, rules, claims</summary>
         <div class="evidence">${escapeHtml(JSON.stringify(item.evidence || [], null, 2))}</div>
@@ -384,6 +408,28 @@ function bindEvents() {
     }
   });
 
+  $("apiTargetForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    try {
+      const saved = await api(`/api/projects/${state.activeProject.id}/api-target`, {
+        method: "PUT",
+        body: JSON.stringify({
+          url: $("apiTargetUrl").value,
+          body_template: $("apiTargetBody").value,
+          response_field_path: $("apiTargetPath").value,
+          timeout_seconds: Number($("apiTargetTimeout").value),
+          auth_header: $("apiTargetAuthHeader").value || "Authorization",
+          auth_env_var: $("apiTargetAuthEnv").value || null,
+        }),
+      });
+      state.activeProject.api_target = saved;
+      renderApiTarget();
+      showToast("API target saved (secret values are never stored)");
+    } catch (error) {
+      showToast(error.message);
+    }
+  });
+
   $("runForm").addEventListener("submit", async (event) => {
     event.preventDefault();
     const button = event.submitter;
@@ -412,6 +458,9 @@ function bindEvents() {
     }
     if ($("runProvider").value === "heuristic") {
       $("runModel").value = "offline";
+    }
+    if ($("runProvider").value === "client_api" && $("runModel").value === "offline") {
+      $("runModel").value = "client-api";
     }
   });
 

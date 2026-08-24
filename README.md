@@ -12,11 +12,11 @@
 
 <p align="center">
   <a href="#quick-start"><img src="https://img.shields.io/badge/quick%20start-2%20commands-6ee7c8?style=flat-square" alt="Quick start"></a>
-  <a href="#why-evalforge"><img src="https://img.shields.io/badge/version-v0.2.0-8ab4ff?style=flat-square" alt="Version"></a>
+  <a href="#why-evalforge"><img src="https://img.shields.io/badge/version-v0.3.0-8ab4ff?style=flat-square" alt="Version"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Proprietary-red?style=flat-square" alt="Proprietary License"></a>
   <a href="#stack"><img src="https://img.shields.io/badge/python-3.11%2B-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python"></a>
   <a href="#stack"><img src="https://img.shields.io/badge/FastAPI-SQLite-009688?style=flat-square" alt="FastAPI"></a>
-  <a href="#tests"><img src="https://img.shields.io/badge/tests-33%20passing-success?style=flat-square" alt="Tests"></a>
+  <a href="#tests"><img src="https://img.shields.io/badge/tests-44%20passing-success?style=flat-square" alt="Tests"></a>
 </p>
 
 <p align="center">
@@ -94,12 +94,20 @@ docker compose up --build
 - **Human review** — multi-reviewer decisions, disagreement preservation, adjudication
 - **Config snapshots** — provider, model, prompt version, retrieval settings, Git SHA, app version per run
 
+### v0.3 client API runner
+- **Per-project API target** — POST URL, JSON body template with `{{prompt}}`, response field path, timeout
+- **Auth via environment variables** — store only the env-var *name*; never the secret value
+- **Batch execution** — every case is called; one failure does not stop the rest
+- **Per-case telemetry** — response text, latency, HTTP status, and redacted errors
+- **Heuristic grading** on successful responses; failed calls are recorded and queued for review
+
 ### Product principles
 - Local-first by default  
 - Deterministic checks never call an LLM  
 - OpenAI is used only when explicitly selected  
 - Unsupported ≠ false  
 - Humans adjudicate uncertain / high-risk outcomes  
+- Client API secrets never appear in API responses, UI, logs, or stored JSON  
 
 ---
 
@@ -107,6 +115,8 @@ docker compose up --build
 
 ```text
 Evaluation cases
+      │
+      ├── client API runner (optional POST {{prompt}})
       │
       ├── deterministic rule checks
       │
@@ -124,7 +134,9 @@ Evaluation cases
 
 ```mermaid
 flowchart LR
-  A[Cases + requirements] --> B[Deterministic rules]
+  A[Cases + requirements] --> R[Optional client API POST]
+  R --> B[Deterministic rules]
+  A --> B
   A --> C[TF-IDF retrieval]
   C --> D[Heuristic / OpenAI grader]
   B --> D
@@ -179,6 +191,29 @@ cp .env.example .env   # PowerShell: Copy-Item .env.example .env
 ```
 
 Set `OPENAI_API_KEY`, restart, and choose **OpenAI structured grader** in the UI.
+
+### Client API runner (v0.3)
+
+1. Copy `.env.example` → `.env` and set a token env var, e.g. `CLIENT_API_TOKEN=...`
+2. Create a project and add (or import) evaluation cases — prompts are required; placeholder responses are fine
+3. In the UI **Client API target** panel (or `PUT /api/projects/{id}/api-target`), configure:
+   - URL (`http`/`https` only)
+   - Body template JSON containing `{{prompt}}`
+   - Response field path (e.g. `data.answer`)
+   - Timeout seconds (default 30)
+   - Auth header name + **env var name** (not the secret)
+4. Choose provider **Client API runner** and start a run
+5. Inspect per-case HTTP status, latency, extracted text, and errors; successful responses update the case candidate text and are graded offline
+
+```bash
+curl -X PUT "http://localhost:8000/api/projects/1/api-target" \
+  -H "Content-Type: application/json" \
+  -d "{\"url\":\"http://127.0.0.1:9000/generate\",\"body_template\":\"{\\\"input\\\": \\\"{{prompt}}\\\"}\",\"response_field_path\":\"data.answer\",\"timeout_seconds\":30,\"auth_header\":\"Authorization\",\"auth_env_var\":\"CLIENT_API_TOKEN\"}"
+
+curl -X POST "http://localhost:8000/api/projects/1/runs" \
+  -H "Content-Type: application/json" \
+  -d "{\"provider\":\"client_api\",\"model\":\"client-api\",\"top_k\":4}"
+```
 
 ### Tests
 
@@ -240,6 +275,7 @@ Interactive docs: [http://localhost:8000/docs](http://localhost:8000/docs)
 | POST | `/api/projects/{id}/cases/batch` | JSON batch create |
 | POST | `/api/projects/{id}/cases/import` | CSV / JSONL import |
 | POST | `/api/projects/{id}/seed` | Load sample benchmark |
+| PUT | `/api/projects/{id}/api-target` | Configure client API target |
 | POST | `/api/projects/{id}/runs` | Execute evaluation |
 | GET | `/api/runs/{id}` | Run detail |
 | GET | `/api/runs/{id}/export` | Download report |
@@ -280,12 +316,15 @@ EvalForge is an **engineering platform**, not a production oracle.
 6. TF-IDF retrieval is intentionally simple  
 7. No auth, multi-tenant isolation, async workers, or rate limiting yet  
 8. Runs are synchronous  
+9. Client API runner supports **POST only** in v0.3  
+10. **SSRF:** URL validation requires `http`/`https` with a hostname and rejects embedded credentials. Loopback and private addresses are allowed for local-first demos. Do not expose EvalForge to untrusted users without egress controls — a configured target can reach internal network hosts  
 
 ### Security
 
 - Do not send confidential assessment content to OpenAI unless policy allows it  
 - Imports reject bad extensions, enforce size limits, sanitize filenames, and never execute uploads  
 - Keep secrets in `.env` — never commit them  
+- Client API auth: store only the environment-variable **name** on the project; the secret value is read at request time and redacted from errors/stored payloads  
 
 ---
 

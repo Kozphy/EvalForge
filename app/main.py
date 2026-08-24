@@ -7,8 +7,10 @@ from typing import Any, Literal
 from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import ValidationError
 
 from . import export_service, import_service, review_service, service
+from .client_api import ApiTargetConfig
 from .db import init_db
 from .schemas import (
     AdjudicationCreate,
@@ -142,6 +144,29 @@ def seed_project(project_id: int) -> dict[str, Any]:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except FileNotFoundError as exc:
         raise HTTPException(status_code=500, detail=f"Sample data missing: {exc}") from exc
+
+
+@app.put("/api/projects/{project_id}/api-target")
+def put_api_target(project_id: int, payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        target = ApiTargetConfig.model_validate(payload)
+        return service.set_api_target(project_id, target)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValidationError as exc:
+        for err in exc.errors():
+            err_type = str(err.get("type", ""))
+            if err_type.startswith("greater_than") or err_type.startswith("less_than"):
+                raise HTTPException(status_code=422, detail=exc.errors()) from exc
+        messages: list[str] = []
+        for err in exc.errors():
+            msg = str(err.get("msg", ""))
+            if msg.startswith("Value error, "):
+                msg = msg[len("Value error, ") :]
+            messages.append(msg)
+        raise HTTPException(status_code=400, detail="; ".join(messages) or "Invalid API target") from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @app.post("/api/projects/{project_id}/runs", status_code=201)

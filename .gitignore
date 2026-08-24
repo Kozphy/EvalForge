@@ -78,6 +78,7 @@ pip-delete-this-directory.txt
 # Includes pytest temporary cache directories created during local runs.
 # -----------------------------------------------------------------------------
 .pytest_cache/
+.pytest-tmp/
 pytest-cache-files-*/
 .coverage
 .coverage.*
@@ -183,3 +184,7 @@ docker-compose.override.yml
 *.tmp
 *.orig
 .python-version
+
+# local leftover personal material
+output/
+
