@@ -1,0 +1,5 @@
+-r requirements.txt
+
+# Optional local tensor retrieval backend. For CUDA-specific wheels, follow the
+# official PyTorch installation selector instead of relying on this generic pin.
+torch>=2.4.0
