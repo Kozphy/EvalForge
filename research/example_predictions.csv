@@ -1,0 +1,7 @@
+case_id,gold_label,rule_baseline,evalforge_hybrid
+c001,fail,pass,fail
+c002,pass,pass,pass
+c003,fail,fail,fail
+c004,pass,fail,pass
+c005,fail,pass,fail
+c006,pass,pass,pass
