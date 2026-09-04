@@ -1,3 +1,5 @@
+import pytest
+
 from app.release_gate import GatePolicy, compare_runs
 
 
@@ -28,7 +30,7 @@ def _row(case_id, severity, name="case"):
 def test_release_gate_passes_improved_candidate(monkeypatch):
     runs = {
         1: _run(1, 7, 0.80, [_row(1, "minor")]),
-        2: _run(2, 7, 0.90, [_row(1, "pass")]),
+        2: _run(2, 7, 0.90, [_row(1, "no_issue")]),
     }
     monkeypatch.setattr("app.release_gate.service.get_run", lambda run_id: runs[run_id])
     result = compare_runs(1, 2)
@@ -39,7 +41,7 @@ def test_release_gate_passes_improved_candidate(monkeypatch):
 
 def test_release_gate_blocks_major_regression(monkeypatch):
     runs = {
-        1: _run(1, 7, 0.90, [_row(1, "pass")]),
+        1: _run(1, 7, 0.90, [_row(1, "no_issue")]),
         2: _run(2, 7, 0.90, [_row(1, "major")]),
     }
     monkeypatch.setattr("app.release_gate.service.get_run", lambda run_id: runs[run_id])
@@ -51,8 +53,8 @@ def test_release_gate_blocks_major_regression(monkeypatch):
 
 def test_release_gate_enforces_accuracy_policy(monkeypatch):
     runs = {
-        1: _run(1, 7, 0.90, [_row(1, "pass")]),
-        2: _run(2, 7, 0.91, [_row(1, "pass")]),
+        1: _run(1, 7, 0.90, [_row(1, "no_issue")]),
+        2: _run(2, 7, 0.91, [_row(1, "no_issue")]),
     }
     monkeypatch.setattr("app.release_gate.service.get_run", lambda run_id: runs[run_id])
     result = compare_runs(1, 2, GatePolicy(min_accuracy_delta=0.05))
@@ -62,13 +64,41 @@ def test_release_gate_enforces_accuracy_policy(monkeypatch):
 
 def test_release_gate_rejects_cross_project_comparison(monkeypatch):
     runs = {
-        1: _run(1, 7, 0.90, [_row(1, "pass")]),
-        2: _run(2, 8, 0.95, [_row(1, "pass")]),
+        1: _run(1, 7, 0.90, [_row(1, "no_issue")]),
+        2: _run(2, 8, 0.95, [_row(1, "no_issue")]),
     }
     monkeypatch.setattr("app.release_gate.service.get_run", lambda run_id: runs[run_id])
-    try:
+    with pytest.raises(ValueError, match="same project"):
         compare_runs(1, 2)
-    except ValueError as exc:
-        assert "same project" in str(exc)
-    else:
-        raise AssertionError("Expected ValueError")
+
+
+def test_release_gate_rejects_case_set_mismatch_by_default(monkeypatch):
+    runs = {
+        1: _run(1, 7, 0.90, [_row(1, "no_issue"), _row(2, "minor")]),
+        2: _run(2, 7, 0.95, [_row(1, "no_issue")]),
+    }
+    monkeypatch.setattr("app.release_gate.service.get_run", lambda run_id: runs[run_id])
+    with pytest.raises(ValueError, match="same case set"):
+        compare_runs(1, 2)
+
+
+def test_release_gate_requires_labeled_accuracy_by_default(monkeypatch):
+    runs = {
+        1: _run(1, 7, None, [_row(1, "no_issue")]),
+        2: _run(2, 7, None, [_row(1, "no_issue")]),
+    }
+    monkeypatch.setattr("app.release_gate.service.get_run", lambda run_id: runs[run_id])
+    with pytest.raises(ValueError, match="labeled accuracy"):
+        compare_runs(1, 2)
+
+
+def test_release_gate_can_compare_unlabeled_runs_when_policy_allows(monkeypatch):
+    runs = {
+        1: _run(1, 7, None, [_row(1, "minor")]),
+        2: _run(2, 7, None, [_row(1, "no_issue")]),
+    }
+    monkeypatch.setattr("app.release_gate.service.get_run", lambda run_id: runs[run_id])
+    result = compare_runs(1, 2, GatePolicy(require_labeled_accuracy=False))
+    assert result.decision == "PASS"
+    assert result.summary["accuracy_delta"] is None
+    assert result.summary["improvement_count"] == 1
