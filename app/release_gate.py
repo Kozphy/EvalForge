@@ -12,6 +12,8 @@ class GatePolicy:
     max_major_regressions: int = 0
     max_new_review_cases: int = 0
     max_api_error_delta: int = 0
+    require_same_case_set: bool = True
+    require_labeled_accuracy: bool = True
 
 
 @dataclass(frozen=True)
@@ -29,22 +31,46 @@ class ReleaseDecision:
 
 
 def _severity_rank(value: str | None) -> int:
-    return {"pass": 0, "minor": 1, "major": 2}.get(str(value or "").lower(), 0)
+    normalized = str(value or "").lower()
+    ranks = {"no_issue": 0, "pass": 0, "minor": 1, "major": 2}
+    if normalized not in ranks:
+        raise ValueError(f"Unsupported severity: {value!r}")
+    return ranks[normalized]
 
 
 def _case_key(row: dict[str, Any]) -> str:
     external = row.get("external_case_id")
     if external:
         return f"external:{external}"
-    return f"case:{row.get('case_id')}"
+    case_id = row.get("case_id")
+    if case_id is None:
+        raise ValueError("Result is missing both external_case_id and case_id")
+    return f"case:{case_id}"
 
 
-def _metric(run: dict[str, Any], name: str, default: float = 0.0) -> float:
-    value = (run.get("metrics") or {}).get(name, default)
+def _index_results(rows: list[dict[str, Any]], label: str) -> dict[str, dict[str, Any]]:
+    indexed: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        key = _case_key(row)
+        if key in indexed:
+            raise ValueError(f"{label} run contains duplicate comparison key {key}")
+        indexed[key] = row
+    return indexed
+
+
+def _optional_metric(run: dict[str, Any], name: str) -> float | None:
+    value = (run.get("metrics") or {}).get(name)
+    if value is None:
+        return None
     try:
         return float(value)
-    except (TypeError, ValueError):
-        return default
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"Metric {name!r} is not numeric") from exc
+
+
+def _count_metric(run: dict[str, Any], name: str) -> int:
+    value = _optional_metric(run, name)
+    return int(value) if value is not None else 0
 
 
 def compare_runs(
@@ -62,11 +88,22 @@ def compare_runs(
     if baseline.get("status") != "completed" or candidate.get("status") != "completed":
         raise ValueError("Both runs must be completed")
 
-    baseline_rows = {_case_key(row): row for row in baseline.get("results", [])}
-    candidate_rows = {_case_key(row): row for row in candidate.get("results", [])}
-    shared = sorted(set(baseline_rows) & set(candidate_rows))
+    baseline_rows = _index_results(baseline.get("results", []), "Baseline")
+    candidate_rows = _index_results(candidate.get("results", []), "Candidate")
+    baseline_keys = set(baseline_rows)
+    candidate_keys = set(candidate_rows)
+    shared = sorted(baseline_keys & candidate_keys)
+    missing_from_candidate = sorted(baseline_keys - candidate_keys)
+    new_in_candidate = sorted(candidate_keys - baseline_keys)
+
     if not shared:
         raise ValueError("Runs do not share comparable cases")
+    if policy.require_same_case_set and (missing_from_candidate or new_in_candidate):
+        raise ValueError(
+            "Runs must contain the same case set for a release decision "
+            f"(missing_from_candidate={len(missing_from_candidate)}, "
+            f"new_in_candidate={len(new_in_candidate)})"
+        )
 
     regressions: list[dict[str, Any]] = []
     improvements = 0
@@ -88,19 +125,28 @@ def compare_runs(
         elif after_rank < before_rank:
             improvements += 1
 
-    baseline_accuracy = _metric(baseline, "accuracy")
-    candidate_accuracy = _metric(candidate, "accuracy")
-    accuracy_delta = candidate_accuracy - baseline_accuracy
-    baseline_reviews = int(_metric(baseline, "human_review_count"))
-    candidate_reviews = int(_metric(candidate, "human_review_count"))
+    baseline_accuracy = _optional_metric(baseline, "accuracy")
+    candidate_accuracy = _optional_metric(candidate, "accuracy")
+    if policy.require_labeled_accuracy and (baseline_accuracy is None or candidate_accuracy is None):
+        raise ValueError("Both runs must include labeled accuracy for the default release policy")
+    accuracy_delta = (
+        candidate_accuracy - baseline_accuracy
+        if baseline_accuracy is not None and candidate_accuracy is not None
+        else None
+    )
+
+    baseline_reviews = _count_metric(baseline, "human_review_count")
+    candidate_reviews = _count_metric(candidate, "human_review_count")
     review_delta = candidate_reviews - baseline_reviews
-    baseline_errors = int(_metric(baseline, "api_error_count"))
-    candidate_errors = int(_metric(candidate, "api_error_count"))
+    baseline_errors = _count_metric(baseline, "api_error_count")
+    candidate_errors = _count_metric(candidate, "api_error_count")
     api_error_delta = candidate_errors - baseline_errors
-    major_regressions = sum(1 for row in regressions if str(row["candidate_severity"]).lower() == "major")
+    major_regressions = sum(
+        1 for row in regressions if str(row["candidate_severity"]).lower() == "major"
+    )
 
     reasons: list[str] = []
-    if accuracy_delta < policy.min_accuracy_delta:
+    if accuracy_delta is not None and accuracy_delta < policy.min_accuracy_delta:
         reasons.append(
             f"Accuracy delta {accuracy_delta:+.4f} is below required {policy.min_accuracy_delta:+.4f}."
         )
@@ -119,7 +165,11 @@ def compare_runs(
 
     decision = "FAIL" if reasons else "PASS"
     summary = {
+        "baseline_case_count": len(baseline_rows),
+        "candidate_case_count": len(candidate_rows),
         "shared_case_count": len(shared),
+        "missing_from_candidate_count": len(missing_from_candidate),
+        "new_in_candidate_count": len(new_in_candidate),
         "baseline_accuracy": baseline_accuracy,
         "candidate_accuracy": candidate_accuracy,
         "accuracy_delta": accuracy_delta,
