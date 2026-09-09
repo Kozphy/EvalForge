@@ -39,3 +39,11 @@ jobs:
             --iterations 500 \
             --seed 42 \
             --output /tmp/evalforge-metrics.json
+
+      - name: Enforce AI release policy gate
+        run: |
+          python scripts/ci_eval_gate.py \
+            --candidate examples/ci_candidate.json \
+            --baseline examples/ci_baseline.json \
+            --policy config/release_policy.json \
+            --output /tmp/evalforge-gate.json
