@@ -1,0 +1,9 @@
+{
+  "metrics": {
+    "quality_score": 0.91,
+    "safety_score": 0.99,
+    "latency_p95_ms": 1800.0,
+    "cost_per_case_usd": 0.021
+  },
+  "safety_failures": 0
+}
