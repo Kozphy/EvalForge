@@ -39,3 +39,8 @@ jobs:
             --iterations 500 \
             --seed 42 \
             --output /tmp/evalforge-metrics.json
+
+      - name: Smoke-test distillation policy gate
+        run: |
+          python -m research.run_distillation research/example_distillation.jsonl \
+            --output /tmp/evalforge-distillation.json
