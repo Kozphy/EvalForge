@@ -1,0 +1,56 @@
+app/control_plane/operator_service.py
+  s_1a0486d26c7e7e::t_d1f6460a9b072f 178
+  s_1a0486d26c7e7e::t_ba4ce9578d192c 1-175,180-244
+  s_1a0486d26c7e7e::t_8e38da941fad60 176-177,179
+app/static/index.html
+  s_1a0486d26c7e7e::t_61ea99d8ced166 6-7,10-16,19-22,26-27,29-30,32-34,36,38-42,45
+tests/test_operator_ui.py
+  s_1a0486d26c7e7e::t_ede3613714a251 1-83
+app/control_plane/operator_fixtures.py
+  s_1a0486d26c7e7e::t_7483651494ba7f 1-488
+app/static/operator.js
+  s_1a0486d26c7e7e::t_c6f2cd6093beaa 1-745
+app/version.py
+  s_1a0486d26c7e7e::t_f366f8bfac26cf 5
+app/static/workbench.html
+  s_1a0486d26c7e7e::t_c052cb1f4f5dd9 1-189
+app/main.py
+  s_1a0486d26c7e7e::t_bbcf98a5c24be3 15,430-431
+  s_1a0486d26c7e7e::t_ed487c8c281a2e 325-421,427-429
+README.md
+  s_1a0486d26c7e7e::t_5429bb52eaf744 2,8,12-13,16-17,21-22,24,30,32,34,36-45,47-48,52-56,60-69,72,74-81,85,95,97,99-108,110,112,114,121,123-125,130-144,148-152,155,157-158,160,162,164-175,177,179,182-183,186,188,190,192,194-196,198,202,204-213,215,217,220-221,226,228,230-242,246,248-251,253,257,259,261-268,272,274-279,285
+  s_1a0486d26c7e7e::t_fc36586923b89a 116,118-119
+docs/architecture/operator-ui-deliverables.md
+  s_1a0486d26c7e7e::t_55076fd74d5592 1-60,63-92
+  s_1a0486d26c7e7e::t_a04971c1cf6aee 61-62
+.github/workflows/ci.yml
+  s_1a0486d26c7e7e::t_a134c9c82d327c 34-36
+scripts/check_operator_console.py
+  s_1a0486d26c7e7e::t_45c551c3e13ce6 15-17
+  s_1a0486d26c7e7e::t_f300d3ec6710b3 1-14,18-124
+docs/architecture/operator-ui-audit.md
+  s_1a0486d26c7e7e::t_3787c8c280d2ff 3,9-10,15-16,22,31-33,38-39
+  s_1a0486d26c7e7e::t_4d44e3219f78ad 1-2,4-8,11-14,17-21,23-30,34-37
+app/static/operator.css
+  s_1a0486d26c7e7e::t_21338f638191ba 1-159
+app/static/workbench.css
+  s_1a0486d26c7e7e::t_3d524ce3227d6e 1-138
+app/static/workbench.js
+  s_1a0486d26c7e7e::t_8202c5c9a5d842 1-489
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "9be6c9e55b60834dea1120164d63149efb5a10e7",
+  "prompts": {},
+  "sessions": {
+    "s_1a0486d26c7e7e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "5594125b-55d1-44f9-ac04-0e25f3d0ef33",
+        "model": "default"
+      },
+      "human_author": "Zixsa <50504962+Kozphy@users.noreply.github.com>"
+    }
+  }
+}
