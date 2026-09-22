@@ -121,6 +121,7 @@ docker compose up --build
 - **Evaluation cases** — prompt, candidate response, expected label, requirements
 - **Runs** — repeatable offline heuristic grading or optional OpenAI structured grading
 - **Metrics** — accuracy, precision/recall/F1, confusion matrix when labels exist
+- **Distillation gate** — compare teacher/student quality, cost, and latency with an auditable CI decision
 
 ### v0.2 capabilities
 - **CSV / JSONL import** — dry-run, atomic, or partial modes (up to 10k cases)
@@ -255,6 +256,28 @@ curl -X POST "http://localhost:8000/api/projects/1/runs" \
 ```bash
 pytest -q
 ```
+
+---
+
+## Knowledge distillation evaluation
+
+EvalForge can govern the evaluation stage of response distillation without
+claiming to train models or access proprietary logits. Supply paired,
+held-out teacher/student observations and enforce quality-retention,
+cost-reduction, latency-reduction, and maximum-quality-drop thresholds.
+
+```bash
+python -m research.run_distillation research/example_distillation.jsonl \
+  --min-quality-retention 0.90 \
+  --min-cost-reduction 0.50 \
+  --output distillation-report.json
+```
+
+The command returns exit code `2` when policy fails, so it can block a
+deployment in CI. Reports include failed checks and a deterministic dataset
+SHA-256 fingerprint. See
+[the knowledge distillation guide](docs/knowledge-distillation.md) for the
+data contract, caveats, and recommended production loop.
 
 ---
 
