@@ -12,6 +12,7 @@ from pydantic import ValidationError
 from . import export_service, import_service, review_service, service
 from .client_api import ApiTargetConfig
 from .control_plane import api as control_plane_api
+from .control_plane import operator_service
 from .db import init_db
 from .schemas import (
     AdjudicationCreate,
@@ -321,9 +322,111 @@ def control_plane_evidence(experiment_id: str) -> list[dict[str, Any]]:
     return control_plane_api.export_evidence(experiment_id)
 
 
+@app.post("/api/operator/demo/reset")
+def operator_demo_reset() -> dict[str, Any]:
+    world = operator_service.reset_demo()
+    return {"status": "ok", "source": "demo_fixture", "run_id": world["runs"][0]["run_id"]}
+
+
+@app.get("/api/operator/overview")
+def operator_overview() -> dict[str, Any]:
+    return operator_service.get_overview()
+
+
+@app.get("/api/operator/runs")
+def operator_list_runs(
+    model: str | None = None,
+    dataset: str | None = None,
+    result: str | None = None,
+    policy_decision: str | None = None,
+    environment: str | None = None,
+) -> list[dict[str, Any]]:
+    return operator_service.list_runs(
+        {
+            "model": model,
+            "dataset": dataset,
+            "result": result,
+            "policy_decision": policy_decision,
+            "environment": environment,
+        }
+    )
+
+
+@app.get("/api/operator/runs/{run_id}")
+def operator_get_run(run_id: str) -> dict[str, Any]:
+    run = operator_service.get_run(run_id)
+    if run is None:
+        raise HTTPException(status_code=404, detail="Run not found")
+    return run
+
+
+@app.get("/api/operator/baselines")
+def operator_baselines() -> list[dict[str, Any]]:
+    return operator_service.list_baselines()
+
+
+@app.get("/api/operator/regressions")
+def operator_regressions(run_id: str | None = None) -> dict[str, Any]:
+    return operator_service.get_regressions(run_id)
+
+
+@app.get("/api/operator/policy")
+def operator_policy(run_id: str | None = None) -> dict[str, Any]:
+    return operator_service.get_policy(run_id)
+
+
+@app.get("/api/operator/evidence")
+def operator_evidence(run_id: str | None = None, experiment_id: str | None = None) -> list[dict[str, Any]]:
+    return operator_service.list_evidence(run_id=run_id, experiment_id=experiment_id)
+
+
+@app.get("/api/operator/approvals")
+def operator_approvals() -> list[dict[str, Any]]:
+    return operator_service.list_approvals()
+
+
+@app.post("/api/operator/approvals/{approval_id}/decision")
+def operator_approval_decision(approval_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        return operator_service.decide_approval(
+            approval_id,
+            outcome=str(payload.get("outcome") or ""),
+            reviewer=str(payload.get("reviewer") or ""),
+            comment=payload.get("comment"),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@app.get("/api/operator/audit")
+def operator_audit(
+    actor: str | None = None,
+    event_type: str | None = None,
+    entity: str | None = None,
+) -> list[dict[str, Any]]:
+    return operator_service.list_audit({"actor": actor, "event_type": event_type, "entity": entity})
+
+
+@app.get("/api/operator/research")
+def operator_research() -> dict[str, Any]:
+    return operator_service.get_research()
+
+
+@app.get("/api/operator/settings")
+def operator_settings() -> dict[str, Any]:
+    return operator_service.get_settings()
+
+
 @app.get("/")
 def index() -> FileResponse:
     return FileResponse(STATIC_DIR / "index.html")
+
+
+@app.get("/workbench")
+def workbench() -> FileResponse:
+    return FileResponse(STATIC_DIR / "workbench.html")
 
 
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")

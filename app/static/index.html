@@ -3,187 +3,45 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EvalForge</title>
-  <link rel="stylesheet" href="/static/styles.css" />
+  <title>EvalForge Control Plane</title>
+  <link rel="stylesheet" href="/static/operator.css" />
 </head>
 <body>
-  <header class="topbar">
-    <div>
-      <div class="eyebrow">LOCAL-FIRST EVALUATION</div>
-      <h1>EvalForge</h1>
-    </div>
-    <div class="status" id="healthStatus">Checking service…</div>
-  </header>
-
-  <div class="shell">
-    <aside class="sidebar">
-      <div class="panel compact">
-        <div class="panel-title-row">
-          <h3>Projects</h3>
-          <button class="secondary" id="refreshProjects" type="button">Refresh</button>
+  <div class="app">
+    <aside class="nav">
+      <div class="brand">
+        <div class="brand-mark">EF</div>
+        <div>
+          <strong>EvalForge</strong>
+          <div class="brand-sub">Evaluation Control Plane</div>
         </div>
-        <form id="createProjectForm" class="stack">
-          <input id="projectName" placeholder="Project name" required maxlength="120" />
-          <textarea id="projectDescription" placeholder="Description (optional)" rows="2"></textarea>
-          <button type="submit">Create project</button>
-        </form>
-        <div class="project-list" id="projectList"></div>
       </div>
-      <div class="notice">
-        <strong>Human review</strong>
-        <p>Low-confidence and unsupported claims are queued for adjudication. LLM grades are not authoritative.</p>
-        <button class="secondary" id="openReviewQueue" type="button">Open review queue</button>
+      <nav id="navList" class="nav-list" aria-label="Primary"></nav>
+      <div class="nav-foot">
+        <span class="pill muted" id="maturityPill">demo_fixture</span>
+        <a class="nav-link" href="/workbench">Legacy workbench</a>
       </div>
     </aside>
 
-    <main class="workspace">
-      <section class="hero panel" id="emptyState">
+    <div class="main">
+      <header class="top">
         <div>
-          <div class="eyebrow">GET STARTED</div>
-          <h2>Build repeatable AI evaluation runs</h2>
-          <p>Create a project, load the sample accounting benchmark, import JSONL/CSV cases, run graders, export reports, and adjudicate uncertain results.</p>
+          <h1 id="pageTitle">Overview</h1>
+          <p class="subtitle" id="pageSubtitle">Operator console</p>
         </div>
-      </section>
-
-      <section class="hidden" id="projectView">
-        <div class="project-heading">
-          <div>
-            <div class="eyebrow">ACTIVE PROJECT</div>
-            <h2 id="activeProjectName"></h2>
-            <p id="activeProjectDescription"></p>
-          </div>
-          <div class="stack">
-            <button id="seedSample" type="button">Load sample data</button>
-            <button class="secondary" id="openReviewsForProject" type="button">Review queue</button>
-          </div>
+        <div class="top-actions">
+          <span class="status-dot" id="healthDot" title="API health"></span>
+          <button type="button" class="btn ghost" id="resetDemoBtn">Reset demo</button>
         </div>
+      </header>
 
-        <div class="stats-grid" id="projectStats"></div>
-
-        <div class="panel">
-          <div class="panel-title-row"><h3>Client API target</h3></div>
-          <p class="meta">POST each case prompt to a remote endpoint. Store only the auth env-var <em>name</em> — never the secret value.</p>
-          <form id="apiTargetForm" class="stack">
-            <input id="apiTargetUrl" placeholder="https://api.example.com/v1/generate" required />
-            <textarea id="apiTargetBody" placeholder='{"input": "{{prompt}}"}' rows="3" required></textarea>
-            <div class="form-grid">
-              <input id="apiTargetPath" placeholder="Response field path (e.g. data.answer)" required />
-              <input id="apiTargetTimeout" type="number" min="0.1" max="120" step="0.1" value="30" title="Timeout seconds" />
-            </div>
-            <div class="form-grid">
-              <input id="apiTargetAuthHeader" placeholder="Auth header (Authorization)" value="Authorization" />
-              <input id="apiTargetAuthEnv" placeholder="Auth env var name (e.g. CLIENT_API_TOKEN)" />
-            </div>
-            <button class="secondary" type="submit">Save API target</button>
-          </form>
-          <div class="meta" id="apiTargetSummary" style="margin-top:.6rem"></div>
-        </div>
-
-        <div class="grid two">
-          <div class="panel">
-            <div class="panel-title-row"><h3>Add reference document</h3></div>
-            <form id="documentForm" class="stack">
-              <input id="docTitle" placeholder="Title" required />
-              <textarea id="docContent" placeholder="Approved evidence content" rows="5" required></textarea>
-              <button type="submit">Add document</button>
-            </form>
-            <div class="record-list" id="documentList"></div>
-          </div>
-
-          <div class="panel">
-            <div class="panel-title-row"><h3>Add evaluation case</h3></div>
-            <form id="caseForm" class="stack">
-              <div class="form-grid">
-                <input id="caseName" placeholder="Case name" required />
-                <input id="caseExternalId" placeholder="External case_id (optional)" />
-              </div>
-              <textarea id="casePrompt" placeholder="Prompt" rows="3" required></textarea>
-              <textarea id="caseResponse" placeholder="Candidate response" rows="3" required></textarea>
-              <select id="caseExpected">
-                <option value="">Expected label (optional)</option>
-                <option value="no_issue">no_issue</option>
-                <option value="minor">minor</option>
-                <option value="major">major</option>
-              </select>
-              <button type="submit">Add case</button>
-            </form>
-            <form id="importForm" class="stack" style="margin-top:1rem">
-              <div class="panel-title-row"><h3>Import cases</h3></div>
-              <input id="importFile" type="file" accept=".jsonl,.csv" required />
-              <label class="checkbox"><input id="importDryRun" type="checkbox" /> Dry run</label>
-              <label class="checkbox"><input id="importAtomic" type="checkbox" checked /> Atomic import</label>
-              <button class="secondary" type="submit">Upload JSONL / CSV</button>
-            </form>
-            <div class="record-list" id="caseList"></div>
-          </div>
-        </div>
-
-        <div class="panel run-panel">
-          <div class="panel-title-row">
-            <h3>Run evaluation</h3>
-            <div id="exportLinks"></div>
-          </div>
-          <form id="runForm" class="run-controls">
-            <label>Provider
-              <select id="runProvider">
-                <option value="heuristic">Heuristic (offline)</option>
-                <option value="openai">OpenAI structured grader</option>
-                <option value="client_api">Client API runner</option>
-              </select>
-            </label>
-            <label>Model
-              <input id="runModel" value="offline" />
-            </label>
-            <label>Top-k
-              <input id="runTopK" type="number" min="1" max="12" value="4" />
-            </label>
-            <button type="submit">Start run</button>
-          </form>
-          <div id="runConfig" class="meta" style="margin-top:.8rem"></div>
-          <div class="metrics" id="runMetrics"></div>
-          <div class="results" id="runResults"></div>
-        </div>
-      </section>
-
-      <section class="hidden" id="reviewView">
-        <div class="project-heading">
-          <div>
-            <div class="eyebrow">HUMAN REVIEW</div>
-            <h2>Review queue</h2>
-            <p>Inspect evidence, rule findings, and claim verdicts before assigning a final label.</p>
-          </div>
-          <button class="secondary" id="backToProject" type="button">Back</button>
-        </div>
-        <div class="grid two">
-          <div class="panel">
-            <div class="panel-title-row"><h3>Queue</h3></div>
-            <div class="form-grid">
-              <select id="reviewStatusFilter">
-                <option value="">Any status</option>
-                <option value="PENDING">PENDING</option>
-                <option value="REVIEWED">REVIEWED</option>
-                <option value="DISAGREEMENT">DISAGREEMENT</option>
-                <option value="ADJUDICATED">ADJUDICATED</option>
-              </select>
-              <select id="reviewSort">
-                <option value="confidence:asc">Confidence ↑</option>
-                <option value="confidence:desc">Confidence ↓</option>
-                <option value="created_at:desc">Newest</option>
-                <option value="created_at:asc">Oldest</option>
-              </select>
-            </div>
-            <button class="secondary" id="refreshReviews" type="button" style="margin-top:.7rem">Refresh queue</button>
-            <div class="record-list" id="reviewList"></div>
-          </div>
-          <div class="panel" id="reviewDetail">
-            <div class="empty-inline">Select a result to review.</div>
-          </div>
-        </div>
-      </section>
-    </main>
+      <div id="banner" class="banner hidden" role="status"></div>
+      <div id="viewRoot" class="view" aria-live="polite">
+        <div class="empty">Loading…</div>
+      </div>
+    </div>
   </div>
-
   <div id="toast" class="toast hidden"></div>
-  <script src="/static/app.js"></script>
+  <script src="/static/operator.js"></script>
 </body>
 </html>

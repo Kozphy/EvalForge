@@ -31,6 +31,9 @@ jobs:
       - name: Run test suite
         run: pytest -q
 
+      - name: Operator console smoke
+        run: python scripts/check_operator_console.py
+
       - name: Control-plane demo smoke
         run: |
           python -m app.control_plane.cli experiment run examples/control_plane_demo/experiment.yaml --demo --seed-baseline production
