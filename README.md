@@ -5,18 +5,18 @@
 <h1 align="center">EvalForge</h1>
 
 <p align="center">
-  <strong>Local-first AI evaluation engineering</strong><br>
-  Build repeatable benchmarks. Ground graders in approved evidence.<br>
-  Catch instruction failures deterministically. Route uncertainty to humans.
+  <strong>Evaluation Control Plane for LLM, RAG, and Agent systems</strong><br>
+  Orchestrate specialized evaluators. Normalize evidence. Compare baselines.<br>
+  Enforce release policy. Preserve audit trails — without rewriting every backend.
 </p>
 
 <p align="center">
   <a href="#quick-start"><img src="https://img.shields.io/badge/quick%20start-2%20commands-6ee7c8?style=flat-square" alt="Quick start"></a>
-  <a href="#why-evalforge"><img src="https://img.shields.io/badge/version-v0.3.0-8ab4ff?style=flat-square" alt="Version"></a>
+  <a href="#why-evalforge"><img src="https://img.shields.io/badge/version-v0.4.0-8ab4ff?style=flat-square" alt="Version"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Proprietary-red?style=flat-square" alt="Proprietary License"></a>
   <a href="#stack"><img src="https://img.shields.io/badge/python-3.11%2B-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python"></a>
   <a href="#stack"><img src="https://img.shields.io/badge/FastAPI-SQLite-009688?style=flat-square" alt="FastAPI"></a>
-  <a href="#tests"><img src="https://img.shields.io/badge/tests-44%20passing-success?style=flat-square" alt="Tests"></a>
+  <a href="#tests"><img src="https://img.shields.io/badge/tests-control%20plane-success?style=flat-square" alt="Tests"></a>
 </p>
 
 <p align="center">
@@ -44,9 +44,44 @@ EvalForge treats evaluation like **engineering**:
 | Evidence lives in someone's chat history | Local TF-IDF retrieval over approved documents |
 | Teams cannot audit why a grade happened | Rule findings, evidence IDs, claim verdicts, exports |
 
-**Positioning:** an engineering workbench for evaluation — not a production truth engine.
+**Positioning:** an **Evaluation Control Plane** that also ships a local-first workbench — orchestrate backends, normalize evidence, compare baselines, gate releases, and keep humans in the loop. Not a production truth oracle.
 
 Built for portfolio depth in **AI evaluation**, **RAG grounding**, **human-in-the-loop review**, and **local-first product design**.
+
+---
+
+## Evaluation Control Plane (v0.4)
+
+```mermaid
+flowchart TB
+  Spec[Experiment Spec] --> Orch[Orchestrator]
+  Orch --> DE[DeepEval adapter]
+  Orch --> PF[Promptfoo adapter]
+  Orch --> CU[Custom heuristic]
+  Orch --> PX[Phoenix traces optional]
+  DE --> Norm[Normalized Results]
+  PF --> Norm
+  CU --> Norm
+  Norm --> Ev[Evidence Store]
+  Ev --> Base[Baseline Registry]
+  Base --> Reg[Regression Engine]
+  Reg --> Pol[Policy Engine]
+  Pol -->|ALLOW| Release[Release]
+  Pol -->|DENY / REVIEW| Human[Human Review + Audit Manifest]
+```
+
+| Status | Capability |
+|---|---|
+| **Implemented** | Contracts, registry, adapters (optional + fakes), orchestrator, baseline, regression, policy, evidence/redaction, audit manifest, CLI, `/api/control-plane/*` |
+| **Experimental** | Live DeepEval/Promptfoo execution (CI uses deterministic fakes) |
+| **Planned** | Durable CP repositories, worker retries/DLQ, OTEL export, immutable golden-set registry |
+
+```bash
+python -m app.control_plane.cli experiment run examples/control_plane_demo/experiment.yaml --demo --seed-baseline production
+python -m app.control_plane.cli evaluators health
+```
+
+Docs: [`docs/architecture/control-plane.md`](docs/architecture/control-plane.md) · [`docs/architecture/current-state.md`](docs/architecture/current-state.md)
 
 ---
 
@@ -282,6 +317,11 @@ Interactive docs: [http://localhost:8000/docs](http://localhost:8000/docs)
 | GET | `/api/reviews` | Review queue |
 | POST | `/api/reviews/{result_id}/decisions` | Submit decision |
 | POST | `/api/reviews/{result_id}/adjudicate` | Final adjudication |
+| POST | `/api/control-plane/experiments/run` | Control-plane experiment run |
+| GET | `/api/control-plane/evaluators` | Evaluator health listing |
+| GET | `/api/control-plane/baselines` | List baselines |
+| GET | `/api/control-plane/evidence/{experiment_id}` | Export evidence |
+| GET | `/api/control-plane/runs/{run_id}` | Control-plane run detail |
 
 Import limits (env-configurable):
 

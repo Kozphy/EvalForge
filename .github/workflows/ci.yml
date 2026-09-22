@@ -31,6 +31,10 @@ jobs:
       - name: Run test suite
         run: pytest -q
 
+      - name: Control-plane demo smoke
+        run: |
+          python -m app.control_plane.cli experiment run examples/control_plane_demo/experiment.yaml --demo --seed-baseline production
+
       - name: Smoke-test research analysis
         run: |
           python -m research.run_analysis research/example_predictions.csv \

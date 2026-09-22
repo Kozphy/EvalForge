@@ -11,6 +11,7 @@ from pydantic import ValidationError
 
 from . import export_service, import_service, review_service, service
 from .client_api import ApiTargetConfig
+from .control_plane import api as control_plane_api
 from .db import init_db
 from .schemas import (
     AdjudicationCreate,
@@ -35,7 +36,7 @@ async def lifespan(_app: FastAPI):
 app = FastAPI(
     title="EvalForge",
     version=APP_VERSION,
-    description="Local-first AI evaluation engineering platform",
+    description="Evaluation Control Plane for LLM, RAG, and Agent systems (local-first workbench + orchestrated backends)",
     lifespan=lifespan,
 )
 
@@ -280,6 +281,44 @@ def adjudicate_review(result_id: int, payload: AdjudicationCreate) -> dict[str, 
         return review_service.adjudicate(result_id, payload)
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@app.post("/api/control-plane/experiments/run")
+def control_plane_run_experiment(payload: dict[str, Any]) -> dict[str, Any]:
+    """Run a control-plane experiment (demo adapters by default)."""
+    demo = bool(payload.get("demo", True))
+    try:
+        return control_plane_api.run_control_plane_experiment(payload, demo=demo)
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.get("/api/control-plane/evaluators")
+def control_plane_evaluators() -> list[dict[str, Any]]:
+    return control_plane_api.list_evaluators()
+
+
+@app.get("/api/control-plane/evaluators/health")
+def control_plane_evaluators_health() -> list[dict[str, Any]]:
+    return control_plane_api.list_evaluators()
+
+
+@app.get("/api/control-plane/runs/{run_id}")
+def control_plane_get_run(run_id: str) -> dict[str, Any]:
+    run = control_plane_api.get_run(run_id)
+    if run is None:
+        raise HTTPException(status_code=404, detail="Control-plane run not found")
+    return run
+
+
+@app.get("/api/control-plane/baselines")
+def control_plane_baselines() -> list[dict[str, Any]]:
+    return control_plane_api.list_baselines()
+
+
+@app.get("/api/control-plane/evidence/{experiment_id}")
+def control_plane_evidence(experiment_id: str) -> list[dict[str, Any]]:
+    return control_plane_api.export_evidence(experiment_id)
 
 
 @app.get("/")
