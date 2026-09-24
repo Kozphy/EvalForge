@@ -1,0 +1,30 @@
+{
+  "n_cases": 154,
+  "n_passed": 154,
+  "accuracy": 1.0,
+  "pass_rate": 1.0,
+  "hallucination_rate": 0.0,
+  "calculation_error_rate": 0.0,
+  "reasoning_error_rate": 0.0,
+  "citation_evidence_failure_rate": 0.0,
+  "instruction_following_failure_rate": 0.0,
+  "critical_error_rate": 0.0,
+  "mean_latency_ms": null,
+  "total_tokens": null,
+  "estimated_cost_usd": null,
+  "precision": 1.0,
+  "recall": 1.0,
+  "f1": 1.0,
+  "false_positive_rate": null,
+  "accuracy_ci95": [
+    1.0,
+    1.0
+  ],
+  "failure_counts": {
+    "FIN-NONE": 154
+  },
+  "dataset_version": "finance-accounting-v1",
+  "dataset_sha256": "d6d2ede08b0ca6eecd040c3e6e54ba4337e7cae14e67ec196c8fb4d008a4c80f",
+  "model": "oracle-expected-answer",
+  "model_version": "gold"
+}

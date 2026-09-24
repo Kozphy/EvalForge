@@ -1,0 +1,25 @@
+{
+  "dataset_version": "finance-accounting-v1",
+  "n_cases": 154,
+  "sha256": "d6d2ede08b0ca6eecd040c3e6e54ba4337e7cae14e67ec196c8fb4d008a4c80f",
+  "path": "finance_eval/dataset/finance_accounting_v1.jsonl",
+  "categories": {
+    "accounting_equations": 10,
+    "journal_entries": 12,
+    "revenue_recognition": 10,
+    "gross_margin": 8,
+    "expense_classification": 6,
+    "cash_flow": 10,
+    "financial_ratios": 18,
+    "financial_statements": 10,
+    "audit_reasoning": 5,
+    "internal_controls": 5,
+    "reconciliation": 5,
+    "anomaly_detection": 5,
+    "financial_analysis": 18,
+    "sql_financial": 16,
+    "python_financial": 16
+  },
+  "planted_failures": 32,
+  "license_note": "Original synthetic items; not copied from copyrighted exams."
+}

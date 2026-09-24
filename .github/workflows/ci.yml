@@ -38,6 +38,13 @@ jobs:
         run: |
           python -m app.control_plane.cli experiment run examples/control_plane_demo/experiment.yaml --demo --seed-baseline production
 
+      - name: Finance evaluation smoke
+        run: |
+          python -m finance_eval run --mode gold --write-baseline
+          python -m finance_eval run --mode candidate
+          python -m finance_eval run --mode live --provider mock --limit 5 --max-cost-usd 1
+          python -m finance_eval report
+
       - name: Smoke-test research analysis
         run: |
           python -m research.run_analysis research/example_predictions.csv \
