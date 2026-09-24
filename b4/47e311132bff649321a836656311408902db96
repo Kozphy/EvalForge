@@ -1,0 +1,19 @@
+attic/blink-frontend/README.md
+  s_1a0486d26c7e7e::t_29c7bccba9ff6c 1-31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b447e311132bff649321a836656311408902db96",
+  "prompts": {},
+  "sessions": {
+    "s_1a0486d26c7e7e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "5594125b-55d1-44f9-ac04-0e25f3d0ef33",
+        "model": "default"
+      },
+      "human_author": "Zixsa <50504962+Kozphy@users.noreply.github.com>"
+    }
+  }
+}
