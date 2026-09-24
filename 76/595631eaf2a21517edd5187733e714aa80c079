@@ -1,0 +1,25 @@
+README.md
+  s_1a0486d26c7e7e::t_f0719956438591 12,15-16
+  s_1a0486d26c7e7e::t_9819979e19bb4f 17
+docs/portfolio-positioning.md
+  s_1a0486d26c7e7e::t_320b339e02bbeb 1-115
+docs/end-to-end-flow.md
+  s_1a0486d26c7e7e::t_33168f1bfde84e 1-56,60-112
+  s_1a0486d26c7e7e::t_7e7018adb1abab 57-59
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "76595631eaf2a21517edd5187733e714aa80c079",
+  "prompts": {},
+  "sessions": {
+    "s_1a0486d26c7e7e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "5594125b-55d1-44f9-ac04-0e25f3d0ef33",
+        "model": "default"
+      },
+      "human_author": "Zixsa <50504962+Kozphy@users.noreply.github.com>"
+    }
+  }
+}
