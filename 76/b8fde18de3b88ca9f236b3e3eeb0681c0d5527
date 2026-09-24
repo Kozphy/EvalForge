@@ -1,0 +1,21 @@
+.gitattributes
+  s_1a0486d26c7e7e::t_7a515edb8b41ca 1-4
+README.md
+  s_1a0486d26c7e7e::t_32c2a961c21723 3,9,12,33-42,62,69,90,93,126-127,141,150,159
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "76b8fde18de3b88ca9f236b3e3eeb0681c0d5527",
+  "prompts": {},
+  "sessions": {
+    "s_1a0486d26c7e7e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "5594125b-55d1-44f9-ac04-0e25f3d0ef33",
+        "model": "default"
+      },
+      "human_author": "Zixsa <50504962+Kozphy@users.noreply.github.com>"
+    }
+  }
+}
