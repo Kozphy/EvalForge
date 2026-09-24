@@ -9,8 +9,11 @@
 | Benchmark | **154** original items · `finance-accounting-v1` |
 | Offline candidate accuracy | **79.9%** vs gold baseline **100%** |
 | Policy decision | **FAIL** (`critical_error_rate > 0.05`) |
-| Judge–human agreement (seeded n=20) | **0.95** |
+| Grader catches planted errors | **31/31** valid cases, 0 false alarms (synthetic, self-authored) |
 | Tests | **71** pytest |
+
+All numbers are **local benchmarks on synthetic data** — no production use, no real-model results.
+What is and is not proven: [`docs/portfolio-positioning.md`](docs/portfolio-positioning.md) · verified run: [`docs/end-to-end-flow.md`](docs/end-to-end-flow.md)
 
 ```bash
 python -m venv .venv && .venv\Scripts\Activate.ps1   # or source .venv/bin/activate
