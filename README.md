@@ -1,15 +1,15 @@
 # EvalForge
 
-**Problem:** Financial AI can produce plausible but materially incorrect outputs ΓÇö wrong equity math, unbalanced journals, cash confused with profit, fabricated standards, or unsupported audit conclusions.
+**Problem:** Financial AI can produce plausible but materially incorrect outputs — wrong equity math, unbalanced journals, cash confused with profit, fabricated standards, or unsupported audit conclusions.
 
 **Solution:** A reproducible evaluation pipeline combining deterministic checks, optional LLM judging, human review, regression testing, policy gates, and audit evidence for finance, accounting, and coding-adjacent LLM tasks.
 
 | | |
 |---|---|
-| Benchmark | **154** original items ┬╖ `finance-accounting-v1` |
+| Benchmark | **154** original items · `finance-accounting-v1` |
 | Offline candidate accuracy | **79.9%** vs gold baseline **100%** |
 | Policy decision | **FAIL** (`critical_error_rate > 0.05`) |
-| JudgeΓÇôhuman agreement (seeded n=20) | **0.95** |
+| Judge–human agreement (seeded n=20) | **0.95** |
 | Tests | **71** pytest |
 
 ```bash
@@ -30,16 +30,16 @@ Audit: [`docs/architecture/finance-eval-audit.md`](docs/architecture/finance-eva
 
 ```text
 Finance / Accounting Dataset
- ΓåÆ Golden Set
- ΓåÆ Model Runner (offline fixture or custom response_fn)
- ΓåÆ Deterministic Evaluation
- ΓåÆ LLM-as-a-Judge (simulated offline; never sole truth)
- ΓåÆ Human Review (seeded subset)
- ΓåÆ Failure Taxonomy (FIN-*)
- ΓåÆ Regression Testing (vs gold baseline)
- ΓåÆ Policy Gate (PASS / WARN / FAIL / HUMAN_REVIEW_REQUIRED)
- ΓåÆ Audit Evidence (JSON/JSONL + hashes)
- ΓåÆ Final Evaluation Report
+ → Golden Set
+ → Model Runner (offline fixture or custom response_fn)
+ → Deterministic Evaluation
+ → LLM-as-a-Judge (simulated offline; never sole truth)
+ → Human Review (seeded subset)
+ → Failure Taxonomy (FIN-*)
+ → Regression Testing (vs gold baseline)
+ → Policy Gate (PASS / WARN / FAIL / HUMAN_REVIEW_REQUIRED)
+ → Audit Evidence (JSON/JSONL + hashes)
+ → Final Evaluation Report
 ```
 
 ```mermaid
@@ -59,14 +59,14 @@ flowchart LR
 
 | Metric | Gold baseline | Candidate | Delta |
 |---|---:|---:|---:|
-| Accuracy | 100% | 79.9% | ΓêÆ20.1pp |
+| Accuracy | 100% | 79.9% | −20.1pp |
 | Critical error rate | 0% | 5.2% | +5.2pp |
 | Hallucination rate | 0% | 0.6% | +0.6pp |
 | Policy | PASS | **FAIL** | blocked |
 
 **Example failures:** `FIN-CALC-001` arithmetic, `FIN-JE-011` unbalanced entry, `FIN-REV-010` revenue timing, `FIN-HALL-006` fabricated fact, `FIN-SQL-007` wrong aggregation.
 
-**Example policy:** `FIN-POL-001` ΓÇö if `critical_error_rate > 0.05` ΓåÆ **FAIL** deployment.
+**Example policy:** `FIN-POL-001` — if `critical_error_rate > 0.05` → **FAIL** deployment.
 
 ---
 
@@ -87,10 +87,10 @@ flowchart LR
 ### Live model evaluation (P0)
 
 ```bash
-# Offline CI-safe path (mock provider ΓÇö no API keys)
+# Offline CI-safe path (mock provider — no API keys)
 python -m finance_eval run --mode live --provider mock --limit 10 --max-cost-usd 1
 
-# Real OpenAI (requires OPENAI_API_KEY in env ΓÇö never commit secrets)
+# Real OpenAI (requires OPENAI_API_KEY in env — never commit secrets)
 python -m finance_eval run --mode live --provider openai --live-model gpt-4o-mini --limit 20 --max-cost-usd 1.0
 
 # Real Anthropic (requires ANTHROPIC_API_KEY)
@@ -123,8 +123,8 @@ The broader EvalForge app remains available:
 uvicorn app.main:app --reload
 ```
 
-- `/` ΓÇö Evaluation Control Plane operator console (demo fixture journey)
-- `/workbench` ΓÇö local SQLite evaluation workbench
+- `/` — Evaluation Control Plane operator console (demo fixture journey)
+- `/workbench` — local SQLite evaluation workbench
 
 Do not confuse the **customer-support operator demo** with the **finance-accounting-v1** benchmark evidence above.
 
@@ -138,7 +138,7 @@ Do not confuse the **customer-support operator demo** with the **finance-account
 | LLM Evaluation Engineer | **Yes** | Runner / policy / evidence layers + tests |
 | AI Governance Engineer | **Partial** | Policy FAIL on critical finance errors + manifests |
 | Coding Evaluator | **Partial** | SQL/Python result fixtures (not sandboxed exec) |
-| Finance AI Trainer | **Weak** | Dataset only ΓÇö no training loop |
+| Finance AI Trainer | **Weak** | Dataset only — no training loop |
 | LLM Evaluator | **Yes** | Deterministic-first + judge/human disagreement tracking |
 
 Details: [`docs/architecture/finance-eval-job-mapping.md`](docs/architecture/finance-eval-job-mapping.md)
@@ -147,7 +147,7 @@ Details: [`docs/architecture/finance-eval-job-mapping.md`](docs/architecture/fin
 
 ## Limitations
 
-- Offline candidate uses planted errors for reproducibility ΓÇö not a blind live-model study.
+- Offline candidate uses planted errors for reproducibility — not a blind live-model study.
 - No production adoption claimed.
 - SQL/Python checks grade numeric results / structure, not arbitrary code execution sandboxes.
 - Human reviews are seeded for agreement demo.
@@ -156,4 +156,4 @@ Details: [`docs/architecture/finance-eval-job-mapping.md`](docs/architecture/fin
 
 ## License
 
-Proprietary ΓÇö see [LICENSE](LICENSE).
+Proprietary — see [LICENSE](LICENSE).

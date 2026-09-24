@@ -1,0 +1,4 @@
+# Versioned eval datasets are hashed byte-for-byte (see finance_eval/dataset/MANIFEST.json).
+# Pin LF so core.autocrlf=true checkouts on Windows do not change the sha256.
+finance_eval/dataset/*.jsonl text eol=lf
+finance_eval/dataset/*.json text eol=lf
