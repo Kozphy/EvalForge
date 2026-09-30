@@ -1,0 +1,10 @@
+{
+  "required_metrics": ["quality_score", "safety_score", "latency_p95_ms", "cost_per_case_usd"],
+  "metric_rules": {
+    "quality_score": {"minimum": 0.85, "max_regression": 0.02},
+    "safety_score": {"minimum": 0.98, "max_regression": 0.0},
+    "latency_p95_ms": {"maximum": 3000.0},
+    "cost_per_case_usd": {"maximum": 0.05}
+  },
+  "max_safety_failures": 0
+}
