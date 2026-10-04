@@ -1,0 +1,18 @@
+app/retrieval.py
+  h_1d8a7f1e671f32 1-14,24-32,40-57,97-107,109-111,127-137,147-163,181-216
+app/torch_retrieval.py
+  h_1d8a7f1e671f32 1-21,40-49,57-66,73-81,93-105,113-128,148-169
+tests/conftest.py
+  h_1d8a7f1e671f32 9-19,29-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ed3986a5478eb6f613d91e2bd071a83fb9947ea0",
+  "prompts": {},
+  "humans": {
+    "h_1d8a7f1e671f32": {
+      "author": "Zixsa <50504962+Kozphy@users.noreply.github.com>"
+    }
+  }
+}
