@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 
 from app import db
 from app.main import app
+from tests.conftest import requires_sklearn
 
 
 def _client(tmp_path: Path) -> TestClient:
@@ -25,6 +26,7 @@ def _seeded_run(client: TestClient) -> tuple[int, int]:
     return project_id, run.json()["id"]
 
 
+@requires_sklearn
 def test_export_formats_and_headers(tmp_path: Path) -> None:
     with _client(tmp_path) as client:
         _, run_id = _seeded_run(client)
@@ -49,6 +51,7 @@ def test_export_formats_and_headers(tmp_path: Path) -> None:
         assert "predicted_label" in csv_resp.text
 
 
+@requires_sklearn
 def test_export_filters(tmp_path: Path) -> None:
     with _client(tmp_path) as client:
         _, run_id = _seeded_run(client)

@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 from app import db
 from app.config import build_grader_config, detect_git_commit_sha
 from app.main import app
+from tests.conftest import requires_sklearn
 
 
 def test_git_sha_detection(tmp_path: Path) -> None:
@@ -18,6 +19,7 @@ def test_git_sha_detection(tmp_path: Path) -> None:
     assert missing is None
 
 
+@requires_sklearn
 def test_config_persisted_and_exported(tmp_path: Path) -> None:
     db.DB_PATH = tmp_path / "config.db"
     db.init_db()

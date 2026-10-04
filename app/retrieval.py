@@ -4,9 +4,6 @@ import os
 import re
 from dataclasses import dataclass
 
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-
 
 @dataclass(frozen=True)
 class Chunk:
@@ -55,7 +52,29 @@ def chunk_text(document_id: int, title: str, content: str, max_chars: int = 900)
     return chunks
 
 
+def _import_sklearn():
+    """Lazy-load sklearn to avoid triggering the scipy DLL at module import time.
+
+    On some systems (e.g. Windows with Application Control policies) scipy's
+    compiled extensions are blocked from loading.  Deferring the import means
+    the rest of the app can start successfully and only the tfidf backend path
+    raises an error.
+    """
+    try:
+        from sklearn.feature_extraction.text import TfidfVectorizer  # noqa: PLC0415
+        from sklearn.metrics.pairwise import cosine_similarity  # noqa: PLC0415
+    except (ImportError, OSError) as exc:
+        raise RuntimeError(
+            "TF-IDF retrieval requires scikit-learn/scipy but they could not be "
+            "loaded: " + str(exc) + ". "
+            "Set EVAL_RETRIEVAL_BACKEND=torch (and install requirements-torch.txt) "
+            "to use the PyTorch backend instead."
+        ) from exc
+    return TfidfVectorizer, cosine_similarity
+
+
 def _tfidf_rank(query: str, corpus: list[str], top_k: int) -> list[tuple[int, float]]:
+    TfidfVectorizer, cosine_similarity = _import_sklearn()
     vectorizer = TfidfVectorizer(stop_words="english", ngram_range=(1, 2), min_df=1)
     matrix = vectorizer.fit_transform(corpus + [query])
     similarities = cosine_similarity(matrix[-1], matrix[:-1]).flatten()

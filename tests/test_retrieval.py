@@ -1,6 +1,10 @@
+import pytest
+
 from app.retrieval import chunk_text, retrieve
+from tests.conftest import requires_sklearn
 
 
+@requires_sklearn
 def test_chunk_text_and_retrieve() -> None:
     docs = [
         {

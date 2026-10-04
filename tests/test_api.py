@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 
 from app import db
 from app.main import app
+from tests.conftest import requires_sklearn
 
 
 def _client(tmp_path: Path) -> TestClient:
@@ -14,6 +15,7 @@ def _client(tmp_path: Path) -> TestClient:
     return TestClient(app)
 
 
+@requires_sklearn
 def test_project_seed_and_run(tmp_path: Path) -> None:
     with _client(tmp_path) as client:
         project = client.post("/api/projects", json={"name": "Demo", "description": "Test"})
