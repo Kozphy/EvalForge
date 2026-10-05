@@ -1,0 +1,19 @@
+app/service.py
+  s_e9660f520bafa5::t_4057f0d4ba1bab 359,366,368-392,438-446,481,484,487,561-562,568-580,582-611,613-642,644-647
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "fbd331c214cd1a1fd79738a57336c34f355ca686",
+  "prompts": {},
+  "sessions": {
+    "s_e9660f520bafa5": {
+      "agent_id": {
+        "tool": "devin",
+        "id": "s_e9660f520bafa5",
+        "model": "unknown"
+      },
+      "human_author": "Zixsa <50504962+Kozphy@users.noreply.github.com>"
+    }
+  }
+}
