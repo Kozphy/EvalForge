@@ -195,6 +195,20 @@ def get_run(run_id: int) -> dict[str, Any]:
 
 @app.get("/api/runs/{run_id}/controls")
 def get_run_controls(run_id: int) -> dict[str, Any]:
+    """Return control summaries for a completed run.
+
+    Returns run-level aggregate control metrics and per-result control
+    reports (allow/review/block decisions with supporting findings).
+
+    Args:
+        run_id: Database ID of the run.
+
+    Returns:
+        Dict with run_id, aggregate controls metrics, and per-result controls.
+
+    Raises:
+        HTTPException: 404 if the run does not exist.
+    """
     run = service.get_run(run_id)
     if run is None:
         raise HTTPException(status_code=404, detail="Run not found")
@@ -214,6 +228,20 @@ def get_run_controls(run_id: int) -> dict[str, Any]:
 
 @app.get("/api/runs/{run_id}/trace")
 def get_run_trace(run_id: int) -> list[dict[str, Any]]:
+    """Return all trace events recorded for a run.
+
+    Trace events are emitted at each evaluation stage (run, retrieval,
+    grader, controls) and stored in the local SQLite database.
+
+    Args:
+        run_id: Database ID of the run.
+
+    Returns:
+        List of trace event dicts ordered by ID.
+
+    Raises:
+        HTTPException: 404 if the run does not exist.
+    """
     if service.get_run(run_id) is None:
         raise HTTPException(status_code=404, detail="Run not found")
     return observability.list_trace_events(run_id)

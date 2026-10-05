@@ -110,6 +110,29 @@ class EvalCaseBatchCreate(BaseModel):
 
 
 class RunCreate(BaseModel):
+    """Request body for creating and executing an evaluation run.
+
+    Attributes:
+        provider: Grader provider ("heuristic", "openai", or "client_api").
+        model: Model identifier string.
+        top_k: Number of evidence chunks to retrieve per case (1–12).
+        prompt_version: Prompt template version string.
+        system_prompt: Optional system prompt override.
+        grader_prompt: Optional grader prompt override.
+        temperature: Sampling temperature (0.0–2.0).
+        max_output_tokens: Optional output token cap.
+        evidence_threshold: Minimum retrieval score to include evidence (0.0–1.0).
+        rule_set_version: Deterministic rule set version string.
+        dataset_version: Optional dataset version tag.
+        model_version: Optional model version tag for reproducibility.
+        min_groundedness: Minimum claim groundedness ratio (0.0–1.0).
+        min_citation_coverage: Minimum citation coverage ratio (0.0–1.0).
+        control_min_confidence: Minimum grader confidence threshold (0.0–1.0).
+        block_on_contradiction: Whether to block release on contradicted claims.
+        block_on_invalid_citation: Whether to block release on invalid citation IDs.
+        block_on_major_rule_failure: Whether to block release on major rule failures.
+        trace_enabled: Whether to emit trace events for this run.
+    """
     provider: Literal["heuristic", "openai", "client_api"] = "heuristic"
     model: str = "gpt-5.6"
     top_k: int = Field(default=4, ge=1, le=12)

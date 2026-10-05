@@ -38,7 +38,16 @@ def _trace(
     payload: dict[str, Any] | None = None,
     result_id: int | None = None,
 ) -> None:
-    """Tracing must never make the evaluation itself fail."""
+    """Record a trace event, swallowing all errors so tracing never fails evaluation.
+
+    Args:
+        enabled: Whether tracing is active for this run.
+        run_id: Database ID of the evaluation run.
+        stage: Evaluation stage (e.g. "run", "retrieval", "grader", "controls").
+        status: Stage status (e.g. "started", "completed", "failed", or a control action).
+        payload: Optional structured data to attach to the event.
+        result_id: Optional database ID of the specific result being traced.
+    """
     if not enabled:
         return
     try:
@@ -560,6 +569,25 @@ def _insert_result(
     api_call_meta: dict[str, Any] | None,
     control_policy: ControlPolicy | None = None,
 ) -> tuple[int, ControlPolicy | None]:
+    """Persist a single grader result to the database.
+
+    If a control policy is provided, evaluates release controls and stores
+    the control report alongside the result. The needs_human_review flag is
+    set if either the grader or controls require it.
+
+    Args:
+        run_id: Database ID of the evaluation run.
+        case: Eval case dict with at minimum an "id" key.
+        output: Grader output including verdict, severity, claims, and confidence.
+        rule_findings: List of deterministic rule check results.
+        evidence: Retrieved evidence chunks.
+        api_call_meta: Optional metadata from a client API call.
+        control_policy: Optional control policy to evaluate release decisions.
+
+    Returns:
+        Tuple of (result_id, control_report). control_report is None if no policy
+        was provided.
+    """
     needs_review = bool(output.needs_human_review)
     review_status = ReviewStatus.PENDING.value
     raw = output.model_dump(mode="json")

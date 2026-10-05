@@ -98,6 +98,37 @@ def build_grader_config(
     trace_enabled: bool = True,
     api_target: dict | None = None,
 ) -> GraderConfig:
+    """Build a GraderConfig from individual keyword arguments.
+
+    Convenience factory that assembles a GraderConfig, auto-detects the
+    current git commit SHA, and stamps the app version. All v0.3 runtime
+    control parameters are forwarded directly to GraderConfig.
+
+    Args:
+        provider: Grader provider ("heuristic", "openai", or "client_api").
+        model: Model identifier string.
+        top_k: Number of evidence chunks to retrieve per case.
+        dataset_version: Optional dataset version tag.
+        prompt_version: Prompt template version string.
+        system_prompt: Optional system prompt override.
+        grader_prompt: Optional grader prompt override.
+        temperature: Sampling temperature (0.0 = deterministic).
+        max_output_tokens: Optional output token cap.
+        evidence_threshold: Minimum retrieval score to include evidence.
+        rule_set_version: Deterministic rule set version string.
+        model_version: Optional model version tag for reproducibility.
+        min_groundedness: Minimum claim groundedness ratio (0.0–1.0).
+        min_citation_coverage: Minimum citation coverage ratio (0.0–1.0).
+        control_min_confidence: Minimum grader confidence threshold (0.0–1.0).
+        block_on_contradiction: Whether to block on contradicted claims.
+        block_on_invalid_citation: Whether to block on invalid citation IDs.
+        block_on_major_rule_failure: Whether to block on major rule failures.
+        trace_enabled: Whether to emit trace events for this run.
+        api_target: Optional public API target snapshot (env var names only).
+
+    Returns:
+        Fully populated GraderConfig instance.
+    """
     return GraderConfig(
         provider=provider,
         model=model,
