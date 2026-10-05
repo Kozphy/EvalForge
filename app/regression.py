@@ -8,6 +8,15 @@ from pydantic import BaseModel, Field
 
 
 class RegressionThresholds(BaseModel):
+    """Thresholds for regression gate evaluation.
+
+    Attributes:
+        min_accuracy: Minimum required accuracy (0.0-1.0). None to skip check.
+        max_review_rate: Maximum allowed review rate (0.0-1.0). None to skip check.
+        max_block_rate: Maximum allowed block rate (0.0-1.0). None to skip check.
+        min_groundedness: Minimum required average groundedness (0.0-1.0). None to skip check.
+    """
+
     min_accuracy: float | None = Field(default=None, ge=0.0, le=1.0)
     max_review_rate: float | None = Field(default=None, ge=0.0, le=1.0)
     max_block_rate: float | None = Field(default=None, ge=0.0, le=1.0)
@@ -15,6 +24,14 @@ class RegressionThresholds(BaseModel):
 
 
 class RegressionGateResult(BaseModel):
+    """Result of regression gate evaluation.
+
+    Attributes:
+        passed: Whether all configured thresholds passed.
+        observed: Observed values for each metric.
+        failures: List of failure messages for thresholds that were not met.
+    """
+
     passed: bool
     observed: dict[str, float | None]
     failures: list[str]
@@ -24,6 +41,19 @@ def evaluate_run_gate(
     run_payload: dict[str, Any],
     thresholds: RegressionThresholds,
 ) -> RegressionGateResult:
+    """Evaluate a run against regression thresholds.
+
+    Computes observed metrics from the run payload and checks them against
+    the configured thresholds. Metrics include accuracy, review rate,
+    block rate, and average groundedness.
+
+    Args:
+        run_payload: Exported run JSON with results and metrics.
+        thresholds: Configured regression thresholds.
+
+    Returns:
+        RegressionGateResult with pass/fail status and failure details.
+    """
     results = list(run_payload.get("results") or [])
     metrics = dict(run_payload.get("metrics") or {})
     count = len(results)

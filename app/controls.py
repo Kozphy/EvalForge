@@ -19,7 +19,16 @@ ControlAction = Literal["allow", "review", "block"]
 
 
 class ControlPolicy(BaseModel):
-    """Release policy snapshotted with each run."""
+    """Release policy snapshotted with each run.
+
+    Attributes:
+        min_groundedness: Minimum ratio of supported claims to total claims (0.0-1.0).
+        min_citation_coverage: Minimum ratio of claims with valid citations (0.0-1.0).
+        min_confidence: Minimum grader confidence threshold (0.0-1.0).
+        block_on_contradiction: Whether to block on contradicted claims.
+        block_on_invalid_citation: Whether to block on invalid citation IDs.
+        block_on_major_rule_failure: Whether to block on major rule failures.
+    """
 
     min_groundedness: float = Field(default=0.75, ge=0.0, le=1.0)
     min_citation_coverage: float = Field(default=0.75, ge=0.0, le=1.0)
@@ -30,6 +39,17 @@ class ControlPolicy(BaseModel):
 
 
 class ControlFinding(BaseModel):
+    """Individual control check result.
+
+    Attributes:
+        control: Name of the control check.
+        passed: Whether the control check passed.
+        action: Release action (allow/review/block) for this control.
+        message: Human-readable explanation of the result.
+        observed: Observed value for the control metric.
+        threshold: Threshold value for the control metric.
+    """
+
     control: str
     passed: bool
     action: ControlAction
@@ -39,6 +59,20 @@ class ControlFinding(BaseModel):
 
 
 class ControlReport(BaseModel):
+    """Complete control evaluation report for a single result.
+
+    Attributes:
+        action: Final release action (allow/review/block).
+        release_allowed: Whether automatic release is permitted.
+        needs_human_review: Whether human review is required.
+        groundedness: Ratio of supported claims to total claims (0.0-1.0).
+        citation_coverage: Ratio of claims with valid citations (0.0-1.0).
+        retrieval_max_score: Maximum retrieval score from evidence set (0.0-1.0).
+        claim_counts: Count of claims by verdict type.
+        invalid_citation_ids: List of citation IDs not found in evidence.
+        findings: List of individual control check results.
+    """
+
     action: ControlAction
     release_allowed: bool
     needs_human_review: bool
@@ -51,6 +85,15 @@ class ControlReport(BaseModel):
 
 
 def _max_action(current: ControlAction, candidate: ControlAction) -> ControlAction:
+    """Return the more restrictive of two control actions.
+
+    Args:
+        current: Current control action.
+        candidate: Candidate control action to compare.
+
+    Returns:
+        The more restrictive action (block > review > allow).
+    """
     rank = {"allow": 0, "review": 1, "block": 2}
     return candidate if rank[candidate] > rank[current] else current
 
@@ -61,7 +104,29 @@ def evaluate_controls(
     evidence: list[dict],
     policy: ControlPolicy,
 ) -> ControlReport:
-    """Evaluate a conservative release decision without another LLM call."""
+    """Evaluate a conservative release decision without another LLM call.
+
+    Converts grader output, deterministic rule findings, and retrieved evidence
+    into an explicit allow/review/block decision based on the configured policy.
+
+    The evaluation checks:
+    - Claim contradiction (block or review based on policy)
+    - Citation integrity (invalid citation IDs)
+    - Major rule failures (deterministic checks)
+    - Groundedness (supported claim ratio)
+    - Citation coverage (claims with valid citations)
+    - Grader confidence
+    - Unresolved claims (unsupported/uncertain)
+
+    Args:
+        output: Grader output including claims and confidence.
+        rule_findings: List of deterministic rule check results.
+        evidence: Retrieved evidence chunks with chunk_id and score.
+        policy: Control policy with thresholds and blocking rules.
+
+    Returns:
+        ControlReport with final action, metrics, and individual findings.
+    """
 
     evidence_ids = {
         str(item.get("chunk_id"))

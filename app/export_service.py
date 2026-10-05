@@ -50,12 +50,30 @@ CSV_FIELDS = [
 
 
 def _latest_decision(decisions: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """Return the most recent review decision.
+
+    Args:
+        decisions: List of review decision dicts.
+
+    Returns:
+        The most recent decision by updated_at/created_at timestamp, or None.
+    """
     if not decisions:
         return None
     return sorted(decisions, key=lambda item: item.get("updated_at") or item.get("created_at") or "")[-1]
 
 
 def _serialize_result(run: dict[str, Any], result: dict[str, Any], decisions: list[dict[str, Any]]) -> dict[str, Any]:
+    """Serialize a single result for export.
+
+    Args:
+        run: Run metadata dict.
+        result: Result dict from database.
+        decisions: List of review decisions for this result.
+
+    Returns:
+        Serialized result dict with flattened fields for export.
+    """
     config = run.get("config") or {}
     expected = result.get("expected_label")
     predicted = result.get("severity")
@@ -124,6 +142,20 @@ def load_export_rows(
     predicted_label: str | None = None,
     incorrect_only: bool = False,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Load and filter results for export.
+
+    Args:
+        run_id: Database ID of the run to export.
+        review_required: Filter to only results requiring review (True) or not (False).
+        predicted_label: Filter to only results with this predicted label.
+        incorrect_only: Filter to only incorrect results.
+
+    Returns:
+        Tuple of (run metadata dict, list of serialized result dicts).
+
+    Raises:
+        LookupError: If the run ID does not exist.
+    """
     with get_conn() as conn:
         run = row_to_dict(conn.execute("SELECT * FROM runs WHERE id=?", (run_id,)).fetchone())
         if run is None:
@@ -176,6 +208,15 @@ def load_export_rows(
 
 
 def export_run_json(run: dict[str, Any], rows: list[dict[str, Any]]) -> str:
+    """Export a run as formatted JSON.
+
+    Args:
+        run: Run metadata dict.
+        rows: List of serialized result dicts.
+
+    Returns:
+        JSON string with run metadata and results.
+    """
     payload = {
         "run_id": run["id"],
         "project_id": run["project_id"],
@@ -192,6 +233,14 @@ def export_run_json(run: dict[str, Any], rows: list[dict[str, Any]]) -> str:
 
 
 def iter_export_jsonl(rows: list[dict[str, Any]]) -> Iterator[str]:
+    """Iterate over rows as JSONL lines.
+
+    Args:
+        rows: List of serialized result dicts.
+
+    Yields:
+        JSON strings, one per line.
+    """
     for row in rows:
         yield json.dumps(row, ensure_ascii=False) + "\n"
 

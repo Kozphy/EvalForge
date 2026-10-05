@@ -18,6 +18,11 @@ from .db import get_conn, rows_to_dicts
 
 
 def utc_now() -> str:
+    """Return the current UTC timestamp in ISO 8601 format.
+
+    Returns:
+        ISO 8601 formatted UTC timestamp string.
+    """
     return datetime.now(timezone.utc).isoformat()
 
 
@@ -29,6 +34,22 @@ def record_trace_event(
     payload: dict[str, Any] | None = None,
     result_id: int | None = None,
 ) -> dict[str, Any]:
+    """Record a trace event for an evaluation run.
+
+    Events are stored in SQLite and optionally mirrored to a JSONL file
+    if EVAL_TRACE_JSONL_PATH is set. The format is vendor-neutral for
+    future integration with observability platforms.
+
+    Args:
+        run_id: Database ID of the evaluation run.
+        stage: Evaluation stage (e.g., "run", "retrieval", "grader", "controls").
+        status: Status of the stage (e.g., "started", "completed", "failed").
+        payload: Optional structured data about the event.
+        result_id: Optional database ID of the specific result.
+
+    Returns:
+        The recorded event dict including the generated ID.
+    """
     event = {
         "run_id": run_id,
         "result_id": result_id,
@@ -65,6 +86,14 @@ def record_trace_event(
 
 
 def list_trace_events(run_id: int) -> list[dict[str, Any]]:
+    """List all trace events for a given run.
+
+    Args:
+        run_id: Database ID of the evaluation run.
+
+    Returns:
+        List of trace event dicts ordered by ID.
+    """
     with get_conn() as conn:
         rows = conn.execute(
             "SELECT * FROM trace_events WHERE run_id=? ORDER BY id",
