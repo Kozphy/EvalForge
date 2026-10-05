@@ -11,6 +11,13 @@ from app.regression import RegressionThresholds, evaluate_run_gate
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Build the CLI argument parser for the regression gate.
+
+    Returns:
+        Configured ArgumentParser with run_json positional argument and
+        optional threshold flags (--min-accuracy, --max-review-rate,
+        --max-block-rate, --min-groundedness).
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("run_json", type=Path, help="JSON export from /api/runs/{id}/export")
     parser.add_argument("--min-accuracy", type=float)
@@ -21,7 +28,16 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main() -> int:
-    args = build_parser().parse_args()
+    """Run the regression gate and print the result as JSON.
+
+    Reads an exported EvalForge run from the path supplied on the command
+    line, evaluates it against the configured thresholds, prints the
+    RegressionGateResult as indented JSON, and exits with code 0 (pass)
+    or 1 (fail).
+
+    Returns:
+        0 if all thresholds passed, 1 if any threshold failed.
+    """
     payload = json.loads(args.run_json.read_text(encoding="utf-8"))
     thresholds = RegressionThresholds(
         min_accuracy=args.min_accuracy,

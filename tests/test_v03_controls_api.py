@@ -9,12 +9,37 @@ from app.main import app
 
 
 def _client(tmp_path: Path) -> TestClient:
+    """Create an isolated TestClient backed by a fresh temporary database.
+
+    Initialises a new SQLite database at tmp_path/test-v03.db and points
+    the application at it so tests do not share state.
+
+    Args:
+        tmp_path: pytest temporary directory fixture path.
+
+    Returns:
+        TestClient wrapping the FastAPI app with the isolated database.
+    """
     db.DB_PATH = tmp_path / "test-v03.db"
     db.init_db()
     return TestClient(app)
 
 
 def test_run_persists_controls_and_trace(tmp_path: Path) -> None:
+    """A heuristic run persists control reports and emits trace events.
+
+    End-to-end test that:
+    - Creates a project and seeds it with the demo fixture cases.
+    - Executes a heuristic run with trace_enabled=True.
+    - Asserts run metrics include allow/review/block counts.
+    - Asserts every result in the payload carries a controls object.
+    - Asserts GET /api/runs/{id}/controls returns per-result control data.
+    - Asserts GET /api/runs/{id}/trace contains run, retrieval, grader,
+      and controls stages.
+
+    Args:
+        tmp_path: pytest temporary directory fixture path.
+    """
     with _client(tmp_path) as client:
         project = client.post(
             "/api/projects",

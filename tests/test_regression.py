@@ -4,6 +4,12 @@ from app.regression import RegressionThresholds, evaluate_run_gate
 
 
 def _run_payload() -> dict:
+    """Build a minimal exported-run payload fixture for regression gate tests.
+
+    Returns:
+        Dict with a metrics block (accuracy=0.9) and two results: one allowed
+        with full groundedness, one routed to review with partial groundedness.
+    """
     return {
         "metrics": {"accuracy": 0.9},
         "results": [
@@ -20,6 +26,12 @@ def _run_payload() -> dict:
 
 
 def test_regression_gate_passes_within_thresholds() -> None:
+    """Regression gate passes when all observed metrics satisfy their thresholds.
+
+    Uses a payload with accuracy=0.9, review_rate=0.5, block_rate=0.0, and
+    average_groundedness=0.8. Verifies that thresholds set below these values
+    produce passed=True and an empty failures list.
+    """
     result = evaluate_run_gate(
         _run_payload(),
         RegressionThresholds(
@@ -34,6 +46,12 @@ def test_regression_gate_passes_within_thresholds() -> None:
 
 
 def test_regression_gate_reports_all_failures() -> None:
+    """Regression gate reports every threshold breach when multiple fail.
+
+    Uses thresholds stricter than the fixture payload on accuracy,
+    review_rate, and groundedness (block_rate passes). Verifies that
+    passed=False and exactly three failure messages are returned.
+    """
     result = evaluate_run_gate(
         _run_payload(),
         RegressionThresholds(

@@ -246,6 +246,18 @@ def iter_export_jsonl(rows: list[dict[str, Any]]) -> Iterator[str]:
 
 
 def export_run_csv(rows: list[dict[str, Any]]) -> str:
+    """Export serialized result rows as a CSV string.
+
+    Serializes list-valued fields (deterministic_findings, retrieved_evidence_ids,
+    claim_verdicts, control_findings) to JSON strings so every cell is a scalar.
+    Column order follows CSV_FIELDS.
+
+    Args:
+        rows: List of serialized result dicts from load_export_rows.
+
+    Returns:
+        CSV string with a header row followed by one row per result.
+    """
     buffer = io.StringIO()
     writer = csv.DictWriter(buffer, fieldnames=CSV_FIELDS, extrasaction="ignore")
     writer.writeheader()
@@ -260,6 +272,14 @@ def export_run_csv(rows: list[dict[str, Any]]) -> str:
 
 
 def content_type_for(fmt: ExportFormat) -> str:
+    """Return the HTTP Content-Type header value for an export format.
+
+    Args:
+        fmt: Export format ("json", "jsonl", or "csv").
+
+    Returns:
+        MIME type string for the given format.
+    """
     if fmt == "json":
         return "application/json"
     if fmt == "jsonl":
@@ -268,4 +288,13 @@ def content_type_for(fmt: ExportFormat) -> str:
 
 
 def filename_for(run_id: int, fmt: ExportFormat) -> str:
+    """Return the suggested download filename for a run export.
+
+    Args:
+        run_id: Database ID of the run.
+        fmt: Export format ("json", "jsonl", or "csv").
+
+    Returns:
+        Filename string of the form ``evalforge-run-{run_id}.{fmt}``.
+    """
     return f"evalforge-run-{run_id}.{fmt}"
