@@ -1,0 +1,18 @@
+.github/workflows/ci.yml
+  h_1d8a7f1e671f32 23-24
+app/controls.py
+  h_1d8a7f1e671f32 302-319
+docs/INTEGRATIONS.md
+  h_1d8a7f1e671f32 107
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "22dcb08b252175d52f4cbe05709354344ef5233c",
+  "prompts": {},
+  "humans": {
+    "h_1d8a7f1e671f32": {
+      "author": "Zixsa <50504962+Kozphy@users.noreply.github.com>"
+    }
+  }
+}
