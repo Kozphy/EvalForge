@@ -1,0 +1,20 @@
+app/controls.py
+  h_1d8a7f1e671f32 22-31,42-52,62-75,88-96,107-129
+app/export_service.py
+  h_1d8a7f1e671f32 53-60,67-76,145-158,211-219,236-243
+app/observability.py
+  h_1d8a7f1e671f32 21-25,37-52,89-96
+app/regression.py
+  h_1d8a7f1e671f32 11-19,27-34,44-56
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "51856a5caa2248331c8170d67aee58d7cf9621a8",
+  "prompts": {},
+  "humans": {
+    "h_1d8a7f1e671f32": {
+      "author": "Zixsa <50504962+Kozphy@users.noreply.github.com>"
+    }
+  }
+}
