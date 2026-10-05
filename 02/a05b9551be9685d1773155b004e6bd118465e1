@@ -1,0 +1,18 @@
+app/async_runs.py
+  h_1d8a7f1e671f32 19,24-27,58-83,85-88,96-99,114-123,152-161,183-192,194-195,203-204,210,215-217,222,226-228,255-269,294-308,337-344,362,368,379,390
+app/main.py
+  h_1d8a7f1e671f32 13,36
+tests/test_async_runs.py
+  h_1d8a7f1e671f32 8,10,16,20-35,92-150
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "02a05b9551be9685d1773155b004e6bd118465e1",
+  "prompts": {},
+  "humans": {
+    "h_1d8a7f1e671f32": {
+      "author": "Zixsa <50504962+Kozphy@users.noreply.github.com>"
+    }
+  }
+}
