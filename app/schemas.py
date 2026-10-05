@@ -110,7 +110,7 @@ class EvalCaseBatchCreate(BaseModel):
 
 
 class RunCreate(BaseModel):
-    provider: Literal["heuristic", "openai"] = "heuristic"
+    provider: Literal["heuristic", "openai", "client_api"] = "heuristic"
     model: str = "gpt-5.6"
     top_k: int = Field(default=4, ge=1, le=12)
     prompt_version: str = "1"

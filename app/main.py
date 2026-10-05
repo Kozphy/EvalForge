@@ -7,8 +7,12 @@ from typing import Any, Literal
 from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import ValidationError
 
 from . import export_service, import_service, observability, review_service, service
+from .client_api import ApiTargetConfig
+from .control_plane import api as control_plane_api
+from .control_plane import operator_service
 from .db import init_db
 from .schemas import (
     AdjudicationCreate,
@@ -33,7 +37,7 @@ async def lifespan(_app: FastAPI):
 app = FastAPI(
     title="EvalForge",
     version=APP_VERSION,
-    description="Local-first AI evaluation engineering platform",
+    description="Evaluation Control Plane for LLM, RAG, and Agent systems (local-first workbench + orchestrated backends)",
     lifespan=lifespan,
 )
 
@@ -142,6 +146,29 @@ def seed_project(project_id: int) -> dict[str, Any]:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except FileNotFoundError as exc:
         raise HTTPException(status_code=500, detail=f"Sample data missing: {exc}") from exc
+
+
+@app.put("/api/projects/{project_id}/api-target")
+def put_api_target(project_id: int, payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        target = ApiTargetConfig.model_validate(payload)
+        return service.set_api_target(project_id, target)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValidationError as exc:
+        for err in exc.errors():
+            err_type = str(err.get("type", ""))
+            if err_type.startswith("greater_than") or err_type.startswith("less_than"):
+                raise HTTPException(status_code=422, detail=exc.errors()) from exc
+        messages: list[str] = []
+        for err in exc.errors():
+            msg = str(err.get("msg", ""))
+            if msg.startswith("Value error, "):
+                msg = msg[len("Value error, ") :]
+            messages.append(msg)
+        raise HTTPException(status_code=400, detail="; ".join(messages) or "Invalid API target") from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @app.post("/api/projects/{project_id}/runs", status_code=201)
@@ -283,9 +310,149 @@ def adjudicate_review(result_id: int, payload: AdjudicationCreate) -> dict[str, 
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
+@app.post("/api/control-plane/experiments/run")
+def control_plane_run_experiment(payload: dict[str, Any]) -> dict[str, Any]:
+    """Run a control-plane experiment (demo adapters by default)."""
+    demo = bool(payload.get("demo", True))
+    try:
+        return control_plane_api.run_control_plane_experiment(payload, demo=demo)
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.get("/api/control-plane/evaluators")
+def control_plane_evaluators() -> list[dict[str, Any]]:
+    return control_plane_api.list_evaluators()
+
+
+@app.get("/api/control-plane/evaluators/health")
+def control_plane_evaluators_health() -> list[dict[str, Any]]:
+    return control_plane_api.list_evaluators()
+
+
+@app.get("/api/control-plane/runs/{run_id}")
+def control_plane_get_run(run_id: str) -> dict[str, Any]:
+    run = control_plane_api.get_run(run_id)
+    if run is None:
+        raise HTTPException(status_code=404, detail="Control-plane run not found")
+    return run
+
+
+@app.get("/api/control-plane/baselines")
+def control_plane_baselines() -> list[dict[str, Any]]:
+    return control_plane_api.list_baselines()
+
+
+@app.get("/api/control-plane/evidence/{experiment_id}")
+def control_plane_evidence(experiment_id: str) -> list[dict[str, Any]]:
+    return control_plane_api.export_evidence(experiment_id)
+
+
+@app.post("/api/operator/demo/reset")
+def operator_demo_reset() -> dict[str, Any]:
+    world = operator_service.reset_demo()
+    return {"status": "ok", "source": "demo_fixture", "run_id": world["runs"][0]["run_id"]}
+
+
+@app.get("/api/operator/overview")
+def operator_overview() -> dict[str, Any]:
+    return operator_service.get_overview()
+
+
+@app.get("/api/operator/runs")
+def operator_list_runs(
+    model: str | None = None,
+    dataset: str | None = None,
+    result: str | None = None,
+    policy_decision: str | None = None,
+    environment: str | None = None,
+) -> list[dict[str, Any]]:
+    return operator_service.list_runs(
+        {
+            "model": model,
+            "dataset": dataset,
+            "result": result,
+            "policy_decision": policy_decision,
+            "environment": environment,
+        }
+    )
+
+
+@app.get("/api/operator/runs/{run_id}")
+def operator_get_run(run_id: str) -> dict[str, Any]:
+    run = operator_service.get_run(run_id)
+    if run is None:
+        raise HTTPException(status_code=404, detail="Run not found")
+    return run
+
+
+@app.get("/api/operator/baselines")
+def operator_baselines() -> list[dict[str, Any]]:
+    return operator_service.list_baselines()
+
+
+@app.get("/api/operator/regressions")
+def operator_regressions(run_id: str | None = None) -> dict[str, Any]:
+    return operator_service.get_regressions(run_id)
+
+
+@app.get("/api/operator/policy")
+def operator_policy(run_id: str | None = None) -> dict[str, Any]:
+    return operator_service.get_policy(run_id)
+
+
+@app.get("/api/operator/evidence")
+def operator_evidence(run_id: str | None = None, experiment_id: str | None = None) -> list[dict[str, Any]]:
+    return operator_service.list_evidence(run_id=run_id, experiment_id=experiment_id)
+
+
+@app.get("/api/operator/approvals")
+def operator_approvals() -> list[dict[str, Any]]:
+    return operator_service.list_approvals()
+
+
+@app.post("/api/operator/approvals/{approval_id}/decision")
+def operator_approval_decision(approval_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+    try:
+        return operator_service.decide_approval(
+            approval_id,
+            outcome=str(payload.get("outcome") or ""),
+            reviewer=str(payload.get("reviewer") or ""),
+            comment=payload.get("comment"),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@app.get("/api/operator/audit")
+def operator_audit(
+    actor: str | None = None,
+    event_type: str | None = None,
+    entity: str | None = None,
+) -> list[dict[str, Any]]:
+    return operator_service.list_audit({"actor": actor, "event_type": event_type, "entity": entity})
+
+
+@app.get("/api/operator/research")
+def operator_research() -> dict[str, Any]:
+    return operator_service.get_research()
+
+
+@app.get("/api/operator/settings")
+def operator_settings() -> dict[str, Any]:
+    return operator_service.get_settings()
+
+
 @app.get("/")
 def index() -> FileResponse:
     return FileResponse(STATIC_DIR / "index.html")
+
+
+@app.get("/workbench")
+def workbench() -> FileResponse:
+    return FileResponse(STATIC_DIR / "workbench.html")
 
 
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")

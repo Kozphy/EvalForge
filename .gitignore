@@ -78,6 +78,7 @@ pip-delete-this-directory.txt
 # Includes pytest temporary cache directories created during local runs.
 # -----------------------------------------------------------------------------
 .pytest_cache/
+.pytest-tmp/
 pytest-cache-files-*/
 .coverage
 .coverage.*
@@ -183,3 +184,20 @@ docker-compose.override.yml
 *.tmp
 *.orig
 .python-version
+
+# local leftover personal material
+output/
+finance_eval/output/
+
+
+# -----------------------------------------------------------------------------
+# Node / Vite (only for the quarantined attic/blink-frontend, not EvalForge)
+# -----------------------------------------------------------------------------
+node_modules/
+dist/
+dist-ssr/
+*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*

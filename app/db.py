@@ -48,6 +48,7 @@ def init_db() -> None:
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         description TEXT NOT NULL DEFAULT '',
+        api_target_json TEXT,
         created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -157,6 +158,7 @@ def migrate_schema(conn: sqlite3.Connection) -> None:
         "controls_json",
         "controls_json TEXT NOT NULL DEFAULT '{}'",
     )
+    _ensure_column(conn, "projects", "api_target_json", "api_target_json TEXT")
 
     conn.executescript(
         """

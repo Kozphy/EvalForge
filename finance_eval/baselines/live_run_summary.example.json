@@ -1,0 +1,56 @@
+{
+  "maturity": "live_or_mock_metrics_only",
+  "note": "Redacted summary: no prompts, responses, or secrets. Cost is estimated.",
+  "run_id": "finrun_a1768490617d",
+  "model": "mock-model",
+  "model_version": "mock:mock-model",
+  "dataset_version": "finance-accounting-v1",
+  "dataset_sha256": "d6d2ede08b0ca6eecd040c3e6e54ba4337e7cae14e67ec196c8fb4d008a4c80f",
+  "n_cases": 10,
+  "metrics": {
+    "n_cases": 10,
+    "n_passed": 10,
+    "accuracy": 1.0,
+    "pass_rate": 1.0,
+    "hallucination_rate": 0.0,
+    "calculation_error_rate": 0.0,
+    "reasoning_error_rate": 0.0,
+    "citation_evidence_failure_rate": 0.0,
+    "instruction_following_failure_rate": 0.0,
+    "critical_error_rate": 0.0,
+    "mean_latency_ms": 12.0,
+    "total_tokens": 241,
+    "estimated_cost_usd": 2.4100000000000006e-05,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "false_positive_rate": null,
+    "accuracy_ci95": [
+      1.0,
+      1.0
+    ],
+    "failure_counts": {
+      "FIN-NONE": 10
+    }
+  },
+  "policy": {
+    "decision": "PASS",
+    "matched_rules": [],
+    "critical_failure_codes_present": [],
+    "rationale": "No policy rules matched; candidate within release thresholds."
+  },
+  "regression": {
+    "regressions": [],
+    "new_failure_categories": [],
+    "accuracy_delta": 0.0
+  },
+  "live_budget": {
+    "max_cost_usd": 1.0,
+    "max_retries": 2,
+    "timeout_s": 60.0,
+    "limit": 10,
+    "pricing_note": "estimated USD from static PRICE_PER_1M table \u2014 not invoices",
+    "spent_usd": 2.4100000000000006e-05
+  },
+  "stopped_reason": null
+}
