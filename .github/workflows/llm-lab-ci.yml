@@ -1,0 +1,31 @@
+name: LLM Lab CI
+
+on:
+  push:
+    paths:
+      - "llm_lab/**"
+      - "tests/test_llm_lab.py"
+      - "requirements-llm.txt"
+      - ".github/workflows/llm-lab-ci.yml"
+  pull_request:
+    paths:
+      - "llm_lab/**"
+      - "tests/test_llm_lab.py"
+      - "requirements-llm.txt"
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install CPU smoke-test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install scikit-learn pytest
+      - name: Run LLM lab smoke tests
+        run: pytest -q tests/test_llm_lab.py
