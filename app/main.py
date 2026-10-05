@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import ValidationError
 
-from . import export_service, import_service, review_service, service
+from . import export_service, import_service, observability, review_service, service
 from .async_runs import ensure_async_job_schema, recover_stale_jobs, router as async_runs_router
 from .client_api import ApiTargetConfig
 from .control_plane import api as control_plane_api
@@ -191,6 +191,60 @@ def get_run(run_id: int) -> dict[str, Any]:
     if run is None:
         raise HTTPException(status_code=404, detail="Run not found")
     return run
+
+
+@app.get("/api/runs/{run_id}/controls")
+def get_run_controls(run_id: int) -> dict[str, Any]:
+    """Return control summaries for a completed run.
+
+    Returns run-level aggregate control metrics and per-result control
+    reports (allow/review/block decisions with supporting findings).
+
+    Args:
+        run_id: Database ID of the run.
+
+    Returns:
+        Dict with run_id, aggregate controls metrics, and per-result controls.
+
+    Raises:
+        HTTPException: 404 if the run does not exist.
+    """
+    run = service.get_run(run_id)
+    if run is None:
+        raise HTTPException(status_code=404, detail="Run not found")
+    return {
+        "run_id": run_id,
+        "controls": (run.get("metrics") or {}).get("controls") or {},
+        "results": [
+            {
+                "result_id": item.get("id"),
+                "case_id": item.get("case_id"),
+                "controls": item.get("controls") or {},
+            }
+            for item in run.get("results") or []
+        ],
+    }
+
+
+@app.get("/api/runs/{run_id}/trace")
+def get_run_trace(run_id: int) -> list[dict[str, Any]]:
+    """Return all trace events recorded for a run.
+
+    Trace events are emitted at each evaluation stage (run, retrieval,
+    grader, controls) and stored in the local SQLite database.
+
+    Args:
+        run_id: Database ID of the run.
+
+    Returns:
+        List of trace event dicts ordered by ID.
+
+    Raises:
+        HTTPException: 404 if the run does not exist.
+    """
+    if service.get_run(run_id) is None:
+        raise HTTPException(status_code=404, detail="Run not found")
+    return observability.list_trace_events(run_id)
 
 
 @app.get("/api/runs/{run_id}/export")

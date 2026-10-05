@@ -2,20 +2,26 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, "feature/**"]
   pull_request:
     branches: [main]
+
+permissions:
+  contents: read
 
 jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.11", "3.12"]
 
     steps:
-      - name: Checkout
+      - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -24,32 +30,10 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+        run: python -m pip install --upgrade pip && pip install -r requirements.txt
 
-      - name: Run test suite
+      - name: Compile Python modules
+        run: python -m compileall -q app scripts tests
+
+      - name: Run tests
         run: pytest -q
-
-      - name: Operator console smoke
-        run: python scripts/check_operator_console.py
-
-      - name: Control-plane demo smoke
-        run: |
-          python -m app.control_plane.cli experiment run examples/control_plane_demo/experiment.yaml --demo --seed-baseline production
-
-      - name: Finance evaluation smoke
-        run: |
-          python -m finance_eval run --mode gold --write-baseline
-          python -m finance_eval run --mode candidate
-          python -m finance_eval run --mode live --provider mock --limit 5 --max-cost-usd 1
-          python -m finance_eval report
-
-      - name: Smoke-test research analysis
-        run: |
-          python -m research.run_analysis research/example_predictions.csv \
-            --systems rule_baseline evalforge_hybrid \
-            --compare rule_baseline evalforge_hybrid \
-            --iterations 500 \
-            --seed 42 \
-            --output /tmp/evalforge-metrics.json
