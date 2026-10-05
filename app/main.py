@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import ValidationError
 
 from . import export_service, import_service, review_service, service
-from .async_runs import ensure_async_job_schema, router as async_runs_router
+from .async_runs import ensure_async_job_schema, recover_stale_jobs, router as async_runs_router
 from .client_api import ApiTargetConfig
 from .control_plane import api as control_plane_api
 from .control_plane import operator_service
@@ -33,6 +33,7 @@ STATIC_DIR = Path(__file__).resolve().parent / "static"
 async def lifespan(_app: FastAPI):
     init_db()
     ensure_async_job_schema()
+    recover_stale_jobs()
     yield
 
 

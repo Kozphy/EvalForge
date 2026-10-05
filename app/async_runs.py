@@ -16,10 +16,15 @@ JobStatus = Literal["queued", "running", "completed", "failed", "cancelled"]
 
 
 def utc_now() -> str:
+    """Return the current UTC time as an ISO 8601 string."""
     return datetime.now(timezone.utc).isoformat()
 
 
 def ensure_async_job_schema() -> None:
+    """Create the async_run_jobs table and its indexes if they do not exist.
+
+    Safe to call multiple times; uses CREATE IF NOT EXISTS semantics.
+    """
     with get_conn() as conn:
         conn.executescript(
             """
@@ -50,7 +55,37 @@ def ensure_async_job_schema() -> None:
         )
 
 
+def recover_stale_jobs() -> int:
+    """Reconcile jobs left in the 'running' state from a previous process.
+
+    On a clean shutdown FastAPI awaits background tasks, but a crash or
+    SIGKILL leaves jobs marked 'running' with no worker behind them.  This
+    function is called once at startup; it atomically transitions every such
+    job to 'failed' so they can be inspected and retried.
+
+    Returns the number of jobs that were recovered.
+    """
+    now = utc_now()
+    with get_conn() as conn:
+        cursor = conn.execute(
+            """
+            UPDATE async_run_jobs
+            SET status='failed',
+                error='Process terminated while job was running; recovered at startup.',
+                completed_at=?,
+                updated_at=?
+            WHERE status='running'
+            """,
+            (now, now),
+        )
+        return cursor.rowcount
+
+
 def _job_to_dict(row: Any) -> dict[str, Any] | None:
+    """Convert a raw SQLite row to a job dict, normalising cancel_requested to bool.
+
+    Returns None when *row* is None (i.e. no matching record was found).
+    """
     item = row_to_dict(row)
     if item is not None and "cancel_requested" in item:
         item["cancel_requested"] = bool(item["cancel_requested"])
@@ -58,6 +93,10 @@ def _job_to_dict(row: Any) -> dict[str, Any] | None:
 
 
 def get_job(job_id: int) -> dict[str, Any] | None:
+    """Fetch a single job by primary key.
+
+    Returns the job dict, or None if no job with *job_id* exists.
+    """
     ensure_async_job_schema()
     with get_conn() as conn:
         return _job_to_dict(
@@ -72,6 +111,16 @@ def list_jobs(
     limit: int = 100,
     offset: int = 0,
 ) -> list[dict[str, Any]]:
+    """Return a paginated list of jobs, optionally filtered by project and/or status.
+
+    Results are ordered newest-first (descending by id).
+
+    Args:
+        project_id: When provided, restrict results to this project.
+        status: When provided, restrict results to jobs in this status.
+        limit: Maximum number of rows to return (1–1000).
+        offset: Number of rows to skip for pagination.
+    """
     ensure_async_job_schema()
     clauses: list[str] = []
     params: list[Any] = []
@@ -100,6 +149,16 @@ def list_jobs(
 
 
 def enqueue_job(project_id: int, config: RunCreate) -> dict[str, Any]:
+    """Insert a new job in 'queued' state and return it.
+
+    Args:
+        project_id: The project to run the evaluation against.
+        config: The run configuration (provider, model, top_k, etc.).
+
+    Raises:
+        LookupError: If *project_id* does not exist.
+        ValueError: If the project has no evaluation cases.
+    """
     ensure_async_job_schema()
     if service.get_project(project_id) is None:
         raise LookupError("Project not found")
@@ -121,7 +180,19 @@ def enqueue_job(project_id: int, config: RunCreate) -> dict[str, Any]:
 
 
 def process_job(job_id: int) -> None:
+    """Claim and execute a queued job, persisting the outcome.
+
+    Uses an atomic UPDATE with ``AND status='queued'`` to claim the job.
+    If the rowcount is 0 the job was already claimed or cancelled by a
+    concurrent caller and this invocation becomes a no-op, preventing
+    double-execution.
+
+    On success the job transitions to 'completed' with a linked run_id.
+    On any exception the job transitions to 'failed' with the error message.
+    """
     ensure_async_job_schema()
+
+    # Read the job first to check for early-exit conditions.
     with get_conn() as conn:
         row = conn.execute(
             "SELECT * FROM async_run_jobs WHERE id = ?", (job_id,)
@@ -129,25 +200,32 @@ def process_job(job_id: int) -> None:
         job = _job_to_dict(row)
         if job is None or job["status"] != "queued":
             return
+
+        # If cancellation was requested before we got here, honour it.
         if job["cancel_requested"]:
             conn.execute(
                 """
                 UPDATE async_run_jobs
                 SET status='cancelled', completed_at=?, updated_at=?
-                WHERE id=?
+                WHERE id=? AND status='queued'
                 """,
                 (utc_now(), utc_now(), job_id),
             )
             return
-        conn.execute(
+
+        # Atomically claim the job: only one caller will see rowcount > 0.
+        cursor = conn.execute(
             """
             UPDATE async_run_jobs
             SET status='running', started_at=?, updated_at=?,
                 attempt_count=attempt_count + 1, error=NULL
-            WHERE id=?
+            WHERE id=? AND status='queued'
             """,
             (utc_now(), utc_now(), job_id),
         )
+        if cursor.rowcount == 0:
+            # Another worker claimed the job between our SELECT and UPDATE.
+            return
 
     try:
         config = RunCreate.model_validate(job["config"])
@@ -174,6 +252,21 @@ def process_job(job_id: int) -> None:
 
 
 def cancel_job(job_id: int) -> dict[str, Any]:
+    """Cancel a queued job immediately.
+
+    Sets ``cancel_requested=1`` and transitions status to 'cancelled'.
+    Running jobs cannot be interrupted safely and raise ValueError.
+
+    Args:
+        job_id: The job to cancel.
+
+    Returns:
+        The updated job dict.
+
+    Raises:
+        LookupError: If no job with *job_id* exists.
+        ValueError: If the job is already terminal or currently running.
+    """
     ensure_async_job_schema()
     job = get_job(job_id)
     if job is None:
@@ -198,6 +291,21 @@ def cancel_job(job_id: int) -> dict[str, Any]:
 
 
 def retry_job(job_id: int) -> dict[str, Any]:
+    """Reset a failed or cancelled job back to 'queued' for re-execution.
+
+    Clears run_id, cancel_requested, error, and the started/completed
+    timestamps so the job looks fresh to the next process_job call.
+
+    Args:
+        job_id: The job to retry.
+
+    Returns:
+        The updated job dict (status='queued').
+
+    Raises:
+        LookupError: If no job with *job_id* exists.
+        ValueError: If the job is not in a retryable terminal state.
+    """
     ensure_async_job_schema()
     job = get_job(job_id)
     if job is None:
@@ -226,6 +334,14 @@ def create_async_run(
     payload: RunCreate,
     background_tasks: BackgroundTasks,
 ) -> dict[str, Any]:
+    """Enqueue an asynchronous evaluation run and return the job immediately.
+
+    The job is persisted in SQLite with status 'queued' before the response
+    is sent.  Execution happens in a FastAPI background task after the HTTP
+    response is delivered to the client.
+
+    Returns HTTP 202 Accepted with the job dict including its id for polling.
+    """
     try:
         job = enqueue_job(project_id, payload)
     except LookupError as exc:
@@ -243,11 +359,13 @@ def get_async_jobs(
     limit: int = Query(default=100, ge=1, le=1000),
     offset: int = Query(default=0, ge=0),
 ) -> list[dict[str, Any]]:
+    """List async run jobs with optional filtering by project_id and/or status."""
     return list_jobs(project_id=project_id, status=status, limit=limit, offset=offset)
 
 
 @router.get("/run-jobs/{job_id}")
 def get_async_job(job_id: int) -> dict[str, Any]:
+    """Retrieve a single async run job by id, embedding the linked run if complete."""
     job = get_job(job_id)
     if job is None:
         raise HTTPException(status_code=404, detail="Async run job not found")
@@ -258,6 +376,7 @@ def get_async_job(job_id: int) -> dict[str, Any]:
 
 @router.post("/run-jobs/{job_id}/cancel")
 def request_job_cancellation(job_id: int) -> dict[str, Any]:
+    """Cancel a queued job.  Returns 409 if the job cannot be cancelled."""
     try:
         return cancel_job(job_id)
     except LookupError as exc:
@@ -268,6 +387,7 @@ def request_job_cancellation(job_id: int) -> dict[str, Any]:
 
 @router.post("/run-jobs/{job_id}/retry", status_code=202)
 def retry_async_job(job_id: int, background_tasks: BackgroundTasks) -> dict[str, Any]:
+    """Retry a failed or cancelled job.  Re-queues and dispatches a background task."""
     try:
         job = retry_job(job_id)
     except LookupError as exc:
