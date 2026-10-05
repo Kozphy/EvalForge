@@ -299,6 +299,24 @@ def evaluate_controls(
     if not unresolved_passed:
         action = _max_action(action, "review")
 
+    grader_review_passed = not output.needs_human_review
+    findings.append(
+        ControlFinding(
+            control="grader_requested_review",
+            passed=grader_review_passed,
+            action="allow" if grader_review_passed else "review",
+            observed=not grader_review_passed,
+            threshold=False,
+            message=(
+                "Grader did not flag this result for human review."
+                if grader_review_passed
+                else "Grader flagged this result as requiring human review."
+            ),
+        )
+    )
+    if not grader_review_passed:
+        action = _max_action(action, "review")
+
     return ControlReport(
         action=action,
         release_allowed=action == "allow",

@@ -104,7 +104,7 @@ A future adapter can forward this event contract to OpenTelemetry, Phoenix, or L
 Promptfoo can continue to generate or red-team candidate outputs. Import those outputs into EvalForge as cases, execute a run, export the report, and gate CI with the included script:
 
 ```bash
-python scripts/regression_gate.py run.json \
+python -m scripts.regression_gate run.json \
   --min-accuracy 0.80 \
   --max-review-rate 0.25 \
   --max-block-rate 0.05 \
