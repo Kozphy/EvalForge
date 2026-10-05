@@ -1,0 +1,288 @@
+.env.example
+  h_1d8a7f1e671f32 2-9,17-20
+.gitattributes
+  h_1d8a7f1e671f32 1-4
+.github/workflows/ci.yml
+  h_1d8a7f1e671f32 1-55
+.gitignore
+  h_1d8a7f1e671f32 81,187-203
+CITATION.cff
+  h_1d8a7f1e671f32 1-16
+LICENSE
+  h_1d8a7f1e671f32 1,3,5-6,8-16,21-25
+README.md
+  h_1d8a7f1e671f32 1,3,5,7,9-13,15-16,19,21-24,27-28,32,35-45,50-58,61,63-68,70,72,74,76,78-90,93-94,96-97,99-100,103,107,109-114,117-119,121,123,126,129-130,132,136,138,140-145,147,153-156,162
+app/client_api.py
+  h_1d8a7f1e671f32 1-244
+app/config.py
+  h_1d8a7f1e671f32 37-38,42-47,49-50,82,100
+app/control_plane/__init__.py
+  h_1d8a7f1e671f32 1-9
+app/control_plane/__main__.py
+  h_1d8a7f1e671f32 1-5
+app/control_plane/adapters/__init__.py
+  h_1d8a7f1e671f32 1-43
+app/control_plane/adapters/custom/__init__.py
+  h_1d8a7f1e671f32 1-3
+app/control_plane/adapters/custom/heuristic.py
+  h_1d8a7f1e671f32 1-82
+app/control_plane/adapters/deepeval/__init__.py
+  h_1d8a7f1e671f32 1-3
+app/control_plane/adapters/deepeval/adapter.py
+  h_1d8a7f1e671f32 1-173
+app/control_plane/adapters/phoenix/__init__.py
+  h_1d8a7f1e671f32 1-3
+app/control_plane/adapters/phoenix/adapter.py
+  h_1d8a7f1e671f32 1-54
+app/control_plane/adapters/promptfoo/__init__.py
+  h_1d8a7f1e671f32 1-3
+app/control_plane/adapters/promptfoo/adapter.py
+  h_1d8a7f1e671f32 1-169
+app/control_plane/adapters/registry.py
+  h_1d8a7f1e671f32 1-46
+app/control_plane/api.py
+  h_1d8a7f1e671f32 1-147
+app/control_plane/baseline/registry.py
+  h_1d8a7f1e671f32 1-86
+app/control_plane/cli.py
+  h_1d8a7f1e671f32 1-225
+app/control_plane/contracts/__init__.py
+  h_1d8a7f1e671f32 1-223
+app/control_plane/events/bus.py
+  h_1d8a7f1e671f32 1-35
+app/control_plane/evidence/redaction.py
+  h_1d8a7f1e671f32 1-60
+app/control_plane/evidence/store.py
+  h_1d8a7f1e671f32 1-101
+app/control_plane/operator_fixtures.py
+  h_1d8a7f1e671f32 1-488
+app/control_plane/operator_service.py
+  h_1d8a7f1e671f32 1-244
+app/control_plane/orchestration/orchestrator.py
+  h_1d8a7f1e671f32 1-227
+app/control_plane/orchestration/review.py
+  h_1d8a7f1e671f32 1-42
+app/control_plane/policy/engine.py
+  h_1d8a7f1e671f32 1-127
+app/control_plane/regression/engine.py
+  h_1d8a7f1e671f32 1-89
+app/db.py
+  h_1d8a7f1e671f32 51,142
+app/main.py
+  h_1d8a7f1e671f32 10,14-16,42,154-176,290-424,430-434
+app/schemas.py
+  h_1d8a7f1e671f32 113
+app/service.py
+  h_1d8a7f1e671f32 4,9-15,20,75-77,81-102,237-245,259,279-282,287-320,325,328,330,335-341,347-348,355-359,363,365-366,368-370,375-461
+app/static/app.js
+  h_1d8a7f1e671f32 120-142,187,411-432,462-464
+app/static/index.html
+  h_1d8a7f1e671f32 6-7,10-16,19-22,26-27,29-30,32-34,36,38-42,45
+app/static/operator.css
+  h_1d8a7f1e671f32 1-159
+app/static/operator.js
+  h_1d8a7f1e671f32 1-745
+app/static/workbench.css
+  h_1d8a7f1e671f32 1-138
+app/static/workbench.html
+  h_1d8a7f1e671f32 1-189
+app/static/workbench.js
+  h_1d8a7f1e671f32 1-489
+app/version.py
+  h_1d8a7f1e671f32 5
+attic/blink-frontend/README.md
+  h_1d8a7f1e671f32 1-31
+attic/blink-frontend/blink-tagger.plugin.mjs
+  h_1d8a7f1e671f32 1-470
+attic/blink-frontend/components.json
+  h_1d8a7f1e671f32 1-24
+attic/blink-frontend/package.json
+  h_1d8a7f1e671f32 1-59
+attic/blink-frontend/public/favicon.svg
+  h_1d8a7f1e671f32 1-10
+attic/blink-frontend/public/icons.svg
+  h_1d8a7f1e671f32 1-24
+attic/blink-frontend/public/robots.txt
+  h_1d8a7f1e671f32 1-20
+attic/blink-frontend/public/sitemap.xml
+  h_1d8a7f1e671f32 1-11
+attic/blink-frontend/scripts/finalize-static-build.mjs
+  h_1d8a7f1e671f32 1-59
+attic/blink-frontend/src/Shell.tsx
+  h_1d8a7f1e671f32 1-63
+attic/blink-frontend/src/assets/typescript.svg
+  h_1d8a7f1e671f32 1
+attic/blink-frontend/src/assets/vite.svg
+  h_1d8a7f1e671f32 1
+attic/blink-frontend/src/blink/client.ts
+  h_1d8a7f1e671f32 1-8
+attic/blink-frontend/src/components/AppSidebarShell.tsx
+  h_1d8a7f1e671f32 1-210
+attic/blink-frontend/src/components/BlinkClientBoundary.tsx
+  h_1d8a7f1e671f32 1-32
+attic/blink-frontend/src/components/ui/avatar.tsx
+  h_1d8a7f1e671f32 1-51
+attic/blink-frontend/src/components/ui/button.tsx
+  h_1d8a7f1e671f32 1-59
+attic/blink-frontend/src/components/ui/card.tsx
+  h_1d8a7f1e671f32 1-92
+attic/blink-frontend/src/components/ui/input.tsx
+  h_1d8a7f1e671f32 1-21
+attic/blink-frontend/src/components/ui/label.tsx
+  h_1d8a7f1e671f32 1-22
+attic/blink-frontend/src/components/ui/sheet.tsx
+  h_1d8a7f1e671f32 1-137
+attic/blink-frontend/src/components/ui/sonner.tsx
+  h_1d8a7f1e671f32 1-21
+attic/blink-frontend/src/components/ui/tooltip.tsx
+  h_1d8a7f1e671f32 1-59
+attic/blink-frontend/src/index.css
+  h_1d8a7f1e671f32 1-169
+attic/blink-frontend/src/layouts/shared-app-layout.tsx
+  h_1d8a7f1e671f32 1-53
+attic/blink-frontend/src/lib/utils.ts
+  h_1d8a7f1e671f32 1-6
+attic/blink-frontend/src/routeTree.gen.ts
+  h_1d8a7f1e671f32 1-111
+attic/blink-frontend/src/router.tsx
+  h_1d8a7f1e671f32 1-25
+attic/blink-frontend/src/routes/__root.tsx
+  h_1d8a7f1e671f32 1-122
+attic/blink-frontend/src/routes/app.tsx
+  h_1d8a7f1e671f32 1-42
+attic/blink-frontend/src/routes/app/index.tsx
+  h_1d8a7f1e671f32 1-49
+attic/blink-frontend/src/routes/index.tsx
+  h_1d8a7f1e671f32 1-91
+attic/blink-frontend/tsconfig.json
+  h_1d8a7f1e671f32 1-37
+attic/blink-frontend/tsconfig.node.json
+  h_1d8a7f1e671f32 1-14
+attic/blink-frontend/vite.config.ts
+  h_1d8a7f1e671f32 1-287
+docs/adr/ADR-001-evaluation-control-plane.md
+  h_1d8a7f1e671f32 1-14
+docs/adr/ADR-002-canonical-evaluation-contract.md
+  h_1d8a7f1e671f32 1-13
+docs/adr/ADR-003-adapter-plugin-architecture.md
+  h_1d8a7f1e671f32 1-13
+docs/adr/ADR-004-baseline-versioning.md
+  h_1d8a7f1e671f32 1-13
+docs/adr/ADR-005-policy-engine.md
+  h_1d8a7f1e671f32 1-13
+docs/adr/ADR-006-evidence-and-audit-model.md
+  h_1d8a7f1e671f32 1-13
+docs/adr/ADR-007-retry-and-failure-taxonomy.md
+  h_1d8a7f1e671f32 1-13
+docs/adr/ADR-008-observability-and-trace-integration.md
+  h_1d8a7f1e671f32 1-13
+docs/architecture/control-plane-upgrade-report.md
+  h_1d8a7f1e671f32 1-102
+docs/architecture/control-plane.md
+  h_1d8a7f1e671f32 1-41
+docs/architecture/current-state.md
+  h_1d8a7f1e671f32 1-137
+docs/architecture/finance-eval-audit.md
+  h_1d8a7f1e671f32 1-106
+docs/architecture/finance-eval-job-mapping.md
+  h_1d8a7f1e671f32 1-68
+docs/architecture/operator-ui-audit.md
+  h_1d8a7f1e671f32 1-39
+docs/architecture/operator-ui-deliverables.md
+  h_1d8a7f1e671f32 1-92
+docs/end-to-end-flow.md
+  h_1d8a7f1e671f32 1-112
+docs/guides/running-an-experiment.md
+  h_1d8a7f1e671f32 1-7
+docs/guides/writing-an-adapter.md
+  h_1d8a7f1e671f32 1-8
+docs/portfolio-positioning.md
+  h_1d8a7f1e671f32 1-115
+docs/reports/finance-evaluation-report.md
+  h_1d8a7f1e671f32 1-196
+examples/control_plane_demo/README.md
+  h_1d8a7f1e671f32 1-18
+examples/control_plane_demo/experiment.yaml
+  h_1d8a7f1e671f32 1-31
+finance_eval/__init__.py
+  h_1d8a7f1e671f32 1-14
+finance_eval/__main__.py
+  h_1d8a7f1e671f32 1-109
+finance_eval/baselines/baseline_metrics.json
+  h_1d8a7f1e671f32 1-30
+finance_eval/baselines/live_run_summary.example.json
+  h_1d8a7f1e671f32 1-56
+finance_eval/dataset/MANIFEST.json
+  h_1d8a7f1e671f32 1-25
+finance_eval/dataset/finance_accounting_v1.jsonl
+  h_1d8a7f1e671f32 1-154
+finance_eval/evidence.py
+  h_1d8a7f1e671f32 1-102
+finance_eval/generate_dataset.py
+  h_1d8a7f1e671f32 1-745
+finance_eval/graders.py
+  h_1d8a7f1e671f32 1-155
+finance_eval/human_review.py
+  h_1d8a7f1e671f32 1-70
+finance_eval/judge.py
+  h_1d8a7f1e671f32 1-36
+finance_eval/live.py
+  h_1d8a7f1e671f32 1-267
+finance_eval/metrics.py
+  h_1d8a7f1e671f32 1-125
+finance_eval/policy.py
+  h_1d8a7f1e671f32 1-167
+finance_eval/report.py
+  h_1d8a7f1e671f32 1-163
+finance_eval/runner.py
+  h_1d8a7f1e671f32 1-232
+finance_eval/schema.py
+  h_1d8a7f1e671f32 1-129
+finance_eval/taxonomy.py
+  h_1d8a7f1e671f32 1-115
+paper/manuscript.md
+  h_1d8a7f1e671f32 1-132
+requirements.txt
+  h_1d8a7f1e671f32 9
+research/README.md
+  h_1d8a7f1e671f32 1-80
+research/RESEARCH_PLAN.md
+  h_1d8a7f1e671f32 1-145
+research/__init__.py
+  h_1d8a7f1e671f32 1
+research/benchmark_schema.json
+  h_1d8a7f1e671f32 1-33
+research/example_predictions.csv
+  h_1d8a7f1e671f32 1-7
+research/metrics.py
+  h_1d8a7f1e671f32 1-126
+research/run_analysis.py
+  h_1d8a7f1e671f32 1-77
+scripts/check_operator_console.py
+  h_1d8a7f1e671f32 1-124
+tests/test_client_api.py
+  h_1d8a7f1e671f32 1-343
+tests/test_control_plane.py
+  h_1d8a7f1e671f32 1-163
+tests/test_control_plane_contracts.py
+  h_1d8a7f1e671f32 1-42
+tests/test_finance_eval.py
+  h_1d8a7f1e671f32 1-151
+tests/test_finance_live.py
+  h_1d8a7f1e671f32 1-172
+tests/test_operator_ui.py
+  h_1d8a7f1e671f32 1-83
+tests/test_research_metrics.py
+  h_1d8a7f1e671f32 1-36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f63124b8f07c661f5c2779a1a53022107244b858",
+  "prompts": {},
+  "humans": {
+    "h_1d8a7f1e671f32": {
+      "author": "Zixsa <50504962+Kozphy@users.noreply.github.com>"
+    }
+  }
+}
