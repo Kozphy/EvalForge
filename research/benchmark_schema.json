@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EvalForge Benchmark Record",
+  "type": "object",
+  "required": ["case_id", "prompt", "candidate_response", "gold_label", "failure_category"],
+  "properties": {
+    "case_id": {"type": "string", "minLength": 1},
+    "prompt": {"type": "string"},
+    "candidate_response": {"type": "string"},
+    "gold_label": {"type": "string", "enum": ["pass", "fail"]},
+    "failure_category": {
+      "type": "string",
+      "enum": [
+        "instruction_following",
+        "factual_grounding",
+        "citation_support",
+        "format_schema",
+        "code_syntax",
+        "sql_safety",
+        "unsupported_claim",
+        "omission",
+        "other"
+      ]
+    },
+    "requirements": {"type": "array", "items": {"type": "string"}},
+    "evidence_ids": {"type": "array", "items": {"type": "string"}},
+    "split": {"type": "string", "enum": ["train", "dev", "test"]},
+    "annotation_provenance": {"type": "string"},
+    "annotator_count": {"type": "integer", "minimum": 1},
+    "adjudicated_label": {"type": ["string", "null"], "enum": ["pass", "fail", null]}
+  },
+  "additionalProperties": true
+}

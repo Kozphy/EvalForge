@@ -34,11 +34,20 @@ class GraderConfig(BaseModel):
     dataset_version: str | None = None
     git_commit_sha: str | None = None
     app_version: str = APP_VERSION
+    # Public API-target snapshot (env var *name* only — never secret values).
+    api_target: dict | None = None
 
 
 def detect_git_commit_sha(cwd: Path | None = None) -> str | None:
-    """Return the current Git commit SHA, or None if unavailable."""
+    """Return the current Git commit SHA, or None if unavailable.
+
+    When ``cwd`` is provided explicitly, require a ``.git`` entry in that
+    directory so temporary folders nested inside a checkout are not treated
+    as the application repository.
+    """
     root = cwd or Path.cwd()
+    if cwd is not None and not (Path(cwd) / ".git").exists():
+        return None
     try:
         result = subprocess.run(
             ["git", "rev-parse", "HEAD"],
@@ -70,6 +79,7 @@ def build_grader_config(
     evidence_threshold: float = 0.25,
     rule_set_version: str = "1",
     model_version: str | None = None,
+    api_target: dict | None = None,
 ) -> GraderConfig:
     return GraderConfig(
         provider=provider,
@@ -87,4 +97,5 @@ def build_grader_config(
         dataset_version=dataset_version,
         git_commit_sha=detect_git_commit_sha(),
         app_version=APP_VERSION,
+        api_target=api_target,
     )

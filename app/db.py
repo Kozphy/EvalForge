@@ -48,6 +48,7 @@ def init_db() -> None:
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         description TEXT NOT NULL DEFAULT '',
+        api_target_json TEXT,
         created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -138,6 +139,7 @@ def migrate_schema(conn: sqlite3.Connection) -> None:
         "review_status TEXT NOT NULL DEFAULT 'PENDING'",
     )
     _ensure_column(conn, "results", "final_label", "final_label TEXT")
+    _ensure_column(conn, "projects", "api_target_json", "api_target_json TEXT")
 
     conn.executescript(
         """
