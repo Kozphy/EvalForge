@@ -1,0 +1,291 @@
+.env.example
+  s_e3884144e4c7b7::t_6ce13c65d751cb 2-9,21-24
+.gitattributes
+  s_e3884144e4c7b7::t_e665834006d0b7 1-4
+.github/workflows/ci.yml
+  s_e3884144e4c7b7::t_d60637845bcf6f 7
+.gitignore
+  s_e3884144e4c7b7::t_5e24017539b736 81,187-203
+CITATION.cff
+  s_e3884144e4c7b7::t_178f2b525d2f11 1-16
+LICENSE
+  s_e3884144e4c7b7::t_e7007b4e1d62ca 1,3,5-6,8-16,21-25
+README.md
+  s_e3884144e4c7b7::t_a003fca7deb75c 1,3,5,7,9-13,15-16,19,21-24,27-28,32,35-45,50-58,61,63-68,70,72,74,76,78-90,93-94,96-97,99-100,103,107,109-114,117-119,121,123,126,129-130,132,136,138,140-145,147,153-156,162
+app/client_api.py
+  s_e3884144e4c7b7::t_ef4c5401c769d7 1-244
+app/config.py
+  s_e3884144e4c7b7::t_61edd3bba1b38f 47-48,52-57,59-60,99,124
+app/control_plane/__init__.py
+  s_e3884144e4c7b7::t_53c68dbe1aa017 1-9
+app/control_plane/__main__.py
+  s_e3884144e4c7b7::t_e5487c800a9011 1-5
+app/control_plane/adapters/__init__.py
+  s_e3884144e4c7b7::t_1a00a86e2d5a1c 1-43
+app/control_plane/adapters/custom/__init__.py
+  s_e3884144e4c7b7::t_1830d9f7b6c800 1-3
+app/control_plane/adapters/custom/heuristic.py
+  s_e3884144e4c7b7::t_557b6b750b9ea0 1-82
+app/control_plane/adapters/deepeval/__init__.py
+  s_e3884144e4c7b7::t_9f6d43713d2787 1-3
+app/control_plane/adapters/deepeval/adapter.py
+  s_e3884144e4c7b7::t_fd9b484b09299d 1-173
+app/control_plane/adapters/phoenix/__init__.py
+  s_e3884144e4c7b7::t_a59e793bb012e9 1-3
+app/control_plane/adapters/phoenix/adapter.py
+  s_e3884144e4c7b7::t_14e7f7499e9436 1-54
+app/control_plane/adapters/promptfoo/__init__.py
+  s_e3884144e4c7b7::t_011534f94aa49b 1-3
+app/control_plane/adapters/promptfoo/adapter.py
+  s_e3884144e4c7b7::t_570857161220bb 1-169
+app/control_plane/adapters/registry.py
+  s_e3884144e4c7b7::t_92aac4ed3c4361 1-46
+app/control_plane/api.py
+  s_e3884144e4c7b7::t_8c6dd398316408 1-147
+app/control_plane/baseline/registry.py
+  s_e3884144e4c7b7::t_c6d853f52e5e0e 1-86
+app/control_plane/cli.py
+  s_e3884144e4c7b7::t_9e1ab553c23499 1-225
+app/control_plane/contracts/__init__.py
+  s_e3884144e4c7b7::t_2a838e3b3bdf27 1-223
+app/control_plane/events/bus.py
+  s_e3884144e4c7b7::t_20a59cde41ef11 1-35
+app/control_plane/evidence/redaction.py
+  s_e3884144e4c7b7::t_4985b0fd503814 1-60
+app/control_plane/evidence/store.py
+  s_e3884144e4c7b7::t_2744645f55f2a9 1-101
+app/control_plane/operator_fixtures.py
+  s_e3884144e4c7b7::t_095d900636424c 1-488
+app/control_plane/operator_service.py
+  s_e3884144e4c7b7::t_5203b2507edf75 1-244
+app/control_plane/orchestration/orchestrator.py
+  s_e3884144e4c7b7::t_66ad2d4008f766 1-227
+app/control_plane/orchestration/review.py
+  s_e3884144e4c7b7::t_bc73474321656b 1-42
+app/control_plane/policy/engine.py
+  s_e3884144e4c7b7::t_7ea21973cb18d8 1-127
+app/control_plane/regression/engine.py
+  s_e3884144e4c7b7::t_b73f9b9ebe7b20 1-89
+app/db.py
+  s_e3884144e4c7b7::t_9f1b14e8494ed8 51,161
+app/main.py
+  s_e3884144e4c7b7::t_dcd2c84e6dd5f8 10,13-15,40,151-173,313-447,453-457
+app/schemas.py
+  s_e3884144e4c7b7::t_9fe4c3cc83e402 113
+app/service.py
+  s_e3884144e4c7b7::t_58514eec0d5ab7 4,11-17,23,102-104,108-129,264-272,331-334,339-372,392,395,397,492-493,507-511,515,524-525,527-529,534-620
+app/static/app.js
+  s_e3884144e4c7b7::t_00300f4c006b67 120-142,187,411-432,462-464
+app/static/index.html
+  s_e3884144e4c7b7::t_01541b2a2b822a 6-7,10-16,19-22,26-27,29-30,32-34,36,38-42,45
+app/static/operator.css
+  s_e3884144e4c7b7::t_4944ec37d48615 1-159
+app/static/operator.js
+  s_e3884144e4c7b7::t_bad962fbabf4a4 1-745
+app/static/workbench.css
+  s_e3884144e4c7b7::t_418913fd778c67 1-138
+app/static/workbench.html
+  s_e3884144e4c7b7::t_8ae8fb237281b9 1-189
+app/static/workbench.js
+  s_e3884144e4c7b7::t_6b400e1f1d262a 1-489
+attic/blink-frontend/README.md
+  s_e3884144e4c7b7::t_59168ff01c44c5 1-31
+attic/blink-frontend/blink-tagger.plugin.mjs
+  s_e3884144e4c7b7::t_d964e6c7d02750 1-470
+attic/blink-frontend/components.json
+  s_e3884144e4c7b7::t_d48a5d7e3ed994 1-24
+attic/blink-frontend/package.json
+  s_e3884144e4c7b7::t_3a3ffebc3bd5df 1-59
+attic/blink-frontend/public/favicon.svg
+  s_e3884144e4c7b7::t_6cb6baa2ba29dc 1-10
+attic/blink-frontend/public/icons.svg
+  s_e3884144e4c7b7::t_1a4ddef9b5005a 1-24
+attic/blink-frontend/public/robots.txt
+  s_e3884144e4c7b7::t_2851b3116c1c46 1-20
+attic/blink-frontend/public/sitemap.xml
+  s_e3884144e4c7b7::t_01ec4e8ab778e1 1-11
+attic/blink-frontend/scripts/finalize-static-build.mjs
+  s_e3884144e4c7b7::t_38aaec98037886 1-59
+attic/blink-frontend/src/Shell.tsx
+  s_e3884144e4c7b7::t_003afa63f0e7a3 1-63
+attic/blink-frontend/src/assets/typescript.svg
+  s_e3884144e4c7b7::t_fc94b8d4584419 1
+attic/blink-frontend/src/assets/vite.svg
+  s_e3884144e4c7b7::t_305131f512e0bb 1
+attic/blink-frontend/src/blink/client.ts
+  s_e3884144e4c7b7::t_4bae045ced2be3 1-8
+attic/blink-frontend/src/components/AppSidebarShell.tsx
+  s_e3884144e4c7b7::t_0133d56c0fe390 1-210
+attic/blink-frontend/src/components/BlinkClientBoundary.tsx
+  s_e3884144e4c7b7::t_efc9fb9b081586 1-32
+attic/blink-frontend/src/components/ui/avatar.tsx
+  s_e3884144e4c7b7::t_ff382861f7971f 1-51
+attic/blink-frontend/src/components/ui/button.tsx
+  s_e3884144e4c7b7::t_d16e815207d86d 1-59
+attic/blink-frontend/src/components/ui/card.tsx
+  s_e3884144e4c7b7::t_cc9ef95a346e6e 1-92
+attic/blink-frontend/src/components/ui/input.tsx
+  s_e3884144e4c7b7::t_69a50c8a2b9794 1-21
+attic/blink-frontend/src/components/ui/label.tsx
+  s_e3884144e4c7b7::t_e1ae31d12e8367 1-22
+attic/blink-frontend/src/components/ui/sheet.tsx
+  s_e3884144e4c7b7::t_27f247b2250748 1-137
+attic/blink-frontend/src/components/ui/sonner.tsx
+  s_e3884144e4c7b7::t_56d7d7d11ba0fc 1-21
+attic/blink-frontend/src/components/ui/tooltip.tsx
+  s_e3884144e4c7b7::t_4b21fc679a82b7 1-59
+attic/blink-frontend/src/index.css
+  s_e3884144e4c7b7::t_ba37cfe5185d3f 1-169
+attic/blink-frontend/src/layouts/shared-app-layout.tsx
+  s_e3884144e4c7b7::t_d108f2dafeee83 1-53
+attic/blink-frontend/src/lib/utils.ts
+  s_e3884144e4c7b7::t_0150ff3e21d823 1-6
+attic/blink-frontend/src/routeTree.gen.ts
+  s_e3884144e4c7b7::t_4ff540ee65a5c8 1-111
+attic/blink-frontend/src/router.tsx
+  s_e3884144e4c7b7::t_c8e1582aba6f2d 1-25
+attic/blink-frontend/src/routes/__root.tsx
+  s_e3884144e4c7b7::t_4b5acef5850e3b 1-122
+attic/blink-frontend/src/routes/app.tsx
+  s_e3884144e4c7b7::t_d195dba99e6235 1-42
+attic/blink-frontend/src/routes/app/index.tsx
+  s_e3884144e4c7b7::t_334238d26857bb 1-49
+attic/blink-frontend/src/routes/index.tsx
+  s_e3884144e4c7b7::t_8105e8e7baa027 1-91
+attic/blink-frontend/tsconfig.json
+  s_e3884144e4c7b7::t_90b786d97a2800 1-37
+attic/blink-frontend/tsconfig.node.json
+  s_e3884144e4c7b7::t_1e629812841ada 1-14
+attic/blink-frontend/vite.config.ts
+  s_e3884144e4c7b7::t_34e59103c5abaa 1-287
+docs/adr/ADR-001-evaluation-control-plane.md
+  s_e3884144e4c7b7::t_2c990788b40719 1-14
+docs/adr/ADR-002-canonical-evaluation-contract.md
+  s_e3884144e4c7b7::t_2b7e5d07391eb6 1-13
+docs/adr/ADR-003-adapter-plugin-architecture.md
+  s_e3884144e4c7b7::t_118c22fbf093d3 1-13
+docs/adr/ADR-004-baseline-versioning.md
+  s_e3884144e4c7b7::t_5471c8c4f226c2 1-13
+docs/adr/ADR-005-policy-engine.md
+  s_e3884144e4c7b7::t_09a7dc5e844cd0 1-13
+docs/adr/ADR-006-evidence-and-audit-model.md
+  s_e3884144e4c7b7::t_920050a9fad053 1-13
+docs/adr/ADR-007-retry-and-failure-taxonomy.md
+  s_e3884144e4c7b7::t_3e89e17fe6dce0 1-13
+docs/adr/ADR-008-observability-and-trace-integration.md
+  s_e3884144e4c7b7::t_4cdb909e794f7e 1-13
+docs/architecture/control-plane-upgrade-report.md
+  s_e3884144e4c7b7::t_5480e91e9925e0 1-102
+docs/architecture/control-plane.md
+  s_e3884144e4c7b7::t_d06db5d99cab4f 1-41
+docs/architecture/current-state.md
+  s_e3884144e4c7b7::t_e7b11a01edd899 1-137
+docs/architecture/finance-eval-audit.md
+  s_e3884144e4c7b7::t_ded821637a376e 1-106
+docs/architecture/finance-eval-job-mapping.md
+  s_e3884144e4c7b7::t_500771f53e94d9 1-68
+docs/architecture/operator-ui-audit.md
+  s_e3884144e4c7b7::t_83f8c22e0de7ab 1-39
+docs/architecture/operator-ui-deliverables.md
+  s_e3884144e4c7b7::t_48bf43d6d15278 1-92
+docs/end-to-end-flow.md
+  s_e3884144e4c7b7::t_ab1f0ca0521b1c 1-112
+docs/guides/running-an-experiment.md
+  s_e3884144e4c7b7::t_e4a5a31ea0b0ba 1-7
+docs/guides/writing-an-adapter.md
+  s_e3884144e4c7b7::t_8a3119a9e842d9 1-8
+docs/portfolio-positioning.md
+  s_e3884144e4c7b7::t_26b1c7cfc05c11 1-115
+docs/reports/finance-evaluation-report.md
+  s_e3884144e4c7b7::t_e7a2de4fd441c2 1-196
+examples/control_plane_demo/README.md
+  s_e3884144e4c7b7::t_278dde3a5e9cce 1-18
+examples/control_plane_demo/experiment.yaml
+  s_e3884144e4c7b7::t_7a80a8581c6b3a 1-31
+finance_eval/__init__.py
+  s_e3884144e4c7b7::t_4b4ce910eeb24c 1-14
+finance_eval/__main__.py
+  s_e3884144e4c7b7::t_41a1ff775c2e45 1-109
+finance_eval/baselines/baseline_metrics.json
+  s_e3884144e4c7b7::t_cf7b0d80cad0e7 1-30
+finance_eval/baselines/live_run_summary.example.json
+  s_e3884144e4c7b7::t_3a03d08960a97c 1-56
+finance_eval/dataset/MANIFEST.json
+  s_e3884144e4c7b7::t_94768a99e72007 1-25
+finance_eval/dataset/finance_accounting_v1.jsonl
+  s_e3884144e4c7b7::t_810881d2fb43bd 1-154
+finance_eval/evidence.py
+  s_e3884144e4c7b7::t_182f9171b82bdd 1-102
+finance_eval/generate_dataset.py
+  s_e3884144e4c7b7::t_5ee6616b8d48ae 1-745
+finance_eval/graders.py
+  s_e3884144e4c7b7::t_e43276ea5bbe20 1-155
+finance_eval/human_review.py
+  s_e3884144e4c7b7::t_20fd9e85d2ceea 1-70
+finance_eval/judge.py
+  s_e3884144e4c7b7::t_c10a20cda4f619 1-36
+finance_eval/live.py
+  s_e3884144e4c7b7::t_abf2047922da72 1-267
+finance_eval/metrics.py
+  s_e3884144e4c7b7::t_3ba83b7208c60a 1-125
+finance_eval/policy.py
+  s_e3884144e4c7b7::t_73390f1ae334a1 1-167
+finance_eval/report.py
+  s_e3884144e4c7b7::t_393e1f89a00f94 1-163
+finance_eval/runner.py
+  s_e3884144e4c7b7::t_6c76d51ed782aa 1-232
+finance_eval/schema.py
+  s_e3884144e4c7b7::t_740e9601955e88 1-129
+finance_eval/taxonomy.py
+  s_e3884144e4c7b7::t_051e2e76403b61 1-115
+paper/manuscript.md
+  s_e3884144e4c7b7::t_65c86c80e661e5 1-132
+requirements.txt
+  s_e3884144e4c7b7::t_d5b8ee3200c311 9
+research/README.md
+  s_e3884144e4c7b7::t_41554213f5f320 1-80
+research/RESEARCH_PLAN.md
+  s_e3884144e4c7b7::t_73286609c4b893 1-145
+research/__init__.py
+  s_e3884144e4c7b7::t_5d894d1d36b451 1
+research/benchmark_schema.json
+  s_e3884144e4c7b7::t_c9b1447700eaec 1-33
+research/example_predictions.csv
+  s_e3884144e4c7b7::t_3edbb21118c1b1 1-7
+research/metrics.py
+  s_e3884144e4c7b7::t_2b2da9a65147dc 1-126
+research/run_analysis.py
+  s_e3884144e4c7b7::t_4f4c9b28341581 1-77
+scripts/check_operator_console.py
+  s_e3884144e4c7b7::t_b7fe5119c14b39 1-124
+tests/test_client_api.py
+  s_e3884144e4c7b7::t_93321f19b2a176 1-343
+tests/test_control_plane.py
+  s_e3884144e4c7b7::t_1e3659294d82fa 1-163
+tests/test_control_plane_contracts.py
+  s_e3884144e4c7b7::t_a557d38ae730fe 1-42
+tests/test_finance_eval.py
+  s_e3884144e4c7b7::t_e146bfa159a7f3 1-151
+tests/test_finance_live.py
+  s_e3884144e4c7b7::t_42b1667d65cbab 1-172
+tests/test_operator_ui.py
+  s_e3884144e4c7b7::t_387fb2a04c587b 1-83
+tests/test_research_metrics.py
+  s_e3884144e4c7b7::t_9a9ea63e266481 1-36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "754cd830ec31683d524d60aedb63a949d292dd75",
+  "prompts": {},
+  "sessions": {
+    "s_e3884144e4c7b7": {
+      "agent_id": {
+        "tool": "devin",
+        "id": "s_e3884144e4c7b7",
+        "model": "unknown"
+      },
+      "human_author": "Zixsa <50504962+Kozphy@users.noreply.github.com>"
+    }
+  }
+}
