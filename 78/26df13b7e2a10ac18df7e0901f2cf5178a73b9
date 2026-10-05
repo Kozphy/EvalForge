@@ -1,0 +1,45 @@
+.env.example
+  s_19c1ee357aa526::t_8ae49444c420ab 18-23
+app/async_runs.py
+  s_19c1ee357aa526::t_4a43d5e838bf0b 1-398
+app/main.py
+  s_19c1ee357aa526::t_69cc6c9c4ed8b1 13,35-36,46
+app/retrieval.py
+  s_19c1ee357aa526::t_47c90cb1d33bae 1-14,17,24-32,40-57,96-216,220,224-230,233-237,244-245
+app/torch_retrieval.py
+  s_19c1ee357aa526::t_36e8899626a139 1-195
+docs/pytorch-retrieval.md
+  s_19c1ee357aa526::t_4ba2e0d5e13f9d 1-61
+requirements-torch.txt
+  s_19c1ee357aa526::t_052f8485dd7efe 1-5
+tests/conftest.py
+  s_19c1ee357aa526::t_a2de8beb61f222 1-36
+tests/test_api.py
+  s_19c1ee357aa526::t_9b7ccb1caedddd 1-11,20,24-33,39,41-55
+tests/test_async_runs.py
+  s_19c1ee357aa526::t_5764aa893373e3 1-150
+tests/test_config.py
+  s_19c1ee357aa526::t_0df316ff416f4e 1-14,24,28-37,46,48-58,82-89
+tests/test_export.py
+  s_19c1ee357aa526::t_55d620f342e72a 1-15,24,28-37,44-56,67,69-83,107,109-119,132-144
+tests/test_retrieval.py
+  s_19c1ee357aa526::t_9c0406b34b7262 1-18,20,23,25-31
+tests/test_torch_retrieval.py
+  s_19c1ee357aa526::t_0a41a53b3b35e4 1-93
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7826df13b7e2a10ac18df7e0901f2cf5178a73b9",
+  "prompts": {},
+  "sessions": {
+    "s_19c1ee357aa526": {
+      "agent_id": {
+        "tool": "devin",
+        "id": "s_19c1ee357aa526",
+        "model": "unknown"
+      },
+      "human_author": "Zixsa <50504962+Kozphy@users.noreply.github.com>"
+    }
+  }
+}
