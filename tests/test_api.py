@@ -1,3 +1,14 @@
+"""Integration tests for the core project/seed/run API endpoints.
+
+These tests exercise the full request-response cycle through FastAPI's
+``TestClient``, using an isolated SQLite database per test (via ``tmp_path``).
+They verify that seeding a project and executing a heuristic run produces the
+expected status codes, result counts, and config snapshot fields.
+
+Tests that trigger a grading run are decorated with ``@requires_sklearn``
+because the default TF-IDF retrieval backend depends on scikit-learn / scipy.
+"""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -10,6 +21,16 @@ from tests.conftest import requires_sklearn
 
 
 def _client(tmp_path: Path) -> TestClient:
+    """Create a ``TestClient`` backed by a fresh, isolated SQLite database.
+
+    Args:
+        tmp_path: pytest-provided temporary directory; the database file is
+            written here so each test starts with an empty schema.
+
+    Returns:
+        A configured :class:`~fastapi.testclient.TestClient` ready to make
+        requests against the EvalForge app.
+    """
     db.DB_PATH = tmp_path / "test.db"
     db.init_db()
     return TestClient(app)
@@ -17,6 +38,21 @@ def _client(tmp_path: Path) -> TestClient:
 
 @requires_sklearn
 def test_project_seed_and_run(tmp_path: Path) -> None:
+    """Seed a project with sample data and execute a heuristic grading run.
+
+    Verifies that:
+
+    * POST ``/api/projects`` returns HTTP 201.
+    * POST ``/api/projects/{id}/seed`` returns HTTP 201.
+    * POST ``/api/projects/{id}/runs`` returns HTTP 201 with status
+      ``"completed"``.
+    * The run payload contains exactly 3 results, a populated ``metrics``
+      block, and a ``config`` snapshot with ``provider`` and ``app_version``.
+
+    Args:
+        tmp_path: pytest fixture providing a temporary directory for the
+            isolated test database.
+    """
     with _client(tmp_path) as client:
         project = client.post("/api/projects", json={"name": "Demo", "description": "Test"})
         assert project.status_code == 201
