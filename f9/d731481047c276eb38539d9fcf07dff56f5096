@@ -1,0 +1,21 @@
+SERVICE.md
+  s_be7467d8494cb0::t_928036e5e087a9 1-75
+docs/sample-report.md
+  s_be7467d8494cb0::t_a6f83b070bc4a9 1-95
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f9d731481047c276eb38539d9fcf07dff56f5096",
+  "prompts": {},
+  "sessions": {
+    "s_be7467d8494cb0": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "4f977ab2-5650-41aa-87bb-53e4627eff55",
+        "model": "default"
+      },
+      "human_author": "Zixsa <50504962+Kozphy@users.noreply.github.com>"
+    }
+  }
+}
