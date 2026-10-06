@@ -33,16 +33,34 @@ def get_conn() -> Iterator[sqlite3.Connection]:
 
 
 def _table_columns(conn: sqlite3.Connection, table: str) -> set[str]:
+    """Return the set of column names defined on a table.
+
+    Args:
+        conn: SQLite connection to inspect.
+        table: Name of the table to introspect.
+
+    Returns:
+        Set of column names present on the table.
+    """
     rows = conn.execute(f"PRAGMA table_info({table})").fetchall()
     return {str(row["name"]) for row in rows}
 
 
 def _ensure_column(conn: sqlite3.Connection, table: str, column: str, ddl: str) -> None:
+    """Add a column to a table when it is not already present.
+
+    Args:
+        conn: SQLite connection to migrate.
+        table: Name of the table to alter.
+        column: Name of the column to ensure.
+        ddl: Column definition applied when the column is missing.
+    """
     if column not in _table_columns(conn, table):
         conn.execute(f"ALTER TABLE {table} ADD COLUMN {ddl}")
 
 
 def init_db() -> None:
+    """Create the schema when missing and apply pending migrations."""
     schema = """
     CREATE TABLE IF NOT EXISTS projects (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

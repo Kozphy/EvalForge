@@ -25,12 +25,21 @@ REPLACEMENT_RESPONSE = "Replacement answer Y."
 
 
 def _client(tmp_path: Path) -> TestClient:
+    """Build a test client backed by an isolated SQLite database.
+
+    Args:
+        tmp_path: Pytest temporary directory for the database file.
+
+    Returns:
+        Test client wired to the isolated application database.
+    """
     db.DB_PATH = tmp_path / "rerun.db"
     db.init_db()
     return TestClient(app)
 
 
 def _api_target() -> dict:
+    """Return a valid client API target configuration for tests."""
     return {
         "url": "https://api.example.com/v1/generate",
         "body_template": '{"input": "{{prompt}}"}',
@@ -40,6 +49,12 @@ def _api_target() -> dict:
 
 
 def _create_case(client: TestClient, project_id: int) -> None:
+    """Add a single evaluation case to a project.
+
+    Args:
+        client: Test client for the application API.
+        project_id: Identifier of the project receiving the case.
+    """
     resp = client.post(
         f"/api/projects/{project_id}/cases",
         json={
@@ -61,6 +76,14 @@ def test_rerun_preserves_historical_response(
     monkeypatch: pytest.MonkeyPatch,
     variant: str,
 ) -> None:
+    """Regression-test that reruns never rewrite historical responses.
+
+    Args:
+        tmp_path: Isolated pytest temporary directory for the database.
+        monkeypatch: Pytest fixture used to patch the HTTP client factory.
+        variant: Endpoint under test: detail, export-json, export-jsonl,
+            or export-csv.
+    """
     answers = [ORIGINAL_RESPONSE, REPLACEMENT_RESPONSE]
 
     def handler(_request: httpx.Request) -> httpx.Response:

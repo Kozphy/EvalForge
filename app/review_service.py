@@ -10,6 +10,15 @@ from .service import utc_now
 
 
 def _get_result(conn: Any, result_id: int) -> dict[str, Any] | None:
+    """Load a single result with its case and run context.
+
+    Args:
+        conn: SQLite connection to query.
+        result_id: Identifier of the result to load.
+
+    Returns:
+        Result record joined with case and run fields, or None when missing.
+    """
     row = conn.execute(
         """
         SELECT results.*,
@@ -45,6 +54,24 @@ def list_reviews(
     limit: int = 100,
     offset: int = 0,
 ) -> list[dict[str, Any]]:
+    """List results needing or having completed human review.
+
+    Args:
+        project_id: Filter by project identifier when provided.
+        run_id: Filter by run identifier when provided.
+        predicted_label: Filter by predicted severity label.
+        min_confidence: Minimum grader confidence when provided.
+        max_confidence: Maximum grader confidence when provided.
+        review_status: Filter by review workflow status.
+        needs_human_review: Filter by human-review flag when not None.
+        sort_by: Column used to order results.
+        sort_dir: Sort direction, either "asc" or "desc".
+        limit: Maximum number of rows to return.
+        offset: Number of rows to skip.
+
+    Returns:
+        Matching result records with case and run context.
+    """
     clauses = ["1=1"]
     params: list[Any] = []
 
@@ -101,6 +128,15 @@ def list_reviews(
 
 
 def get_review_detail(result_id: int) -> dict[str, Any] | None:
+    """Load one result with its review decision history.
+
+    Args:
+        result_id: Identifier of the result to load.
+
+    Returns:
+        Result record with case, run, and decision context, or None
+        when the result does not exist.
+    """
     with get_conn() as conn:
         result = _get_result(conn, result_id)
         if result is None:

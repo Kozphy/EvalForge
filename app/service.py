@@ -224,6 +224,19 @@ def validate_requirements_for_run(cases: list[dict]) -> None:
 
 
 def execute_run(project_id: int, config: RunCreate) -> dict:
+    """Execute an evaluation run for all cases in a project.
+
+    Args:
+        project_id: Identifier of the project to evaluate.
+        config: Run configuration selecting the provider and model.
+
+    Returns:
+        The completed run record including per-case results.
+
+    Raises:
+        ValueError: When the project is missing, has no cases, or the
+            client API provider is used without a configured target.
+    """
     project = get_project(project_id)
     if project is None:
         raise ValueError("Project not found")
@@ -375,6 +388,14 @@ def execute_run(project_id: int, config: RunCreate) -> dict:
 
 
 def _api_failure_output(api_result: ApiCallResult) -> tuple[GraderOutput, list]:
+    """Build a failing grader output for an unsuccessful client API call.
+
+    Args:
+        api_result: Result of the failed client API call.
+
+    Returns:
+        Tuple of the synthetic failing grader output and empty findings.
+    """
     reason = api_result.error or "Client API call failed."
     output = GraderOutput(
         verdict="fail",
@@ -389,6 +410,12 @@ def _api_failure_output(api_result: ApiCallResult) -> tuple[GraderOutput, list]:
 
 
 def _update_case_response(case_id: int, response: str) -> None:
+    """Update the current response recorded on an evaluation case.
+
+    Args:
+        case_id: Identifier of the case to update.
+        response: Latest response text produced for the case.
+    """
     with get_conn() as conn:
         conn.execute(
             "UPDATE eval_cases SET response=? WHERE id=?",
@@ -406,6 +433,18 @@ def _insert_result(
     api_call_meta: dict[str, Any] | None,
     response_text: str | None = None,
 ) -> None:
+    """Persist one evaluation result for a run.
+
+    Args:
+        run_id: Identifier of the run the result belongs to.
+        case: Evaluation case record that was evaluated.
+        output: Grader verdict for the case.
+        rule_findings: Deterministic rule findings for the case.
+        evidence: Retrieved evidence chunks supporting the verdict.
+        api_call_meta: Client API call metadata, when applicable.
+        response_text: Response text evaluated for the case. Snapshotted
+            onto the result so later reruns cannot rewrite history.
+    """
     needs_review = bool(output.needs_human_review)
     review_status = ReviewStatus.PENDING.value
     raw = output.model_dump(mode="json")
@@ -473,6 +512,15 @@ def _human_review_count(run_id: int) -> int:
 
 
 def get_run(run_id: int) -> dict | None:
+    """Load a run together with its historical results.
+
+    Args:
+        run_id: Identifier of the run to load.
+
+    Returns:
+        The run record with per-case results, or None when not found.
+        Each result carries the response snapshotted at evaluation time.
+    """
     with get_conn() as conn:
         run = row_to_dict(conn.execute("SELECT * FROM runs WHERE id=?", (run_id,)).fetchone())
         if run is None:

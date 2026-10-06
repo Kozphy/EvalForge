@@ -50,6 +50,16 @@ def _latest_decision(decisions: list[dict[str, Any]]) -> dict[str, Any] | None:
 
 
 def _serialize_result(run: dict[str, Any], result: dict[str, Any], decisions: list[dict[str, Any]]) -> dict[str, Any]:
+    """Render one result as a flat export row.
+
+    Args:
+        run: Run record the result belongs to.
+        result: Result record including its snapshotted response.
+        decisions: Review decisions recorded for the result.
+
+    Returns:
+        Export row with metrics, labels, evidence, and review context.
+    """
     config = run.get("config") or {}
     expected = result.get("expected_label")
     predicted = result.get("severity")
@@ -109,6 +119,20 @@ def load_export_rows(
     predicted_label: str | None = None,
     incorrect_only: bool = False,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Load a run and its results as filtered export rows.
+
+    Args:
+        run_id: Identifier of the run to export.
+        review_required: Filter by human-review flag when not None.
+        predicted_label: Filter by predicted severity label when provided.
+        incorrect_only: Keep only rows whose prediction was incorrect.
+
+    Returns:
+        Tuple of the run record and the filtered export rows.
+
+    Raises:
+        LookupError: When the run does not exist.
+    """
     with get_conn() as conn:
         run = row_to_dict(conn.execute("SELECT * FROM runs WHERE id=?", (run_id,)).fetchone())
         if run is None:
