@@ -311,6 +311,7 @@ def execute_run(project_id: int, config: RunCreate) -> dict:
                         rule_findings=rule_findings,
                         evidence=[],
                         api_call_meta=api_call_meta,
+                        response_text=response_text,
                     )
                     continue
 
@@ -339,6 +340,7 @@ def execute_run(project_id: int, config: RunCreate) -> dict:
                 rule_findings=rule_findings,
                 evidence=evidence,
                 api_call_meta=api_call_meta,
+                response_text=response_text,
             )
 
         metrics = calculate_metrics(expected, predicted)
@@ -402,6 +404,7 @@ def _insert_result(
     rule_findings: list,
     evidence: list,
     api_call_meta: dict[str, Any] | None,
+    response_text: str | None = None,
 ) -> None:
     needs_review = bool(output.needs_human_review)
     review_status = ReviewStatus.PENDING.value
@@ -412,10 +415,10 @@ def _insert_result(
         conn.execute(
             """
             INSERT INTO results(
-                run_id, case_id, verdict, severity, score, confidence, reason,
+                run_id, case_id, verdict, severity, score, confidence, reason, response,
                 evidence_json, claims_json, rule_findings_json,
                 needs_human_review, review_status, raw_json
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 run_id,
@@ -425,6 +428,7 @@ def _insert_result(
                 output.score,
                 output.confidence,
                 output.reason,
+                response_text,
                 json.dumps(evidence, ensure_ascii=False),
                 json.dumps(
                     [item.model_dump(mode="json") for item in output.claims],
@@ -476,7 +480,7 @@ def get_run(run_id: int) -> dict | None:
         rows = conn.execute(
             """
             SELECT results.*, eval_cases.name AS case_name, eval_cases.prompt,
-                   eval_cases.response, eval_cases.expected_label,
+                   eval_cases.expected_label,
                    eval_cases.external_case_id
             FROM results
             JOIN eval_cases ON eval_cases.id = results.case_id

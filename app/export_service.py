@@ -119,7 +119,6 @@ def load_export_rows(
             SELECT results.*,
                    eval_cases.name AS case_name,
                    eval_cases.prompt,
-                   eval_cases.response,
                    eval_cases.expected_label,
                    eval_cases.external_case_id
             FROM results

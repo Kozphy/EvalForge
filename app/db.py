@@ -97,6 +97,7 @@ def init_db() -> None:
         score REAL NOT NULL,
         confidence REAL NOT NULL,
         reason TEXT NOT NULL,
+        response TEXT,
         evidence_json TEXT NOT NULL DEFAULT '[]',
         claims_json TEXT NOT NULL DEFAULT '[]',
         rule_findings_json TEXT NOT NULL DEFAULT '[]',
@@ -139,6 +140,7 @@ def migrate_schema(conn: sqlite3.Connection) -> None:
         "review_status TEXT NOT NULL DEFAULT 'PENDING'",
     )
     _ensure_column(conn, "results", "final_label", "final_label TEXT")
+    _ensure_column(conn, "results", "response", "response TEXT")
     _ensure_column(conn, "projects", "api_target_json", "api_target_json TEXT")
 
     conn.executescript(
