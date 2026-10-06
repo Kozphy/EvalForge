@@ -1,0 +1,23 @@
+README.md
+  s_be7467d8494cb0::t_78c37076365366 3,5-11,19,24-27
+  s_be7467d8494cb0::t_0fe41969fd689c 161-172
+  s_be7467d8494cb0::t_00fdb026bff11a 181-187
+  s_be7467d8494cb0::t_ce1f15ba602c1b 28
+  s_be7467d8494cb0::t_6d5e8eefb877de 173-174
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c4985cdd429c32243d2e6b308a866f3bcfd6df47",
+  "prompts": {},
+  "sessions": {
+    "s_be7467d8494cb0": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "4f977ab2-5650-41aa-87bb-53e4627eff55",
+        "model": "default"
+      },
+      "human_author": "Zixsa <50504962+Kozphy@users.noreply.github.com>"
+    }
+  }
+}
