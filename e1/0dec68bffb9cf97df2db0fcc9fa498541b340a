@@ -1,0 +1,25 @@
+app/db.py
+  s_5dc5e7851c76ef::t_4866763d7b130c 36-44,50-57,63
+app/export_service.py
+  s_5dc5e7851c76ef::t_3deef7bb9757e2 53-62,122-135
+app/review_service.py
+  s_5dc5e7851c76ef::t_cbdbf1d324aaa8 13-21,57-74,131-139
+app/service.py
+  s_5dc5e7851c76ef::t_ae43a6eba1c9fe 227-239,391-398,413-418,436-447,515-523
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e10dec68bffb9cf97df2db0fcc9fa498541b340a",
+  "prompts": {},
+  "sessions": {
+    "s_5dc5e7851c76ef": {
+      "agent_id": {
+        "tool": "github-copilot-cli",
+        "id": "1e1fef2c-5067-443b-ac67-f4ef27f1c4cf",
+        "model": "unknown"
+      },
+      "human_author": "Zixsa <50504962+Kozphy@users.noreply.github.com>"
+    }
+  }
+}
