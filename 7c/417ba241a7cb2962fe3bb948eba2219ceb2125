@@ -1,0 +1,23 @@
+tests/test_research_paper_tables.py
+  s_1a0486d26c7e7e::t_373eba392cb161 1-36
+paper/manuscript.md
+  s_1a0486d26c7e7e::t_2d4c334105fdca 5-9,13,17,19-24,28,30,32,34,36,38,40,42-47,49,51,53,55,57,59,61,63-71,73,75-83,85,89-114,120-133,135-139,141,143-145,147-148,150-184,188-206,210-233,236,240-248,252-260,264-272
+  s_1a0486d26c7e7e::t_981290262d645d 234
+  s_1a0486d26c7e7e::t_d99f6ff7a162cd 235
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7c417ba241a7cb2962fe3bb948eba2219ceb2125",
+  "prompts": {},
+  "sessions": {
+    "s_1a0486d26c7e7e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "5594125b-55d1-44f9-ac04-0e25f3d0ef33",
+        "model": "default"
+      },
+      "human_author": "Zixsa <50504962+Kozphy@users.noreply.github.com>"
+    }
+  }
+}
