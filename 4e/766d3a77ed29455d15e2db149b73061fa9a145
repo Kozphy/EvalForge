@@ -1,0 +1,40 @@
+research/datasets/dev/cases.jsonl
+  s_1a0486d26c7e7e::t_f2159a1ac7eee9 1-20
+research/datasets/test/cases.jsonl
+  s_1a0486d26c7e7e::t_f2159a1ac7eee9 1-40
+research/DATASET_CARD.md
+  s_1a0486d26c7e7e::t_3022679c847446 1-72
+research/datasets/holdout/cases.jsonl
+  s_1a0486d26c7e7e::t_f2159a1ac7eee9 1-20
+research/dataset.py
+  s_1a0486d26c7e7e::t_fa3a6c6563e547 1-24,26-333
+  s_1a0486d26c7e7e::t_a9babeb63e1abf 25
+research/datasets/corpus/kb.jsonl
+  s_1a0486d26c7e7e::t_f2159a1ac7eee9 1-11
+tests/test_research_dataset.py
+  s_1a0486d26c7e7e::t_abf49e4b2c09c7 1-79
+research/taxonomy.py
+  s_1a0486d26c7e7e::t_3253c469dc9983 1-99
+.gitattributes
+  s_1a0486d26c7e7e::t_1693c534689068 5-7
+research/datasets/MANIFEST.json
+  s_1a0486d26c7e7e::t_f2159a1ac7eee9 1-199
+research/datasets/source_v1.py
+  s_1a0486d26c7e7e::t_436dbb685658e5 1-953
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "4e766d3a77ed29455d15e2db149b73061fa9a145",
+  "prompts": {},
+  "sessions": {
+    "s_1a0486d26c7e7e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "5594125b-55d1-44f9-ac04-0e25f3d0ef33",
+        "model": "default"
+      },
+      "human_author": "Zixsa <50504962+Kozphy@users.noreply.github.com>"
+    }
+  }
+}
