@@ -1,0 +1,199 @@
+{
+  "created": "2026-09-24",
+  "dataset_name": "evalforge-bench",
+  "dataset_sha256": "7e7c2d2c8b40a773b7e12d07c8d86e276ddb50a5a72bc4bc0933dd65e5797c3b",
+  "distribution": {
+    "dev": {
+      "ambiguous": 1,
+      "categories": {
+        "ambiguous_case": 1,
+        "calculation_error": 1,
+        "factual_error": 1,
+        "format_error": 1,
+        "hallucination": 1,
+        "instruction_violation": 1,
+        "missing_required_information": 1,
+        "none": 8,
+        "other": 1,
+        "reasoning_error": 1,
+        "retrieval_grounding_failure": 1,
+        "unsafe_output": 1,
+        "unsupported_claim": 1
+      },
+      "labels": {
+        "fail": 12,
+        "pass": 8
+      }
+    },
+    "holdout": {
+      "ambiguous": 1,
+      "categories": {
+        "ambiguous_case": 1,
+        "calculation_error": 1,
+        "factual_error": 1,
+        "format_error": 1,
+        "hallucination": 1,
+        "instruction_violation": 1,
+        "missing_required_information": 1,
+        "none": 8,
+        "other": 1,
+        "reasoning_error": 1,
+        "retrieval_grounding_failure": 1,
+        "unsafe_output": 1,
+        "unsupported_claim": 1
+      },
+      "labels": {
+        "fail": 12,
+        "pass": 8
+      }
+    },
+    "test": {
+      "ambiguous": 1,
+      "categories": {
+        "ambiguous_case": 1,
+        "calculation_error": 3,
+        "factual_error": 3,
+        "format_error": 2,
+        "hallucination": 2,
+        "instruction_violation": 2,
+        "missing_required_information": 2,
+        "none": 17,
+        "reasoning_error": 2,
+        "retrieval_grounding_failure": 2,
+        "unsafe_output": 2,
+        "unsupported_claim": 2
+      },
+      "labels": {
+        "fail": 23,
+        "pass": 17
+      }
+    }
+  },
+  "files": {
+    "corpus/kb.jsonl": {
+      "ids": [
+        "KB-01",
+        "KB-02",
+        "KB-03",
+        "KB-04",
+        "KB-05",
+        "KB-06",
+        "KB-07",
+        "KB-08",
+        "KB-09",
+        "KB-10",
+        "KB-11"
+      ],
+      "n": 11,
+      "sha256": "5c3613a4e0b5288dc3e211d2aa0ed5c0eac789e500de1312451bdc4576d5cdb0"
+    },
+    "dev/cases.jsonl": {
+      "ids": [
+        "EFB-001",
+        "EFB-002",
+        "EFB-003",
+        "EFB-004",
+        "EFB-005",
+        "EFB-006",
+        "EFB-007",
+        "EFB-008",
+        "EFB-009",
+        "EFB-010",
+        "EFB-011",
+        "EFB-012",
+        "EFB-013",
+        "EFB-014",
+        "EFB-015",
+        "EFB-016",
+        "EFB-017",
+        "EFB-018",
+        "EFB-019",
+        "EFB-020"
+      ],
+      "n": 20,
+      "sha256": "c75caece93d80503d2d24c466bf0adb048ca876ec4ac9dca10ccec72c26be1e5"
+    },
+    "holdout/cases.jsonl": {
+      "ids": [
+        "EFB-061",
+        "EFB-062",
+        "EFB-063",
+        "EFB-064",
+        "EFB-065",
+        "EFB-066",
+        "EFB-067",
+        "EFB-068",
+        "EFB-069",
+        "EFB-070",
+        "EFB-071",
+        "EFB-072",
+        "EFB-073",
+        "EFB-074",
+        "EFB-075",
+        "EFB-076",
+        "EFB-077",
+        "EFB-078",
+        "EFB-079",
+        "EFB-080"
+      ],
+      "n": 20,
+      "sha256": "1f9b1f321144a61a0f48977d0db9d293a5e6ea3ffabb7b8fba464a8194ae80ba"
+    },
+    "test/cases.jsonl": {
+      "ids": [
+        "EFB-021",
+        "EFB-022",
+        "EFB-023",
+        "EFB-024",
+        "EFB-025",
+        "EFB-026",
+        "EFB-027",
+        "EFB-028",
+        "EFB-029",
+        "EFB-030",
+        "EFB-031",
+        "EFB-032",
+        "EFB-033",
+        "EFB-034",
+        "EFB-035",
+        "EFB-036",
+        "EFB-037",
+        "EFB-038",
+        "EFB-039",
+        "EFB-040",
+        "EFB-041",
+        "EFB-042",
+        "EFB-043",
+        "EFB-044",
+        "EFB-045",
+        "EFB-046",
+        "EFB-047",
+        "EFB-048",
+        "EFB-049",
+        "EFB-050",
+        "EFB-051",
+        "EFB-052",
+        "EFB-053",
+        "EFB-054",
+        "EFB-055",
+        "EFB-056",
+        "EFB-057",
+        "EFB-058",
+        "EFB-059",
+        "EFB-060"
+      ],
+      "n": 40,
+      "sha256": "1590451734a1c38b08bd4b7e307b9b335eea8ab2ffe18f7e270dc587c024a75d"
+    }
+  },
+  "hashing": "sha256 of exact file bytes (UTF-8, LF); dataset_sha256 = sha256 over sorted (path, file sha256)",
+  "provenance": {
+    "annotators": 1,
+    "authoring": "repository author with AI drafting assistance",
+    "external_validation_level": "E0",
+    "label_source": "single author judgement; not independently adjudicated",
+    "production_data": false,
+    "source": "synthetic_handwritten"
+  },
+  "version": "1.0.0"
+}
