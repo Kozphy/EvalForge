@@ -1,0 +1,33 @@
+research/results/smoke-offline-20261007T121705Z/disagreements.jsonl
+  s_1a0486d26c7e7e::t_51b4fe7d6e1531 1-103
+research/results/smoke-offline-20261007T121705Z/predictions.jsonl
+  s_1a0486d26c7e7e::t_51b4fe7d6e1531 1-320
+research/results/smoke-offline-20261007T121705Z/metrics.json
+  s_1a0486d26c7e7e::t_51b4fe7d6e1531 1-1495
+research/results/smoke-offline-20261007T121705Z/judge_raw.jsonl
+  s_1a0486d26c7e7e::t_51b4fe7d6e1531 1-160
+research/results/smoke-offline-20261007T121705Z/evidence.jsonl
+  s_1a0486d26c7e7e::t_51b4fe7d6e1531 1-200
+research/results/smoke-offline-20261007T121705Z/report.md
+  s_1a0486d26c7e7e::t_51b4fe7d6e1531 1-107
+research/results/smoke-offline-20261007T121705Z/manifest.json
+  s_1a0486d26c7e7e::t_51b4fe7d6e1531 1-178
+research/results/smoke-offline-20261007T121705Z/confidence_intervals.json
+  s_1a0486d26c7e7e::t_51b4fe7d6e1531 1-471
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5e3e0711fcd3545862552867e470bb76d57a41ab",
+  "prompts": {},
+  "sessions": {
+    "s_1a0486d26c7e7e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "5594125b-55d1-44f9-ac04-0e25f3d0ef33",
+        "model": "default"
+      },
+      "human_author": "Zixsa <50504962+Kozphy@users.noreply.github.com>"
+    }
+  }
+}
