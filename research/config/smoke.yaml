@@ -1,0 +1,41 @@
+# Offline smoke experiment: no paid API, no network, deterministic, runs in seconds.
+# The judge is the heuristic stand-in (app.graders.heuristic_grade), NOT an LLM. Only the
+# B1 deterministic-only numbers are a real measurement; all judge-based rows exercise the
+# pipeline mechanics and must not be cited as evidence about LLM judging.
+experiment:
+  name: smoke-offline
+  splits: [test]
+  seed: 20260924
+
+judge:
+  backend: heuristic_standin
+  temperature: null
+  max_tokens: null
+  max_cost_usd: 0.0
+
+retrieval:
+  backend: tfidf
+  top_k: 4
+  include_cited_documents: true
+
+routing:
+  min_groundedness: 0.75
+  min_citation_coverage: 0.75
+  min_confidence: 0.7
+  block_on_contradiction: true
+  block_on_invalid_citation: true
+  block_on_major_rule_failure: true
+
+systems:
+  - B1_deterministic
+  - B2_single_judge
+  - B3_grounded_judge
+  - B4_hybrid
+  - A1_minus_rules
+  - A2_minus_retrieval
+  - A3_minus_judge
+  - A4_minus_routing
+
+bootstrap:
+  iterations: 1000
+  seed: 20260924

@@ -6,140 +6,73 @@
 
 ## Motivation
 
-LLM-as-a-judge evaluation is convenient but can be unstable, opaque, and difficult to audit. EvalForge studies whether a hybrid evaluation pipeline can improve reliability by combining deterministic checks, evidence retrieval, optional model-based grading, and human adjudication.
+LLM-as-a-judge evaluation is convenient, but it can be unstable, opaque, and hard to audit. EvalForge studies whether a hybrid pipeline evaluates more reliably than simpler alternatives. The pipeline combines deterministic checks, approved-evidence retrieval, a structured judge, uncertainty controls, and human-review routing.
 
-## Research questions
+## Research questions (canonical)
 
-### RQ1 — Detection quality
-Does a hybrid evaluator detect response failures more accurately than a deterministic-only or single-judge baseline?
+**RQ1.** Does a hybrid evaluation pipeline combining deterministic rules, evidence retrieval, structured LLM judging, and human-review routing detect AI-output failures more reliably than simpler evaluation approaches?
 
-### RQ2 — False positives
-Does evidence grounding reduce false-positive failure judgments compared with an ungrounded judge?
+**RQ2.** Which components of the hybrid evaluator contribute most to accuracy, false-positive reduction, and review efficiency?
 
-### RQ3 — Component contribution
-Which components contribute most to performance: deterministic rules, retrieval grounding, model-based grading, or human review routing?
+The earlier draft had four questions; they map onto these two. Detection quality and false positives fall under RQ1. Component contribution and operational trade-offs fall under RQ2.
 
-### RQ4 — Operational trade-offs
-What accuracy, latency, and cost trade-offs arise across evaluator configurations?
+## Systems (identical frozen cases for all)
 
-## Hypotheses
+| ID | System | Components |
+|---|---|---|
+| B1 | Deterministic-only | `check_rules`; any failed rule → fail |
+| B2 | Single judge | one judge call; no evidence, no rules, no routing |
+| B3 | Grounded judge | approved-evidence retrieval (TF-IDF top-4 + cited documents) → judge |
+| B4 | EvalForge hybrid | rules → retrieval → structured judge → controls/uncertainty → human-review routing → final decision → audit record |
+| A1–A4 | Ablations | B4 minus rules / minus retrieval / minus judge (replaced by EvalForge's lexical grader) / minus routing |
 
-- **H1:** Hybrid evaluation achieves higher macro-F1 than deterministic-only evaluation.
-- **H2:** Evidence-grounded evaluation has a lower false-positive rate than an ungrounded model judge.
-- **H3:** Removing deterministic checks causes a measurable drop in precision on format and instruction-following failures.
-- **H4:** Human-review routing improves final adjudicated accuracy on low-confidence cases, at the cost of review effort.
+The exact decision rule is in the docstring of [`systems.py`](systems.py). It was fixed before any test-split result existed.
 
-## Experimental conditions
+## Pre-registered hypotheses and decision rules
 
-At minimum compare:
+All hypotheses are evaluated on the **test** split (n=40) with the **LLM** judge (`config/default.yaml`). A hypothesis is:
 
-1. **Rule baseline** — deterministic checks only.
-2. **Single judge baseline** — one model-based evaluator without retrieval grounding.
-3. **Grounded judge** — model-based evaluator with approved evidence retrieval.
-4. **EvalForge hybrid** — deterministic rules + grounding + confidence/review routing.
+- **supported** if the 95% paired-bootstrap CI of the stated difference excludes 0 in the predicted direction;
+- **contradicted** if the CI excludes 0 in the opposite direction;
+- **inconclusive** otherwise.
 
-Optional fifth condition:
+Inconclusive is the expected outcome for small effects at n=40. It is reported as such, never as support.
 
-5. **EvalForge + human adjudication** — final reviewed outcome for uncertain cases.
+| ID | Hypothesis | Statistic |
+|---|---|---|
+| H1a/b/c | B4 has higher macro-F1 than B1 / B2 / B3 | Δ macro-F1 (B4 − baseline) |
+| H2 | Grounding lowers false positives: FPR(B3) < FPR(B2) | Δ FPR (B3 − B2) |
+| H3 | Removing rules lowers recall on format_error + missing_required_information | per-category recall, A1 vs B4 (descriptive; n=4 on test) |
+| H4 | Routing concentrates errors: routing precision of B4 > B4 automated error rate | routing precision vs (1 − accuracy) (descriptive) |
+| H5 | Removing retrieval lowers macro-F1: A2 < B4 | Δ macro-F1 (A2 − B4) |
 
-## Dataset design
+The holdout split (n=20) is touched once, after the test-split analysis is written, to check that the direction of the effects holds. It is never used to change anything.
 
-Each benchmark record should contain:
+## Dataset
 
-- stable case ID;
-- prompt;
-- candidate response;
-- gold label;
-- failure category;
-- expected requirements;
-- optional supporting evidence IDs;
-- annotation provenance;
-- annotator count;
-- adjudicated label where applicable.
+See [`DATASET_CARD.md`](DATASET_CARD.md): `evalforge-bench` v1.0.0, 80 synthetic single-author-labelled cases, 12-category taxonomy ([`taxonomy.py`](taxonomy.py)), dev/test/holdout, sha256-frozen.
 
-Recommended failure taxonomy:
+## Metrics, statistics, protocol
 
-- instruction_following;
-- factual_grounding;
-- citation_support;
-- format_schema;
-- code_syntax;
-- sql_safety;
-- unsupported_claim;
-- omission;
-- other.
-
-Do not evaluate on the same hand-written examples used to tune grader rules. Maintain a held-out test partition.
-
-## Primary metrics
-
-- accuracy;
-- macro precision;
-- macro recall;
-- macro F1;
-- false-positive rate;
-- false-negative rate.
-
-## Secondary metrics
-
-- latency per case;
-- estimated model cost per case;
-- human-review rate;
-- coverage / abstention rate;
-- inter-annotator agreement where multiple annotators exist.
-
-## Statistical analysis
-
-Report point estimates plus uncertainty. For the primary F1 comparison, use paired bootstrap resampling over benchmark cases and report a 95% confidence interval for the difference between systems.
-
-Where appropriate, use McNemar's test for paired binary correctness outcomes. Treat statistical significance as supporting evidence, not as a substitute for effect size.
-
-## Ablation study
-
-Run the full hybrid system and then remove one component at a time:
-
-- no deterministic rules;
-- no retrieval grounding;
-- no model judge;
-- no uncertainty/review routing.
-
-Measure changes in macro-F1, FPR, latency, and review rate.
+- Metric definitions and null/abstention conventions: [`METRICS.md`](METRICS.md).
+- Run procedure, tuning rules, and deviations log: [`EXPERIMENT_PROTOCOL.md`](EXPERIMENT_PROTOCOL.md).
+- Threats to validity: [`THREATS_TO_VALIDITY.md`](THREATS_TO_VALIDITY.md).
+- External validation level achieved: [`EXTERNAL_VALIDATION.md`](EXTERNAL_VALIDATION.md).
 
 ## Error analysis
 
-For every system, inspect false positives and false negatives by failure category. Record recurring failure modes and representative case IDs. Separate:
-
-- grader error;
-- ambiguous gold label;
-- insufficient evidence;
-- retrieval failure;
-- model hallucination;
-- rule over-trigger;
-- rule under-trigger.
-
-## Threats to validity
-
-Track at least:
-
-- benchmark size and representativeness;
-- label subjectivity;
-- leakage between rule development and test cases;
-- model/provider drift;
-- prompt sensitivity;
-- retrieval corpus quality;
-- dependence between benchmark cases;
-- cost and latency measurement variance.
-
-## Reproducibility target
-
-A third party should be able to:
-
-1. install dependencies;
-2. obtain or generate the benchmark;
-3. execute every baseline and EvalForge condition;
-4. regenerate metrics and confidence intervals;
-5. reproduce the tables used in the paper.
+Every disagreement with the gold label is written to `disagreements.jsonl` with an automatic reason tag: rule false positive, judge false positive or false negative, gold evidence not retrieved, overconfident judge error, ambiguous gold label, or abstention. The generated `report.md` counts these tags per system and lists every B4 disagreement.
 
 ## Definition of research-ready
 
-EvalForge is research-ready when the repository contains a frozen benchmark version, documented baselines, reproducible experiment configs, statistical analysis, ablation results, failure analysis, and a manuscript whose claims are traceable to generated artifacts.
+The repository contains:
+
+- a frozen benchmark;
+- documented baselines;
+- reproducible experiment configs;
+- statistical analysis;
+- ablation results;
+- failure analysis;
+- a manuscript whose numbers are generated from committed experiment artifacts.
+
+Status per item: see the checklist in [`README.md`](README.md).

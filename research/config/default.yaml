@@ -1,0 +1,45 @@
+# Pre-registered main experiment (RQ1/RQ2). Requires OPENAI_API_KEY in the environment.
+# Do not change systems, prompts, thresholds or seeds after viewing test results; if you must,
+# bump `name`, record why in research/EXPERIMENT_PROTOCOL.md, and keep the earlier results.
+experiment:
+  name: rq1-llm-gpt-4o-mini
+  splits: [test]
+  seed: 20260924
+
+judge:
+  backend: llm            # llm | heuristic_standin | replay
+  provider: openai
+  model: gpt-4o-mini
+  api_key_env: OPENAI_API_KEY   # name only; the key itself is never written to disk
+  temperature: 0.0
+  max_tokens: 600
+  max_cost_usd: 2.00      # hard cap on estimated spend for the whole run
+  max_retries: 2
+  timeout_s: 60
+
+retrieval:
+  backend: tfidf
+  top_k: 4
+  include_cited_documents: true
+
+routing:                  # app.controls.ControlPolicy
+  min_groundedness: 0.75
+  min_citation_coverage: 0.75
+  min_confidence: 0.7
+  block_on_contradiction: true
+  block_on_invalid_citation: true
+  block_on_major_rule_failure: true
+
+systems:
+  - B1_deterministic
+  - B2_single_judge
+  - B3_grounded_judge
+  - B4_hybrid
+  - A1_minus_rules
+  - A2_minus_retrieval
+  - A3_minus_judge
+  - A4_minus_routing
+
+bootstrap:
+  iterations: 2000
+  seed: 20260924

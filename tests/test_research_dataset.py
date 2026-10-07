@@ -73,6 +73,13 @@ def test_holdout_requires_explicit_opt_in():
     assert len(dataset.load_split("holdout", allow_holdout=True)) == 20
 
 
+def test_published_json_schema_matches_case_model():
+    published = json.loads((dataset.DATASETS_DIR.parent / "benchmark_schema.json").read_text(encoding="utf-8"))
+    generated = dataset.BenchmarkCase.model_json_schema()
+    assert published["properties"] == generated["properties"]
+    assert published["required"] == generated["required"]
+
+
 def test_provenance_is_labelled_synthetic():
     for row in _all_rows():
         assert row["provenance"]["production_data"] is False

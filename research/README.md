@@ -2,79 +2,61 @@
 
 This directory turns EvalForge from an evaluation product into a testable research artifact.
 
-## Start here
+**Question.** Does a hybrid evaluator (rules → evidence retrieval → structured judge → uncertainty controls → human-review routing) detect AI-output failures more reliably than a deterministic-only checker, a single LLM judge, or a grounded judge (RQ1)? And which components matter (RQ2)?
 
-Read [`RESEARCH_PLAN.md`](RESEARCH_PLAN.md) for the research questions, hypotheses, baselines, metrics, ablations, and validity threats.
+**Evidence level.** Everything here is a **local benchmark on synthetic, single-author-labelled data** (external validation level E0). Nothing here is production evidence.
 
-## Benchmark contract
+## Reproduce in two commands
 
-Benchmark records should conform to [`benchmark_schema.json`](benchmark_schema.json).
+```bash
+pip install -r requirements.txt
+python -m research.dataset check                              # frozen benchmark hashes match MANIFEST.json
+python -m research.run --config research/config/smoke.yaml    # offline, no API key, seconds
+```
 
-Keep development data separate from the held-out test set. Do not tune grader rules against the final test partition.
+The second command writes `research/results/smoke-offline-<timestamp>/`, containing `manifest.json`, `predictions.jsonl`, `evidence.jsonl`, `judge_raw.jsonl`, `disagreements.jsonl`, `errors.jsonl`, `metrics.json`, `confidence_intervals.json`, and `report.md`.
 
-## Analyze paired predictions
+The LLM-judge experiment is `python -m research.run --config research/config/default.yaml`. It needs `OPENAI_API_KEY` and has a $2.00 estimated-spend cap.
 
-The analysis CLI expects one row per benchmark case and one prediction column per system.
+## Map
+
+| File | Purpose |
+|---|---|
+| [`RESEARCH_PLAN.md`](RESEARCH_PLAN.md) | RQs, systems, pre-registered hypotheses and decision rules |
+| [`DATASET_CARD.md`](DATASET_CARD.md) | evalforge-bench v1.0.0: provenance, schema, distribution, biases |
+| [`EXPERIMENT_PROTOCOL.md`](EXPERIMENT_PROTOCOL.md) | Order of work, tuning rules, artifacts, deviations log |
+| [`METRICS.md`](METRICS.md) | Definitions, null/abstention conventions, statistics |
+| [`THREATS_TO_VALIDITY.md`](THREATS_TO_VALIDITY.md) | What could make the conclusions wrong |
+| [`EXTERNAL_VALIDATION.md`](EXTERNAL_VALIDATION.md) | E0-E5 ladder; only E0 achieved |
+| `datasets/` | Frozen corpus + dev/test/holdout JSONL + `MANIFEST.json`; `source_v1.py` is the authoring source |
+| `taxonomy.py`, `dataset.py` | Failure taxonomy; validation, hashing, leakage checks, holdout guard |
+| `judge.py`, `systems.py` | Judge prompt/parsing/backends; B1-B4 and ablations A1-A4 |
+| `run.py`, `analysis.py`, `metrics.py` | Runner, aggregation/report, statistics |
+| `paper_tables.py` | Writes manuscript tables from a results directory |
+| `config/` | `smoke.yaml` (offline), `default.yaml` (LLM judge) |
+| `results/` | Committed raw experiment outputs (immutable; hash-verified) |
+| `analysis/`, `paper/` | Pointers to generated analyses and the manuscript |
+
+## Definition-of-done status
+
+| Item | Status |
+|---|---|
+| Frozen, versioned benchmark with hashes, provenance, taxonomy, no cross-split duplicates | Done |
+| B1-B4 implemented on identical cases | Done |
+| Ablations (minus rules / retrieval / judge / routing) | Done (implemented; LLM results NOT YET MEASURED) |
+| Bootstrap CIs, paired bootstrap, exact McNemar, deterministic seeds | Done |
+| Disagreement records + error analysis | Done (generated per run) |
+| Smoke experiment, no paid API | Done |
+| Default LLM-judge experiment on test | **NOT YET MEASURED**: needs an API key and approval of spend |
+| Holdout confirmation run | **NOT YET MEASURED** |
+| Manuscript tables generated from outputs | Done for the smoke run; LLM rows NOT YET MEASURED |
+| External validation beyond E0 | Not achieved |
+
+## Legacy paired-prediction CLI
+
+`run_analysis.py` still analyses a CSV with one prediction column per system:
 
 ```bash
 python -m research.run_analysis research/example_predictions.csv \
-  --systems rule_baseline evalforge_hybrid \
-  --compare rule_baseline evalforge_hybrid \
-  --iterations 2000 \
-  --seed 42
+  --systems rule_baseline evalforge_hybrid --compare rule_baseline evalforge_hybrid --iterations 2000 --seed 42
 ```
-
-The command writes `research/results/metrics.json` and prints the same report.
-
-The report includes:
-
-- accuracy;
-- precision;
-- recall;
-- F1;
-- false-positive rate;
-- false-negative rate;
-- confusion counts;
-- paired-bootstrap 95% confidence interval when `--compare` is supplied.
-
-## Experiment protocol
-
-For each experiment, record:
-
-1. repository commit SHA;
-2. benchmark version or content hash;
-3. exact system configuration;
-4. provider/model version when applicable;
-5. prompt version;
-6. retrieval settings;
-7. random seed;
-8. timestamp and environment;
-9. output artifact path.
-
-Never overwrite a published result without retaining enough metadata to reproduce the earlier version.
-
-## Recommended result layout
-
-```text
-research/
-├── results/
-│   ├── experiment-001/
-│   │   ├── predictions.csv
-│   │   ├── metrics.json
-│   │   ├── config.json
-│   │   └── notes.md
-│   └── experiment-002/
-└── ...
-```
-
-## Research quality gate
-
-Before making a quantitative claim in `paper/manuscript.md`, verify that:
-
-- the benchmark is frozen and versioned;
-- the compared systems use the same cases;
-- test cases were not used to tune rules;
-- the result can be regenerated from a documented command;
-- uncertainty is reported for primary comparisons;
-- failure cases have been manually inspected;
-- limitations and negative results are preserved.

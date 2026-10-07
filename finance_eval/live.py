@@ -50,6 +50,7 @@ class ModelCallResult:
     retries: int = 0
     provider: str | None = None
     model: str | None = None
+    model_version: str | None = None
 
 
 class CostCapExceeded(RuntimeError):
@@ -127,10 +128,32 @@ class LiveModelClient:
         return "mock"
 
     def complete(self, case: FinanceCase) -> ModelCallResult:
+        return self._with_retries(lambda: self._complete_once(case))
+
+    def complete_messages(
+        self,
+        system: str,
+        user: str,
+        *,
+        temperature: float = 0.0,
+        max_tokens: int = 1024,
+    ) -> ModelCallResult:
+        """Generic system+user completion with the same retry and cost-cap budget."""
+        if self.provider == "mock":
+            raise ValueError("provider=mock only supports FinanceCase prompts; inject an httpx transport instead")
+        if self.provider == "openai":
+            call = lambda: self._openai_complete(system, user, temperature, max_tokens)  # noqa: E731
+        elif self.provider == "anthropic":
+            call = lambda: self._anthropic_complete(system, user, temperature, max_tokens)  # noqa: E731
+        else:
+            raise ValueError(f"unsupported provider: {self.provider}")
+        return self._with_retries(call)
+
+    def _with_retries(self, call: Callable[[], ModelCallResult]) -> ModelCallResult:
         last_error: str | None = None
         for attempt in range(self.budget.max_retries + 1):
             try:
-                result = self._complete_once(case)
+                result = call()
                 result.retries = attempt
                 self.budget.charge(result.estimated_cost_usd)
                 return result
@@ -153,9 +176,9 @@ class LiveModelClient:
         if self.provider == "mock":
             return self._mock_complete(case)
         if self.provider == "openai":
-            return self._openai_complete(case)
+            return self._openai_complete(SYSTEM_PROMPT, build_user_prompt(case), 0.0, 1024)
         if self.provider == "anthropic":
-            return self._anthropic_complete(case)
+            return self._anthropic_complete(SYSTEM_PROMPT, build_user_prompt(case), 0.0, 1024)
         raise ValueError(f"unsupported provider: {self.provider}")
 
     def _mock_complete(self, case: FinanceCase) -> ModelCallResult:
@@ -173,7 +196,7 @@ class LiveModelClient:
             model=self.model,
         )
 
-    def _openai_complete(self, case: FinanceCase) -> ModelCallResult:
+    def _openai_complete(self, system: str, user: str, temperature: float, max_tokens: int) -> ModelCallResult:
         started = time.perf_counter()
         headers = {
             "Authorization": f"Bearer {self.api_key}",
@@ -182,10 +205,11 @@ class LiveModelClient:
         body = {
             "model": self.model,
             "messages": [
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": build_user_prompt(case)},
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
             ],
-            "temperature": 0,
+            "temperature": temperature,
+            "max_tokens": max_tokens,
         }
         with httpx.Client(timeout=self.budget.timeout_s, transport=self.transport) as client:
             res = client.post("https://api.openai.com/v1/chat/completions", headers=headers, json=body)
@@ -204,9 +228,10 @@ class LiveModelClient:
             estimated_cost_usd=estimate_cost_usd(self.model, prompt_tokens, completion_tokens),
             provider="openai",
             model=self.model,
+            model_version=payload.get("model"),
         )
 
-    def _anthropic_complete(self, case: FinanceCase) -> ModelCallResult:
+    def _anthropic_complete(self, system: str, user: str, temperature: float, max_tokens: int) -> ModelCallResult:
         started = time.perf_counter()
         headers = {
             "x-api-key": self.api_key or "",
@@ -215,10 +240,10 @@ class LiveModelClient:
         }
         body = {
             "model": self.model,
-            "max_tokens": 1024,
-            "system": SYSTEM_PROMPT,
-            "messages": [{"role": "user", "content": build_user_prompt(case)}],
-            "temperature": 0,
+            "max_tokens": max_tokens,
+            "system": system,
+            "messages": [{"role": "user", "content": user}],
+            "temperature": temperature,
         }
         with httpx.Client(timeout=self.budget.timeout_s, transport=self.transport) as client:
             res = client.post("https://api.anthropic.com/v1/messages", headers=headers, json=body)
@@ -239,6 +264,7 @@ class LiveModelClient:
             estimated_cost_usd=estimate_cost_usd(self.model, prompt_tokens, completion_tokens),
             provider="anthropic",
             model=self.model,
+            model_version=payload.get("model"),
         )
 
 

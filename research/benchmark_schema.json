@@ -1,33 +1,278 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "EvalForge Benchmark Record",
-  "type": "object",
-  "required": ["case_id", "prompt", "candidate_response", "gold_label", "failure_category"],
-  "properties": {
-    "case_id": {"type": "string", "minLength": 1},
-    "prompt": {"type": "string"},
-    "candidate_response": {"type": "string"},
-    "gold_label": {"type": "string", "enum": ["pass", "fail"]},
-    "failure_category": {
-      "type": "string",
-      "enum": [
-        "instruction_following",
-        "factual_grounding",
-        "citation_support",
-        "format_schema",
-        "code_syntax",
-        "sql_safety",
-        "unsupported_claim",
-        "omission",
-        "other"
-      ]
-    },
-    "requirements": {"type": "array", "items": {"type": "string"}},
-    "evidence_ids": {"type": "array", "items": {"type": "string"}},
-    "split": {"type": "string", "enum": ["train", "dev", "test"]},
-    "annotation_provenance": {"type": "string"},
-    "annotator_count": {"type": "integer", "minimum": 1},
-    "adjudicated_label": {"type": ["string", "null"], "enum": ["pass", "fail", null]}
+  "": "Generated from research.dataset.BenchmarkCase; tests fail if it drifts.",
+  "$defs": {
+    "RequirementSpec": {
+      "properties": {
+        "citation_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Citation Ids",
+          "type": "array"
+        },
+        "exact_normalized_match": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Exact Normalized Match"
+        },
+        "exact_sentences": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Exact Sentences"
+        },
+        "forbidden_json_keys": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Forbidden Json Keys",
+          "type": "array"
+        },
+        "forbidden_phrases": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Forbidden Phrases",
+          "type": "array"
+        },
+        "forbidden_regex": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Forbidden Regex",
+          "type": "array"
+        },
+        "json_schema": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Json Schema"
+        },
+        "max_sentences": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Sentences"
+        },
+        "max_words": {
+          "anyOf": [
+            {
+              "maximum": 100000,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Words"
+        },
+        "min_sentences": {
+          "anyOf": [
+            {
+              "maximum": 100,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min Sentences"
+        },
+        "min_words": {
+          "anyOf": [
+            {
+              "maximum": 100000,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min Words"
+        },
+        "require_citation": {
+          "default": false,
+          "title": "Require Citation",
+          "type": "boolean"
+        },
+        "require_date_format": {
+          "default": false,
+          "title": "Require Date Format",
+          "type": "boolean"
+        },
+        "require_email_format": {
+          "default": false,
+          "title": "Require Email Format",
+          "type": "boolean"
+        },
+        "require_json": {
+          "default": false,
+          "title": "Require Json",
+          "type": "boolean"
+        },
+        "require_python_syntax": {
+          "default": false,
+          "title": "Require Python Syntax",
+          "type": "boolean"
+        },
+        "require_sql_syntax": {
+          "default": false,
+          "title": "Require Sql Syntax",
+          "type": "boolean"
+        },
+        "require_url_format": {
+          "default": false,
+          "title": "Require Url Format",
+          "type": "boolean"
+        },
+        "required_json_keys": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Json Keys",
+          "type": "array"
+        },
+        "required_phrases": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Phrases",
+          "type": "array"
+        },
+        "required_regex": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Regex",
+          "type": "array"
+        }
+      },
+      "title": "RequirementSpec",
+      "type": "object"
+    }
   },
-  "additionalProperties": true
+  "properties": {
+    "ambiguous": {
+      "default": false,
+      "title": "Ambiguous",
+      "type": "boolean"
+    },
+    "candidate_response": {
+      "minLength": 1,
+      "title": "Candidate Response",
+      "type": "string"
+    },
+    "case_id": {
+      "pattern": "^EFB-\\d{3}$",
+      "title": "Case Id",
+      "type": "string"
+    },
+    "content_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Content Sha256",
+      "type": "string"
+    },
+    "dataset_version": {
+      "title": "Dataset Version",
+      "type": "string"
+    },
+    "failure_category": {
+      "title": "Failure Category",
+      "type": "string"
+    },
+    "gold_evidence_ids": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Gold Evidence Ids",
+      "type": "array"
+    },
+    "gold_label": {
+      "enum": [
+        "pass",
+        "fail"
+      ],
+      "title": "Gold Label",
+      "type": "string"
+    },
+    "label_rationale": {
+      "minLength": 1,
+      "title": "Label Rationale",
+      "type": "string"
+    },
+    "prompt": {
+      "minLength": 1,
+      "title": "Prompt",
+      "type": "string"
+    },
+    "provenance": {
+      "additionalProperties": true,
+      "title": "Provenance",
+      "type": "object"
+    },
+    "requirements": {
+      "$ref": "#/$defs/RequirementSpec"
+    },
+    "split": {
+      "enum": [
+        "dev",
+        "test",
+        "holdout"
+      ],
+      "title": "Split",
+      "type": "string"
+    }
+  },
+  "required": [
+    "case_id",
+    "dataset_version",
+    "split",
+    "prompt",
+    "candidate_response",
+    "gold_label",
+    "failure_category",
+    "gold_evidence_ids",
+    "label_rationale",
+    "provenance",
+    "content_sha256"
+  ],
+  "title": "evalforge-bench case (v1)",
+  "type": "object"
 }

@@ -33,7 +33,15 @@ jobs:
         run: python -m pip install --upgrade pip && pip install -r requirements.txt
 
       - name: Compile Python modules
-        run: python -m compileall -q app scripts tests
+        run: python -m compileall -q app scripts tests research finance_eval
 
       - name: Run tests
         run: pytest -q
+
+      - name: Verify frozen research benchmark
+        run: python -m research.dataset check
+
+      - name: Research smoke experiment (offline, no API)
+        run: |
+          python -m research.run --config research/config/smoke.yaml --results-root "$RUNNER_TEMP/research" --experiment-id ci-smoke
+          python -m research.run --verify "$RUNNER_TEMP/research/ci-smoke"
