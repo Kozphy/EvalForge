@@ -1,0 +1,82 @@
+research/run.py
+  s_1a0486d26c7e7e::t_f25b59f699369e 250-263,270-271
+  s_1a0486d26c7e7e::t_62ca7c3c75f50a 1-181,183-186,188-189,191-193,201-249,264-269,272-408
+  s_1a0486d26c7e7e::t_620b5211ae4637 182,187,190,194-200
+research/THREATS_TO_VALIDITY.md
+  s_1a0486d26c7e7e::t_0d087ae6b74417 1-33
+research/README.md
+  s_1a0486d26c7e7e::t_811ac7df317db8 5,7,9,12-14,17-57,59-61
+research/RESEARCH_PLAN.md
+  s_1a0486d26c7e7e::t_d6bbcc16e0b254 9,11,13,15,17,19,21-27,29,31,33,35-37,39,41-47,49,51,53,55,57-60,64,66,68,70-76,78
+tests/test_research_dataset.py
+  s_1a0486d26c7e7e::t_d5333ff786dbc8 76-82
+tests/test_research_systems.py
+  s_1a0486d26c7e7e::t_b1545c0751ae7b 1-123
+tests/test_research_run.py
+  s_1a0486d26c7e7e::t_45ba5849724f53 1-123
+research/systems.py
+  s_1a0486d26c7e7e::t_b420cfd223f44f 188
+  s_1a0486d26c7e7e::t_ba74ef17c3e017 216
+  s_1a0486d26c7e7e::t_63c14bdc75ea92 303
+  s_1a0486d26c7e7e::t_396e4b8f005677 29
+  s_1a0486d26c7e7e::t_c36beb5c1abc1c 264,266-267
+  s_1a0486d26c7e7e::t_9d8f794360ba99 146,153
+  s_1a0486d26c7e7e::t_e1a53e1e62a46d 1-28,30-145,147-152,154-187,189-215,217-263,265,268-302,304-310
+  s_1a0486d26c7e7e::t_9523051b2278b0 311
+research/config/default.yaml
+  s_1a0486d26c7e7e::t_0a3cceadff3fe6 1-45
+research/EXPERIMENT_PROTOCOL.md
+  s_1a0486d26c7e7e::t_48993c8a6ded58 1-54
+research/benchmark_schema.json
+  s_1a0486d26c7e7e::t_6ce8280d6ebd1c 2-189,191-214,216-253,255-261,263-277
+research/analysis.py
+  s_1a0486d26c7e7e::t_d040c5201daedd 1-401
+research/paper/README.md
+  s_1a0486d26c7e7e::t_f16f54f396cff1 1-11
+.github/workflows/ci.yml
+  s_1a0486d26c7e7e::t_687a041745faf2 36,40-47
+research/metrics.py
+  s_1a0486d26c7e7e::t_8f397f3fdade5f 156-158
+  s_1a0486d26c7e7e::t_c459d59a4141c8 10
+  s_1a0486d26c7e7e::t_d51af3f7dd09e3 127-155,159-354
+research/judge.py
+  s_1a0486d26c7e7e::t_77348b26302c0f 1-416
+research/paper_tables.py
+  s_1a0486d26c7e7e::t_f6bc3cb5379aa4 1-212
+research/METRICS.md
+  s_1a0486d26c7e7e::t_904f54f7a4c050 1-53
+research/EXTERNAL_VALIDATION.md
+  s_1a0486d26c7e7e::t_9ab1afb091ea9f 1-28
+research/analysis/README.md
+  s_1a0486d26c7e7e::t_e7f1b82398d720 1-12
+research/config/smoke.yaml
+  s_1a0486d26c7e7e::t_cc241d12849138 1-41
+tests/test_research_metrics.py
+  s_1a0486d26c7e7e::t_03777b6e72399d 74-79
+  s_1a0486d26c7e7e::t_7575aaab8db22c 1-12,48-73,80-134
+finance_eval/live.py
+  s_1a0486d26c7e7e::t_eea0ff9d3d5a89 179,181
+  s_1a0486d26c7e7e::t_eb0b168eb7f352 131-152,156
+  s_1a0486d26c7e7e::t_f9ff7402cfef0a 199,208-209,211-212
+  s_1a0486d26c7e7e::t_da0c8c46b12894 267
+  s_1a0486d26c7e7e::t_81b83958650915 231,234,243-246
+  s_1a0486d26c7e7e::t_8efea0d5756445 53
+tests/test_research_judge.py
+  s_1a0486d26c7e7e::t_624b949831aa13 1-144
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "54ea98da6cadad3f1651ea0b227d8daac95c6620",
+  "prompts": {},
+  "sessions": {
+    "s_1a0486d26c7e7e": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "5594125b-55d1-44f9-ac04-0e25f3d0ef33",
+        "model": "default"
+      },
+      "human_author": "Zixsa <50504962+Kozphy@users.noreply.github.com>"
+    }
+  }
+}
