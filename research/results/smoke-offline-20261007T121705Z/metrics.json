@@ -1,0 +1,1495 @@
+{
+  "comparisons": {
+    "A1_minus_rules_vs_B4_hybrid": {
+      "direction": "difference = system_b - system_a",
+      "mcnemar_exact": {
+        "a_correct_b_wrong": 2,
+        "a_wrong_b_correct": 0,
+        "discordant": 2,
+        "p_value": 0.5
+      },
+      "paired_bootstrap": {
+        "accuracy": {
+          "ci_high": 0.0,
+          "ci_low": -0.125,
+          "difference_b_minus_a": -0.050000000000000044,
+          "system_a": 0.775,
+          "system_b": 0.725,
+          "valid_resamples": 1000
+        },
+        "f1": {
+          "ci_high": 0.0,
+          "ci_low": -0.14846596561267786,
+          "difference_b_minus_a": -0.058990357345433786,
+          "system_a": 0.7906976744186046,
+          "system_b": 0.7317073170731708,
+          "valid_resamples": 1000
+        },
+        "false_positive_rate": {
+          "ci_high": 0.0,
+          "ci_low": 0.0,
+          "difference_b_minus_a": 0.0,
+          "system_a": 0.17647058823529413,
+          "system_b": 0.17647058823529413,
+          "valid_resamples": 1000
+        },
+        "macro_f1": {
+          "ci_high": 0.0,
+          "ci_low": -0.11871804429721447,
+          "difference_b_minus_a": -0.04889919807673626,
+          "system_a": 0.7737272155876807,
+          "system_b": 0.7248280175109444,
+          "valid_resamples": 1000
+        }
+      },
+      "system_a": "B4_hybrid",
+      "system_b": "A1_minus_rules"
+    },
+    "A2_minus_retrieval_vs_B4_hybrid": {
+      "direction": "difference = system_b - system_a",
+      "mcnemar_exact": {
+        "a_correct_b_wrong": 14,
+        "a_wrong_b_correct": 6,
+        "discordant": 20,
+        "p_value": 0.11531829833984375
+      },
+      "paired_bootstrap": {
+        "accuracy": {
+          "ci_high": 0.024999999999999915,
+          "ci_low": -0.4,
+          "difference_b_minus_a": -0.20000000000000007,
+          "system_a": 0.775,
+          "system_b": 0.575,
+          "valid_resamples": 1000
+        },
+        "f1": {
+          "ci_high": 0.10135379945162538,
+          "ci_low": -0.2114244374889269,
+          "difference_b_minus_a": -0.060538944259874494,
+          "system_a": 0.7906976744186046,
+          "system_b": 0.7301587301587301,
+          "valid_resamples": 1000
+        },
+        "false_positive_rate": {
+          "ci_high": 1.0,
+          "ci_low": 0.6153846153846154,
+          "difference_b_minus_a": 0.8235294117647058,
+          "system_a": 0.17647058823529413,
+          "system_b": 1.0,
+          "valid_resamples": 1000
+        },
+        "macro_f1": {
+          "ci_high": -0.24635158018009476,
+          "ci_low": -0.5449786611854712,
+          "difference_b_minus_a": -0.4086478505083156,
+          "system_a": 0.7737272155876807,
+          "system_b": 0.36507936507936506,
+          "valid_resamples": 1000
+        }
+      },
+      "system_a": "B4_hybrid",
+      "system_b": "A2_minus_retrieval"
+    },
+    "A3_minus_judge_vs_B4_hybrid": {
+      "direction": "difference = system_b - system_a",
+      "mcnemar_exact": {
+        "a_correct_b_wrong": 0,
+        "a_wrong_b_correct": 0,
+        "discordant": 0,
+        "p_value": 1.0
+      },
+      "paired_bootstrap": {
+        "accuracy": {
+          "ci_high": 0.0,
+          "ci_low": 0.0,
+          "difference_b_minus_a": 0.0,
+          "system_a": 0.775,
+          "system_b": 0.775,
+          "valid_resamples": 1000
+        },
+        "f1": {
+          "ci_high": 0.0,
+          "ci_low": 0.0,
+          "difference_b_minus_a": 0.0,
+          "system_a": 0.7906976744186046,
+          "system_b": 0.7906976744186046,
+          "valid_resamples": 1000
+        },
+        "false_positive_rate": {
+          "ci_high": 0.0,
+          "ci_low": 0.0,
+          "difference_b_minus_a": 0.0,
+          "system_a": 0.17647058823529413,
+          "system_b": 0.17647058823529413,
+          "valid_resamples": 1000
+        },
+        "macro_f1": {
+          "ci_high": 0.0,
+          "ci_low": 0.0,
+          "difference_b_minus_a": 0.0,
+          "system_a": 0.7737272155876807,
+          "system_b": 0.7737272155876807,
+          "valid_resamples": 1000
+        }
+      },
+      "system_a": "B4_hybrid",
+      "system_b": "A3_minus_judge"
+    },
+    "A4_minus_routing_vs_B4_hybrid": {
+      "direction": "difference = system_b - system_a",
+      "mcnemar_exact": {
+        "a_correct_b_wrong": 0,
+        "a_wrong_b_correct": 0,
+        "discordant": 0,
+        "p_value": 1.0
+      },
+      "paired_bootstrap": {
+        "accuracy": {
+          "ci_high": 0.0,
+          "ci_low": 0.0,
+          "difference_b_minus_a": 0.0,
+          "system_a": 0.775,
+          "system_b": 0.775,
+          "valid_resamples": 1000
+        },
+        "f1": {
+          "ci_high": 0.0,
+          "ci_low": 0.0,
+          "difference_b_minus_a": 0.0,
+          "system_a": 0.7906976744186046,
+          "system_b": 0.7906976744186046,
+          "valid_resamples": 1000
+        },
+        "false_positive_rate": {
+          "ci_high": 0.0,
+          "ci_low": 0.0,
+          "difference_b_minus_a": 0.0,
+          "system_a": 0.17647058823529413,
+          "system_b": 0.17647058823529413,
+          "valid_resamples": 1000
+        },
+        "macro_f1": {
+          "ci_high": 0.0,
+          "ci_low": 0.0,
+          "difference_b_minus_a": 0.0,
+          "system_a": 0.7737272155876807,
+          "system_b": 0.7737272155876807,
+          "valid_resamples": 1000
+        }
+      },
+      "system_a": "B4_hybrid",
+      "system_b": "A4_minus_routing"
+    },
+    "B3_grounded_judge_vs_B2_single_judge": {
+      "direction": "difference = system_b - system_a",
+      "mcnemar_exact": {
+        "a_correct_b_wrong": 8,
+        "a_wrong_b_correct": 14,
+        "discordant": 22,
+        "p_value": 0.28627872467041016
+      },
+      "paired_bootstrap": {
+        "accuracy": {
+          "ci_high": 0.35062499999999946,
+          "ci_low": -0.07500000000000007,
+          "difference_b_minus_a": 0.15000000000000002,
+          "system_a": 0.575,
+          "system_b": 0.725,
+          "valid_resamples": 1000
+        },
+        "f1": {
+          "ci_high": 0.18333333333333335,
+          "ci_low": -0.17222902097902082,
+          "difference_b_minus_a": 0.0015485869144407083,
+          "system_a": 0.7301587301587301,
+          "system_b": 0.7317073170731708,
+          "valid_resamples": 1000
+        },
+        "false_positive_rate": {
+          "ci_high": -0.6153846153846154,
+          "ci_low": -1.0,
+          "difference_b_minus_a": -0.8235294117647058,
+          "system_a": 1.0,
+          "system_b": 0.17647058823529413,
+          "valid_resamples": 1000
+        },
+        "macro_f1": {
+          "ci_high": 0.5166666666666666,
+          "ci_low": 0.1878077642478147,
+          "difference_b_minus_a": 0.35974865243157933,
+          "system_a": 0.36507936507936506,
+          "system_b": 0.7248280175109444,
+          "valid_resamples": 1000
+        }
+      },
+      "system_a": "B2_single_judge",
+      "system_b": "B3_grounded_judge"
+    },
+    "B4_hybrid_vs_B1_deterministic": {
+      "direction": "difference = system_b - system_a",
+      "mcnemar_exact": {
+        "a_correct_b_wrong": 3,
+        "a_wrong_b_correct": 14,
+        "discordant": 17,
+        "p_value": 0.012725830078125
+      },
+      "paired_bootstrap": {
+        "accuracy": {
+          "ci_high": 0.475,
+          "ci_low": 0.09999999999999998,
+          "difference_b_minus_a": 0.275,
+          "system_a": 0.5,
+          "system_b": 0.775,
+          "valid_resamples": 1000
+        },
+        "f1": {
+          "ci_high": 0.7867239467849223,
+          "ci_low": 0.33675438596491214,
+          "difference_b_minus_a": 0.5599284436493739,
+          "system_a": 0.23076923076923078,
+          "system_b": 0.7906976744186046,
+          "valid_resamples": 1000
+        },
+        "false_positive_rate": {
+          "ci_high": 0.38461538461538464,
+          "ci_low": 0.0,
+          "difference_b_minus_a": 0.17647058823529413,
+          "system_a": 0.0,
+          "system_b": 0.17647058823529413,
+          "valid_resamples": 1000
+        },
+        "macro_f1": {
+          "ci_high": 0.5105415859067849,
+          "ci_low": 0.17130798579903714,
+          "difference_b_minus_a": 0.34352778538825046,
+          "system_a": 0.4301994301994302,
+          "system_b": 0.7737272155876807,
+          "valid_resamples": 1000
+        }
+      },
+      "system_a": "B1_deterministic",
+      "system_b": "B4_hybrid"
+    },
+    "B4_hybrid_vs_B2_single_judge": {
+      "direction": "difference = system_b - system_a",
+      "mcnemar_exact": {
+        "a_correct_b_wrong": 6,
+        "a_wrong_b_correct": 14,
+        "discordant": 20,
+        "p_value": 0.11531829833984375
+      },
+      "paired_bootstrap": {
+        "accuracy": {
+          "ci_high": 0.4,
+          "ci_low": -0.024999999999999915,
+          "difference_b_minus_a": 0.20000000000000007,
+          "system_a": 0.575,
+          "system_b": 0.775,
+          "valid_resamples": 1000
+        },
+        "f1": {
+          "ci_high": 0.21142443748892684,
+          "ci_low": -0.1013537994516254,
+          "difference_b_minus_a": 0.060538944259874494,
+          "system_a": 0.7301587301587301,
+          "system_b": 0.7906976744186046,
+          "valid_resamples": 1000
+        },
+        "false_positive_rate": {
+          "ci_high": -0.6153846153846154,
+          "ci_low": -1.0,
+          "difference_b_minus_a": -0.8235294117647058,
+          "system_a": 1.0,
+          "system_b": 0.17647058823529413,
+          "valid_resamples": 1000
+        },
+        "macro_f1": {
+          "ci_high": 0.5449786611854712,
+          "ci_low": 0.24635158018009476,
+          "difference_b_minus_a": 0.4086478505083156,
+          "system_a": 0.36507936507936506,
+          "system_b": 0.7737272155876807,
+          "valid_resamples": 1000
+        }
+      },
+      "system_a": "B2_single_judge",
+      "system_b": "B4_hybrid"
+    },
+    "B4_hybrid_vs_B3_grounded_judge": {
+      "direction": "difference = system_b - system_a",
+      "mcnemar_exact": {
+        "a_correct_b_wrong": 0,
+        "a_wrong_b_correct": 2,
+        "discordant": 2,
+        "p_value": 0.5
+      },
+      "paired_bootstrap": {
+        "accuracy": {
+          "ci_high": 0.125,
+          "ci_low": 0.0,
+          "difference_b_minus_a": 0.050000000000000044,
+          "system_a": 0.725,
+          "system_b": 0.775,
+          "valid_resamples": 1000
+        },
+        "f1": {
+          "ci_high": 0.14846596561267786,
+          "ci_low": 0.0,
+          "difference_b_minus_a": 0.058990357345433786,
+          "system_a": 0.7317073170731708,
+          "system_b": 0.7906976744186046,
+          "valid_resamples": 1000
+        },
+        "false_positive_rate": {
+          "ci_high": 0.0,
+          "ci_low": 0.0,
+          "difference_b_minus_a": 0.0,
+          "system_a": 0.17647058823529413,
+          "system_b": 0.17647058823529413,
+          "valid_resamples": 1000
+        },
+        "macro_f1": {
+          "ci_high": 0.11871804429721444,
+          "ci_low": 0.0,
+          "difference_b_minus_a": 0.04889919807673626,
+          "system_a": 0.7248280175109444,
+          "system_b": 0.7737272155876807,
+          "valid_resamples": 1000
+        }
+      },
+      "system_a": "B3_grounded_judge",
+      "system_b": "B4_hybrid"
+    }
+  },
+  "experiment_id": "smoke-offline-20261007T121705Z",
+  "status": "complete",
+  "systems": {
+    "A1_minus_rules": {
+      "abstention_rate": 0.0,
+      "accuracy_by_ambiguity": {
+        "ambiguous": {
+          "accuracy": 0.0,
+          "n": 1
+        },
+        "unambiguous": {
+          "accuracy": 0.7435897435897436,
+          "n": 39
+        }
+      },
+      "automated": {
+        "abstained": 0,
+        "accuracy": 0.725,
+        "f1": 0.7317073170731708,
+        "false_negative_rate": 0.34782608695652173,
+        "false_positive_rate": 0.17647058823529413,
+        "fn": 8,
+        "fp": 3,
+        "macro_f1": 0.7248280175109444,
+        "n": 40,
+        "n_decided": 40,
+        "precision": 0.8333333333333334,
+        "recall": 0.6521739130434783,
+        "tn": 14,
+        "tp": 15
+      },
+      "basis": "no paid API calls (local computation only)",
+      "category_accuracy_on_true_positives": {
+        "n": 15,
+        "value": 0.2
+      },
+      "components": {
+        "judge": "judge",
+        "retrieval": true,
+        "routing": true,
+        "rules": false
+      },
+      "cost_per_case_usd": 0.0,
+      "description": "B4 without deterministic rules.",
+      "gold_evidence_recall": {
+        "n": 40,
+        "note": "share of cases whose gold evidence documents were all in the evidence set",
+        "value": 0.95
+      },
+      "human_review_rate": 0.25,
+      "judge_call_failures": 0,
+      "judge_human_agreement": {
+        "cohen_kappa": 0.4132029339853301,
+        "n_judged": 40,
+        "note": "raw judge verdict vs author gold label, before rules/controls are applied",
+        "value": 0.7
+      },
+      "judge_parse_failures": 0,
+      "label": "Hybrid - rules",
+      "latency_ms": {
+        "mean": 6.047,
+        "p50": 5.835,
+        "p95": 8.059,
+        "unit": "ms wall-clock per case (local compute + judge API latency; cache hits use original call latency)"
+      },
+      "n": 40,
+      "per_category_recall": {
+        "ambiguous_case": {
+          "detected": 0,
+          "n": 1,
+          "recall": 0.0
+        },
+        "calculation_error": {
+          "detected": 2,
+          "n": 3,
+          "recall": 0.6666666666666666
+        },
+        "factual_error": {
+          "detected": 1,
+          "n": 3,
+          "recall": 0.3333333333333333
+        },
+        "format_error": {
+          "detected": 1,
+          "n": 2,
+          "recall": 0.5
+        },
+        "hallucination": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "instruction_violation": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "missing_required_information": {
+          "detected": 0,
+          "n": 2,
+          "recall": 0.0
+        },
+        "reasoning_error": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "retrieval_grounding_failure": {
+          "detected": 1,
+          "n": 2,
+          "recall": 0.5
+        },
+        "unsafe_output": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "unsupported_claim": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        }
+      },
+      "review": {
+        "automated_errors": 11,
+        "coverage": 0.75,
+        "error_capture_rate": 0.09090909090909091,
+        "errors_routed": 1,
+        "oracle_note": "SIMULATED upper bound: routed cases receive the gold label (perfect reviewer). Not measured human performance.",
+        "oracle_resolved": {
+          "abstained": 0,
+          "accuracy": 0.75,
+          "f1": 0.75,
+          "false_negative_rate": 0.34782608695652173,
+          "false_positive_rate": 0.11764705882352941,
+          "fn": 8,
+          "fp": 2,
+          "macro_f1": 0.75,
+          "n": 40,
+          "n_decided": 40,
+          "precision": 0.8823529411764706,
+          "recall": 0.6521739130434783,
+          "tn": 15,
+          "tp": 15
+        },
+        "routed": 10,
+        "routing_precision": 0.1,
+        "selective_on_unrouted": {
+          "abstained": 0,
+          "accuracy": 0.6666666666666666,
+          "f1": 0.5454545454545454,
+          "false_negative_rate": 0.5714285714285714,
+          "false_positive_rate": 0.125,
+          "fn": 8,
+          "fp": 2,
+          "macro_f1": 0.6411483253588517,
+          "n": 30,
+          "n_decided": 30,
+          "precision": 0.75,
+          "recall": 0.42857142857142855,
+          "tn": 14,
+          "tp": 6
+        },
+        "unreviewed_errors": 10
+      },
+      "routing_enabled": true
+    },
+    "A2_minus_retrieval": {
+      "abstention_rate": 0.0,
+      "accuracy_by_ambiguity": {
+        "ambiguous": {
+          "accuracy": 1.0,
+          "n": 1
+        },
+        "unambiguous": {
+          "accuracy": 0.5641025641025641,
+          "n": 39
+        }
+      },
+      "automated": {
+        "abstained": 0,
+        "accuracy": 0.575,
+        "f1": 0.7301587301587301,
+        "false_negative_rate": 0.0,
+        "false_positive_rate": 1.0,
+        "fn": 0,
+        "fp": 17,
+        "macro_f1": 0.36507936507936506,
+        "n": 40,
+        "n_decided": 40,
+        "precision": 0.575,
+        "recall": 1.0,
+        "tn": 0,
+        "tp": 23
+      },
+      "basis": "no paid API calls (local computation only)",
+      "category_accuracy_on_true_positives": {
+        "n": 23,
+        "value": 0.21739130434782608
+      },
+      "components": {
+        "judge": "judge",
+        "retrieval": false,
+        "routing": true,
+        "rules": true
+      },
+      "cost_per_case_usd": 0.0,
+      "description": "B4 without retrieval or citation resolution; judge sees no evidence.",
+      "human_review_rate": 0.925,
+      "judge_call_failures": 0,
+      "judge_human_agreement": {
+        "cohen_kappa": 0.0,
+        "n_judged": 40,
+        "note": "raw judge verdict vs author gold label, before rules/controls are applied",
+        "value": 0.575
+      },
+      "judge_parse_failures": 0,
+      "label": "Hybrid - retrieval",
+      "latency_ms": {
+        "mean": 0.267,
+        "p50": 0.252,
+        "p95": 0.44,
+        "unit": "ms wall-clock per case (local compute + judge API latency; cache hits use original call latency)"
+      },
+      "n": 40,
+      "per_category_recall": {
+        "ambiguous_case": {
+          "detected": 1,
+          "n": 1,
+          "recall": 1.0
+        },
+        "calculation_error": {
+          "detected": 3,
+          "n": 3,
+          "recall": 1.0
+        },
+        "factual_error": {
+          "detected": 3,
+          "n": 3,
+          "recall": 1.0
+        },
+        "format_error": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "hallucination": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "instruction_violation": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "missing_required_information": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "reasoning_error": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "retrieval_grounding_failure": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "unsafe_output": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "unsupported_claim": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        }
+      },
+      "review": {
+        "automated_errors": 17,
+        "coverage": 0.075,
+        "error_capture_rate": 1.0,
+        "errors_routed": 17,
+        "oracle_note": "SIMULATED upper bound: routed cases receive the gold label (perfect reviewer). Not measured human performance.",
+        "oracle_resolved": {
+          "abstained": 0,
+          "accuracy": 1.0,
+          "f1": 1.0,
+          "false_negative_rate": 0.0,
+          "false_positive_rate": 0.0,
+          "fn": 0,
+          "fp": 0,
+          "macro_f1": 1.0,
+          "n": 40,
+          "n_decided": 40,
+          "precision": 1.0,
+          "recall": 1.0,
+          "tn": 17,
+          "tp": 23
+        },
+        "routed": 37,
+        "routing_precision": 0.4594594594594595,
+        "selective_on_unrouted": {
+          "abstained": 0,
+          "accuracy": 1.0,
+          "f1": 1.0,
+          "false_negative_rate": 0.0,
+          "false_positive_rate": null,
+          "fn": 0,
+          "fp": 0,
+          "macro_f1": null,
+          "n": 3,
+          "n_decided": 3,
+          "precision": 1.0,
+          "recall": 1.0,
+          "tn": 0,
+          "tp": 3
+        },
+        "unreviewed_errors": 0
+      },
+      "routing_enabled": true
+    },
+    "A3_minus_judge": {
+      "abstention_rate": 0.0,
+      "accuracy_by_ambiguity": {
+        "ambiguous": {
+          "accuracy": 0.0,
+          "n": 1
+        },
+        "unambiguous": {
+          "accuracy": 0.7948717948717948,
+          "n": 39
+        }
+      },
+      "automated": {
+        "abstained": 0,
+        "accuracy": 0.775,
+        "f1": 0.7906976744186046,
+        "false_negative_rate": 0.2608695652173913,
+        "false_positive_rate": 0.17647058823529413,
+        "fn": 6,
+        "fp": 3,
+        "macro_f1": 0.7737272155876807,
+        "n": 40,
+        "n_decided": 40,
+        "precision": 0.85,
+        "recall": 0.7391304347826086,
+        "tn": 14,
+        "tp": 17
+      },
+      "basis": "no paid API calls (local computation only)",
+      "category_accuracy_on_true_positives": {
+        "n": 17,
+        "value": 0.35294117647058826
+      },
+      "components": {
+        "judge": "heuristic_grader",
+        "retrieval": true,
+        "routing": true,
+        "rules": true
+      },
+      "cost_per_case_usd": 0.0,
+      "description": "B4 with the judge replaced by EvalForge's lexical claim grader.",
+      "gold_evidence_recall": {
+        "n": 40,
+        "note": "share of cases whose gold evidence documents were all in the evidence set",
+        "value": 0.95
+      },
+      "human_review_rate": 0.225,
+      "judge_call_failures": 0,
+      "judge_human_agreement": {
+        "cohen_kappa": 0.5037220843672456,
+        "n_judged": 40,
+        "note": "raw judge verdict vs author gold label, before rules/controls are applied",
+        "value": 0.75
+      },
+      "judge_parse_failures": 0,
+      "label": "Hybrid - judge",
+      "latency_ms": {
+        "mean": 5.531,
+        "p50": 5.37,
+        "p95": 7.162,
+        "unit": "ms wall-clock per case (local compute + judge API latency; cache hits use original call latency)"
+      },
+      "n": 40,
+      "per_category_recall": {
+        "ambiguous_case": {
+          "detected": 0,
+          "n": 1,
+          "recall": 0.0
+        },
+        "calculation_error": {
+          "detected": 2,
+          "n": 3,
+          "recall": 0.6666666666666666
+        },
+        "factual_error": {
+          "detected": 1,
+          "n": 3,
+          "recall": 0.3333333333333333
+        },
+        "format_error": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "hallucination": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "instruction_violation": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "missing_required_information": {
+          "detected": 1,
+          "n": 2,
+          "recall": 0.5
+        },
+        "reasoning_error": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "retrieval_grounding_failure": {
+          "detected": 1,
+          "n": 2,
+          "recall": 0.5
+        },
+        "unsafe_output": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "unsupported_claim": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        }
+      },
+      "review": {
+        "automated_errors": 9,
+        "coverage": 0.775,
+        "error_capture_rate": 0.1111111111111111,
+        "errors_routed": 1,
+        "oracle_note": "SIMULATED upper bound: routed cases receive the gold label (perfect reviewer). Not measured human performance.",
+        "oracle_resolved": {
+          "abstained": 0,
+          "accuracy": 0.8,
+          "f1": 0.8095238095238095,
+          "false_negative_rate": 0.2608695652173913,
+          "false_positive_rate": 0.11764705882352941,
+          "fn": 6,
+          "fp": 2,
+          "macro_f1": 0.7994987468671679,
+          "n": 40,
+          "n_decided": 40,
+          "precision": 0.8947368421052632,
+          "recall": 0.7391304347826086,
+          "tn": 15,
+          "tp": 17
+        },
+        "routed": 9,
+        "routing_precision": 0.1111111111111111,
+        "selective_on_unrouted": {
+          "abstained": 0,
+          "accuracy": 0.7419354838709677,
+          "f1": 0.6923076923076923,
+          "false_negative_rate": 0.4,
+          "false_positive_rate": 0.125,
+          "fn": 6,
+          "fp": 2,
+          "macro_f1": 0.735042735042735,
+          "n": 31,
+          "n_decided": 31,
+          "precision": 0.8181818181818182,
+          "recall": 0.6,
+          "tn": 14,
+          "tp": 9
+        },
+        "unreviewed_errors": 8
+      },
+      "routing_enabled": true
+    },
+    "A4_minus_routing": {
+      "abstention_rate": 0.0,
+      "accuracy_by_ambiguity": {
+        "ambiguous": {
+          "accuracy": 0.0,
+          "n": 1
+        },
+        "unambiguous": {
+          "accuracy": 0.7948717948717948,
+          "n": 39
+        }
+      },
+      "automated": {
+        "abstained": 0,
+        "accuracy": 0.775,
+        "f1": 0.7906976744186046,
+        "false_negative_rate": 0.2608695652173913,
+        "false_positive_rate": 0.17647058823529413,
+        "fn": 6,
+        "fp": 3,
+        "macro_f1": 0.7737272155876807,
+        "n": 40,
+        "n_decided": 40,
+        "precision": 0.85,
+        "recall": 0.7391304347826086,
+        "tn": 14,
+        "tp": 17
+      },
+      "basis": "no paid API calls (local computation only)",
+      "category_accuracy_on_true_positives": {
+        "n": 17,
+        "value": 0.35294117647058826
+      },
+      "components": {
+        "judge": "judge",
+        "retrieval": true,
+        "routing": false,
+        "rules": true
+      },
+      "cost_per_case_usd": 0.0,
+      "description": "B4 without human-review routing.",
+      "gold_evidence_recall": {
+        "n": 40,
+        "note": "share of cases whose gold evidence documents were all in the evidence set",
+        "value": 0.95
+      },
+      "human_review_rate": 0.0,
+      "judge_call_failures": 0,
+      "judge_human_agreement": {
+        "cohen_kappa": 0.4132029339853301,
+        "n_judged": 40,
+        "note": "raw judge verdict vs author gold label, before rules/controls are applied",
+        "value": 0.7
+      },
+      "judge_parse_failures": 0,
+      "label": "Hybrid - routing",
+      "latency_ms": {
+        "mean": 7.925,
+        "p50": 7.346,
+        "p95": 13.892,
+        "unit": "ms wall-clock per case (local compute + judge API latency; cache hits use original call latency)"
+      },
+      "n": 40,
+      "per_category_recall": {
+        "ambiguous_case": {
+          "detected": 0,
+          "n": 1,
+          "recall": 0.0
+        },
+        "calculation_error": {
+          "detected": 2,
+          "n": 3,
+          "recall": 0.6666666666666666
+        },
+        "factual_error": {
+          "detected": 1,
+          "n": 3,
+          "recall": 0.3333333333333333
+        },
+        "format_error": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "hallucination": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "instruction_violation": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "missing_required_information": {
+          "detected": 1,
+          "n": 2,
+          "recall": 0.5
+        },
+        "reasoning_error": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "retrieval_grounding_failure": {
+          "detected": 1,
+          "n": 2,
+          "recall": 0.5
+        },
+        "unsafe_output": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "unsupported_claim": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        }
+      },
+      "routing_enabled": false
+    },
+    "B1_deterministic": {
+      "abstention_rate": 0.0,
+      "accuracy_by_ambiguity": {
+        "ambiguous": {
+          "accuracy": 0.0,
+          "n": 1
+        },
+        "unambiguous": {
+          "accuracy": 0.5128205128205128,
+          "n": 39
+        }
+      },
+      "automated": {
+        "abstained": 0,
+        "accuracy": 0.5,
+        "f1": 0.23076923076923078,
+        "false_negative_rate": 0.8695652173913043,
+        "false_positive_rate": 0.0,
+        "fn": 20,
+        "fp": 0,
+        "macro_f1": 0.4301994301994302,
+        "n": 40,
+        "n_decided": 40,
+        "precision": 1.0,
+        "recall": 0.13043478260869565,
+        "tn": 17,
+        "tp": 3
+      },
+      "basis": "no paid API calls (local computation only)",
+      "category_accuracy_on_true_positives": {
+        "n": 3,
+        "value": 1.0
+      },
+      "components": {
+        "judge": "none",
+        "retrieval": false,
+        "routing": false,
+        "rules": true
+      },
+      "cost_per_case_usd": 0.0,
+      "description": "Rule checks only; any failed rule => fail, otherwise pass.",
+      "human_review_rate": 0.0,
+      "judge_call_failures": 0,
+      "judge_human_agreement": {
+        "note": "not applicable: system has no judge",
+        "value": null
+      },
+      "judge_parse_failures": 0,
+      "label": "Deterministic-only",
+      "latency_ms": {
+        "mean": 0.029,
+        "p50": 0.017,
+        "p95": 0.045,
+        "unit": "ms wall-clock per case (local compute + judge API latency; cache hits use original call latency)"
+      },
+      "n": 40,
+      "per_category_recall": {
+        "ambiguous_case": {
+          "detected": 0,
+          "n": 1,
+          "recall": 0.0
+        },
+        "calculation_error": {
+          "detected": 0,
+          "n": 3,
+          "recall": 0.0
+        },
+        "factual_error": {
+          "detected": 0,
+          "n": 3,
+          "recall": 0.0
+        },
+        "format_error": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "hallucination": {
+          "detected": 0,
+          "n": 2,
+          "recall": 0.0
+        },
+        "instruction_violation": {
+          "detected": 0,
+          "n": 2,
+          "recall": 0.0
+        },
+        "missing_required_information": {
+          "detected": 1,
+          "n": 2,
+          "recall": 0.5
+        },
+        "reasoning_error": {
+          "detected": 0,
+          "n": 2,
+          "recall": 0.0
+        },
+        "retrieval_grounding_failure": {
+          "detected": 0,
+          "n": 2,
+          "recall": 0.0
+        },
+        "unsafe_output": {
+          "detected": 0,
+          "n": 2,
+          "recall": 0.0
+        },
+        "unsupported_claim": {
+          "detected": 0,
+          "n": 2,
+          "recall": 0.0
+        }
+      },
+      "routing_enabled": false
+    },
+    "B2_single_judge": {
+      "abstention_rate": 0.0,
+      "accuracy_by_ambiguity": {
+        "ambiguous": {
+          "accuracy": 1.0,
+          "n": 1
+        },
+        "unambiguous": {
+          "accuracy": 0.5641025641025641,
+          "n": 39
+        }
+      },
+      "automated": {
+        "abstained": 0,
+        "accuracy": 0.575,
+        "f1": 0.7301587301587301,
+        "false_negative_rate": 0.0,
+        "false_positive_rate": 1.0,
+        "fn": 0,
+        "fp": 17,
+        "macro_f1": 0.36507936507936506,
+        "n": 40,
+        "n_decided": 40,
+        "precision": 0.575,
+        "recall": 1.0,
+        "tn": 0,
+        "tp": 23
+      },
+      "basis": "no paid API calls (local computation only)",
+      "category_accuracy_on_true_positives": {
+        "n": 23,
+        "value": 0.08695652173913043
+      },
+      "components": {
+        "judge": "judge",
+        "retrieval": false,
+        "routing": false,
+        "rules": false
+      },
+      "cost_per_case_usd": 0.0,
+      "description": "One judge call, no retrieved evidence, no rules, no routing.",
+      "human_review_rate": 0.0,
+      "judge_call_failures": 0,
+      "judge_human_agreement": {
+        "cohen_kappa": 0.0,
+        "n_judged": 40,
+        "note": "raw judge verdict vs author gold label, before rules/controls are applied",
+        "value": 0.575
+      },
+      "judge_parse_failures": 0,
+      "label": "Single judge",
+      "latency_ms": {
+        "mean": 0.124,
+        "p50": 0.094,
+        "p95": 0.296,
+        "unit": "ms wall-clock per case (local compute + judge API latency; cache hits use original call latency)"
+      },
+      "n": 40,
+      "per_category_recall": {
+        "ambiguous_case": {
+          "detected": 1,
+          "n": 1,
+          "recall": 1.0
+        },
+        "calculation_error": {
+          "detected": 3,
+          "n": 3,
+          "recall": 1.0
+        },
+        "factual_error": {
+          "detected": 3,
+          "n": 3,
+          "recall": 1.0
+        },
+        "format_error": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "hallucination": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "instruction_violation": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "missing_required_information": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "reasoning_error": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "retrieval_grounding_failure": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "unsafe_output": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "unsupported_claim": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        }
+      },
+      "routing_enabled": false
+    },
+    "B3_grounded_judge": {
+      "abstention_rate": 0.0,
+      "accuracy_by_ambiguity": {
+        "ambiguous": {
+          "accuracy": 0.0,
+          "n": 1
+        },
+        "unambiguous": {
+          "accuracy": 0.7435897435897436,
+          "n": 39
+        }
+      },
+      "automated": {
+        "abstained": 0,
+        "accuracy": 0.725,
+        "f1": 0.7317073170731708,
+        "false_negative_rate": 0.34782608695652173,
+        "false_positive_rate": 0.17647058823529413,
+        "fn": 8,
+        "fp": 3,
+        "macro_f1": 0.7248280175109444,
+        "n": 40,
+        "n_decided": 40,
+        "precision": 0.8333333333333334,
+        "recall": 0.6521739130434783,
+        "tn": 14,
+        "tp": 15
+      },
+      "basis": "no paid API calls (local computation only)",
+      "category_accuracy_on_true_positives": {
+        "n": 15,
+        "value": 0.2
+      },
+      "components": {
+        "judge": "judge",
+        "retrieval": true,
+        "routing": false,
+        "rules": false
+      },
+      "cost_per_case_usd": 0.0,
+      "description": "Approved-evidence retrieval, then one judge call; no rules, no routing.",
+      "gold_evidence_recall": {
+        "n": 40,
+        "note": "share of cases whose gold evidence documents were all in the evidence set",
+        "value": 0.95
+      },
+      "human_review_rate": 0.0,
+      "judge_call_failures": 0,
+      "judge_human_agreement": {
+        "cohen_kappa": 0.4132029339853301,
+        "n_judged": 40,
+        "note": "raw judge verdict vs author gold label, before rules/controls are applied",
+        "value": 0.7
+      },
+      "judge_parse_failures": 0,
+      "label": "Grounded judge",
+      "latency_ms": {
+        "mean": 110.415,
+        "p50": 5.688,
+        "p95": 7.452,
+        "unit": "ms wall-clock per case (local compute + judge API latency; cache hits use original call latency)"
+      },
+      "n": 40,
+      "per_category_recall": {
+        "ambiguous_case": {
+          "detected": 0,
+          "n": 1,
+          "recall": 0.0
+        },
+        "calculation_error": {
+          "detected": 2,
+          "n": 3,
+          "recall": 0.6666666666666666
+        },
+        "factual_error": {
+          "detected": 1,
+          "n": 3,
+          "recall": 0.3333333333333333
+        },
+        "format_error": {
+          "detected": 1,
+          "n": 2,
+          "recall": 0.5
+        },
+        "hallucination": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "instruction_violation": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "missing_required_information": {
+          "detected": 0,
+          "n": 2,
+          "recall": 0.0
+        },
+        "reasoning_error": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "retrieval_grounding_failure": {
+          "detected": 1,
+          "n": 2,
+          "recall": 0.5
+        },
+        "unsafe_output": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "unsupported_claim": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        }
+      },
+      "routing_enabled": false
+    },
+    "B4_hybrid": {
+      "abstention_rate": 0.0,
+      "accuracy_by_ambiguity": {
+        "ambiguous": {
+          "accuracy": 0.0,
+          "n": 1
+        },
+        "unambiguous": {
+          "accuracy": 0.7948717948717948,
+          "n": 39
+        }
+      },
+      "automated": {
+        "abstained": 0,
+        "accuracy": 0.775,
+        "f1": 0.7906976744186046,
+        "false_negative_rate": 0.2608695652173913,
+        "false_positive_rate": 0.17647058823529413,
+        "fn": 6,
+        "fp": 3,
+        "macro_f1": 0.7737272155876807,
+        "n": 40,
+        "n_decided": 40,
+        "precision": 0.85,
+        "recall": 0.7391304347826086,
+        "tn": 14,
+        "tp": 17
+      },
+      "basis": "no paid API calls (local computation only)",
+      "category_accuracy_on_true_positives": {
+        "n": 17,
+        "value": 0.35294117647058826
+      },
+      "components": {
+        "judge": "judge",
+        "retrieval": true,
+        "routing": true,
+        "rules": true
+      },
+      "cost_per_case_usd": 0.0,
+      "description": "Rules -> retrieval -> structured judge -> controls/uncertainty -> routing.",
+      "gold_evidence_recall": {
+        "n": 40,
+        "note": "share of cases whose gold evidence documents were all in the evidence set",
+        "value": 0.95
+      },
+      "human_review_rate": 0.225,
+      "judge_call_failures": 0,
+      "judge_human_agreement": {
+        "cohen_kappa": 0.4132029339853301,
+        "n_judged": 40,
+        "note": "raw judge verdict vs author gold label, before rules/controls are applied",
+        "value": 0.7
+      },
+      "judge_parse_failures": 0,
+      "label": "EvalForge hybrid",
+      "latency_ms": {
+        "mean": 7.06,
+        "p50": 7.035,
+        "p95": 10.195,
+        "unit": "ms wall-clock per case (local compute + judge API latency; cache hits use original call latency)"
+      },
+      "n": 40,
+      "per_category_recall": {
+        "ambiguous_case": {
+          "detected": 0,
+          "n": 1,
+          "recall": 0.0
+        },
+        "calculation_error": {
+          "detected": 2,
+          "n": 3,
+          "recall": 0.6666666666666666
+        },
+        "factual_error": {
+          "detected": 1,
+          "n": 3,
+          "recall": 0.3333333333333333
+        },
+        "format_error": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "hallucination": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "instruction_violation": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "missing_required_information": {
+          "detected": 1,
+          "n": 2,
+          "recall": 0.5
+        },
+        "reasoning_error": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "retrieval_grounding_failure": {
+          "detected": 1,
+          "n": 2,
+          "recall": 0.5
+        },
+        "unsafe_output": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        },
+        "unsupported_claim": {
+          "detected": 2,
+          "n": 2,
+          "recall": 1.0
+        }
+      },
+      "review": {
+        "automated_errors": 9,
+        "coverage": 0.775,
+        "error_capture_rate": 0.1111111111111111,
+        "errors_routed": 1,
+        "oracle_note": "SIMULATED upper bound: routed cases receive the gold label (perfect reviewer). Not measured human performance.",
+        "oracle_resolved": {
+          "abstained": 0,
+          "accuracy": 0.8,
+          "f1": 0.8095238095238095,
+          "false_negative_rate": 0.2608695652173913,
+          "false_positive_rate": 0.11764705882352941,
+          "fn": 6,
+          "fp": 2,
+          "macro_f1": 0.7994987468671679,
+          "n": 40,
+          "n_decided": 40,
+          "precision": 0.8947368421052632,
+          "recall": 0.7391304347826086,
+          "tn": 15,
+          "tp": 17
+        },
+        "routed": 9,
+        "routing_precision": 0.1111111111111111,
+        "selective_on_unrouted": {
+          "abstained": 0,
+          "accuracy": 0.7419354838709677,
+          "f1": 0.6923076923076923,
+          "false_negative_rate": 0.4,
+          "false_positive_rate": 0.125,
+          "fn": 6,
+          "fp": 2,
+          "macro_f1": 0.735042735042735,
+          "n": 31,
+          "n_decided": 31,
+          "precision": 0.8181818181818182,
+          "recall": 0.6,
+          "tn": 14,
+          "tp": 9
+        },
+        "unreviewed_errors": 8
+      },
+      "routing_enabled": true
+    }
+  }
+}

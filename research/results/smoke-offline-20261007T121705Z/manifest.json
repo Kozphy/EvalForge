@@ -1,0 +1,178 @@
+{
+  "artifacts": {
+    "confidence_intervals.json": "b498c7747c27902cee379b9d82aa300706fe154d8258d60a46c0c7bcbabbb9bd",
+    "disagreements.jsonl": "e6bd45b4418319b9600aed53a90d086bb0a96c3fe17d172ad0a7ce7712f7688f",
+    "errors.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "evidence.jsonl": "47eaddc25b903241339019627709fe9a1d263e944c7823750124b9810e682d2e",
+    "judge_raw.jsonl": "6e2ab8a1a34a9fbcc4caabdd85fa2431fb337d5b6a92c3432cc569a83374e36c",
+    "metrics.json": "7aab75a7d1a795ce99af1a3a88fc0dd44d6bbef75ae7ab6dda7d55363cc57f6b",
+    "predictions.jsonl": "73594d9c61923670116998b01e7beb84b22f50f52eccda0b5687dcf9f66d370e",
+    "report.md": "dd25a49ad17c85cdf91f0ec02f61544dc80d71b5d7d18066fd7f19b59d011dc2"
+  },
+  "bootstrap": {
+    "iterations": 1000,
+    "seed": 20260924
+  },
+  "command": "python -m research.run --config research/config/smoke.yaml",
+  "config": {
+    "bootstrap": {
+      "iterations": 1000,
+      "seed": 20260924
+    },
+    "experiment": {
+      "name": "smoke-offline",
+      "seed": 20260924,
+      "splits": [
+        "test"
+      ]
+    },
+    "judge": {
+      "backend": "heuristic_standin",
+      "max_cost_usd": 0.0,
+      "max_tokens": null,
+      "temperature": null
+    },
+    "retrieval": {
+      "backend": "tfidf",
+      "include_cited_documents": true,
+      "top_k": 4
+    },
+    "routing": {
+      "block_on_contradiction": true,
+      "block_on_invalid_citation": true,
+      "block_on_major_rule_failure": true,
+      "min_citation_coverage": 0.75,
+      "min_confidence": 0.7,
+      "min_groundedness": 0.75
+    },
+    "systems": [
+      "B1_deterministic",
+      "B2_single_judge",
+      "B3_grounded_judge",
+      "B4_hybrid",
+      "A1_minus_rules",
+      "A2_minus_retrieval",
+      "A3_minus_judge",
+      "A4_minus_routing"
+    ]
+  },
+  "config_path": "research/config/smoke.yaml",
+  "config_sha256": "53c3f443b710c165d90c12911a32d38079bec37afd34f65dd6e7b034006dd29c",
+  "created_utc": "2026-10-07T12:17:05.858050+00:00",
+  "dataset": {
+    "case_ids": [
+      "EFB-021",
+      "EFB-022",
+      "EFB-023",
+      "EFB-024",
+      "EFB-025",
+      "EFB-026",
+      "EFB-027",
+      "EFB-028",
+      "EFB-029",
+      "EFB-030",
+      "EFB-031",
+      "EFB-032",
+      "EFB-033",
+      "EFB-034",
+      "EFB-035",
+      "EFB-036",
+      "EFB-037",
+      "EFB-038",
+      "EFB-039",
+      "EFB-040",
+      "EFB-041",
+      "EFB-042",
+      "EFB-043",
+      "EFB-044",
+      "EFB-045",
+      "EFB-046",
+      "EFB-047",
+      "EFB-048",
+      "EFB-049",
+      "EFB-050",
+      "EFB-051",
+      "EFB-052",
+      "EFB-053",
+      "EFB-054",
+      "EFB-055",
+      "EFB-056",
+      "EFB-057",
+      "EFB-058",
+      "EFB-059",
+      "EFB-060"
+    ],
+    "dataset_sha256": "7e7c2d2c8b40a773b7e12d07c8d86e276ddb50a5a72bc4bc0933dd65e5797c3b",
+    "holdout_used": false,
+    "n_cases": 40,
+    "name": "evalforge-bench",
+    "splits": [
+      "test"
+    ],
+    "version": "1.0.0"
+  },
+  "errors_recorded": 0,
+  "evidence_label": "local benchmark on synthetic, single-author-labelled data (external validation E0); offline heuristic stand-in judge (NOT an LLM)",
+  "experiment_id": "smoke-offline-20261007T121705Z",
+  "git": {
+    "branch": "research/rq1-hybrid-evaluation",
+    "commit": "54ea98da6cadad3f1651ea0b227d8daac95c6620",
+    "dirty": false
+  },
+  "judge": {
+    "api_key_env": null,
+    "backend": "heuristic_standin",
+    "cache_hits": 0,
+    "calls_made": 240,
+    "cost_cap_usd": 0.0,
+    "estimated_spend_usd": 0.0,
+    "is_llm": false,
+    "max_tokens": null,
+    "model": "heuristic_standin",
+    "model_versions_reported_by_provider": [],
+    "prompt_version": "judge-v1",
+    "provider": null,
+    "system_prompt_sha256": "6e696c18091e40129c0fc660dc512c9169e1ed46effa791609fc23e46e8f3ec6",
+    "temperature": null
+  },
+  "retrieval": {
+    "backend": "tfidf",
+    "corpus_documents": 11,
+    "include_cited_documents": true,
+    "top_k": 4
+  },
+  "routing_policy": {
+    "block_on_contradiction": true,
+    "block_on_invalid_citation": true,
+    "block_on_major_rule_failure": true,
+    "min_citation_coverage": 0.75,
+    "min_confidence": 0.7,
+    "min_groundedness": 0.75
+  },
+  "runtime": {
+    "packages": {
+      "PyYAML": "6.0.3",
+      "httpx": "0.28.1",
+      "numpy": "2.5.1",
+      "openai": "3.11.0",
+      "pydantic": "2.13.4",
+      "scikit-learn": "1.9.0",
+      "scipy": "1.18.1"
+    },
+    "platform": "Windows-11-10.0.26300-SP0",
+    "python": "3.14.6"
+  },
+  "seed": 20260924,
+  "status": "complete",
+  "stopped_reason": null,
+  "systems": [
+    "B1_deterministic",
+    "B2_single_judge",
+    "B3_grounded_judge",
+    "B4_hybrid",
+    "A1_minus_rules",
+    "A2_minus_retrieval",
+    "A3_minus_judge",
+    "A4_minus_routing"
+  ]
+}
