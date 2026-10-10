@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import json
 import os
+from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from . import observability
 from .client_api import (
     ApiCallResult,
     ApiTargetConfig,
@@ -14,6 +16,7 @@ from .client_api import (
     redact_secrets,
 )
 from .config import build_grader_config
+from .controls import ControlPolicy, evaluate_controls
 from .db import get_conn, row_to_dict, rows_to_dicts
 from .graders import calculate_metrics, heuristic_grade, openai_grade
 from .retrieval import retrieve
@@ -24,6 +27,39 @@ EXAMPLES_DIR = Path(__file__).resolve().parent.parent / "examples"
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _trace(
+    enabled: bool,
+    run_id: int,
+    *,
+    stage: str,
+    status: str,
+    payload: dict[str, Any] | None = None,
+    result_id: int | None = None,
+) -> None:
+    """Record a trace event, swallowing all errors so tracing never fails evaluation.
+
+    Args:
+        enabled: Whether tracing is active for this run.
+        run_id: Database ID of the evaluation run.
+        stage: Evaluation stage (e.g. "run", "retrieval", "grader", "controls").
+        status: Stage status (e.g. "started", "completed", "failed", or a control action).
+        payload: Optional structured data to attach to the event.
+        result_id: Optional database ID of the specific result being traced.
+    """
+    if not enabled:
+        return
+    try:
+        observability.record_trace_event(
+            run_id,
+            stage=stage,
+            status=status,
+            payload=payload,
+            result_id=result_id,
+        )
+    except Exception:
+        pass
 
 
 def get_project(project_id: int) -> dict | None:
@@ -256,7 +292,21 @@ def execute_run(project_id: int, config: RunCreate) -> dict:
         evidence_threshold=config.evidence_threshold,
         rule_set_version=config.rule_set_version,
         model_version=config.model_version,
-        api_target=api_target_public,
+        min_groundedness=config.min_groundedness,
+        min_citation_coverage=config.min_citation_coverage,
+        control_min_confidence=config.control_min_confidence,
+        block_on_contradiction=config.block_on_contradiction,
+        block_on_invalid_citation=config.block_on_invalid_citation,
+        block_on_major_rule_failure=config.block_on_major_rule_failure,
+        trace_enabled=config.trace_enabled,
+    )
+    control_policy = ControlPolicy(
+        min_groundedness=config.min_groundedness,
+        min_citation_coverage=config.min_citation_coverage,
+        min_confidence=config.control_min_confidence,
+        block_on_contradiction=config.block_on_contradiction,
+        block_on_invalid_citation=config.block_on_invalid_citation,
+        block_on_major_rule_failure=config.block_on_major_rule_failure,
     )
 
     with get_conn() as conn:
@@ -274,8 +324,19 @@ def execute_run(project_id: int, config: RunCreate) -> dict:
         )
         run_id = int(cursor.lastrowid)
 
+    _trace(
+        config.trace_enabled,
+        run_id,
+        stage="run",
+        status="started",
+        payload={"project_id": project_id, "case_count": len(cases)},
+    )
+
     predicted: list[str] = []
     expected: list[str | None] = []
+    control_actions: list[str] = []
+    groundedness_values: list[float] = []
+    citation_coverage_values: list[float] = []
     http_client = None
     if config.provider == "client_api":
         assert api_target is not None
@@ -304,14 +365,40 @@ def execute_run(project_id: int, config: RunCreate) -> dict:
                     output, rule_findings = _api_failure_output(api_result)
                     predicted.append(output.severity)
                     expected.append(case.get("expected_label"))
-                    _insert_result(
+                    result_id, control_report = _insert_result(
                         run_id=run_id,
                         case=case,
                         output=output,
                         rule_findings=rule_findings,
                         evidence=[],
                         api_call_meta=api_call_meta,
+                        control_policy=control_policy,
                     )
+                    _trace(
+                        config.trace_enabled,
+                        run_id,
+                        result_id=result_id,
+                        stage="grader",
+                        status="completed",
+                        payload={
+                            "case_id": case["id"],
+                            "provider": config.provider,
+                            "verdict": output.verdict,
+                            "severity": output.severity,
+                            "confidence": output.confidence,
+                            "claim_count": len(output.claims),
+                            "failed_rule_count": sum(not item.passed for item in rule_findings),
+                        },
+                    )
+                    if control_report:
+                        _trace(
+                            config.trace_enabled,
+                            run_id,
+                            result_id=result_id,
+                            stage="controls",
+                            status=control_report.action,
+                            payload=control_report.model_dump(mode="json"),
+                        )
                     continue
 
                 response_text = api_result.response_text
@@ -319,6 +406,21 @@ def execute_run(project_id: int, config: RunCreate) -> dict:
 
             query = f"{case['prompt']}\n{response_text}"
             evidence = retrieve(query, documents, top_k=config.top_k)
+            _trace(
+                config.trace_enabled,
+                run_id,
+                stage="retrieval",
+                status="completed",
+                payload={
+                    "case_id": case["id"],
+                    "query_chars": len(query),
+                    "top_k": config.top_k,
+                    "evidence": [
+                        {"chunk_id": item.get("chunk_id"), "score": item.get("score")}
+                        for item in evidence
+                    ],
+                },
+            )
 
             if config.provider == "openai":
                 output, rule_findings = openai_grade(
@@ -330,20 +432,69 @@ def execute_run(project_id: int, config: RunCreate) -> dict:
                     case["prompt"], response_text, requirements, evidence
                 )
 
+            control_report = evaluate_controls(
+                output,
+                rule_findings,
+                evidence,
+                control_policy,
+            )
             predicted.append(output.severity)
             expected.append(case.get("expected_label"))
-            _insert_result(
+            control_actions.append(control_report.action)
+            groundedness_values.append(control_report.groundedness)
+            citation_coverage_values.append(control_report.citation_coverage)
+
+            result_id, _ = _insert_result(
                 run_id=run_id,
                 case=case,
                 output=output,
                 rule_findings=rule_findings,
                 evidence=evidence,
                 api_call_meta=api_call_meta,
+                control_policy=control_policy,
+            )
+
+            _trace(
+                config.trace_enabled,
+                run_id,
+                result_id=result_id,
+                stage="grader",
+                status="completed",
+                payload={
+                    "case_id": case["id"],
+                    "provider": config.provider,
+                    "verdict": output.verdict,
+                    "severity": output.severity,
+                    "confidence": output.confidence,
+                    "claim_count": len(output.claims),
+                    "failed_rule_count": sum(not item.passed for item in rule_findings),
+                },
+            )
+            _trace(
+                config.trace_enabled,
+                run_id,
+                result_id=result_id,
+                stage="controls",
+                status=control_report.action,
+                payload=control_report.model_dump(mode="json"),
             )
 
         metrics = calculate_metrics(expected, predicted)
         metrics["case_count"] = len(cases)
         metrics["human_review_count"] = _human_review_count(run_id)
+        actions = Counter(control_actions)
+        metrics["controls"] = {
+            "allow_count": actions.get("allow", 0),
+            "review_count": actions.get("review", 0),
+            "block_count": actions.get("block", 0),
+            "release_rate": round(actions.get("allow", 0) / len(cases), 4) if len(cases) > 0 else 0,
+            "average_groundedness": round(
+                sum(groundedness_values) / len(groundedness_values), 4
+            ) if groundedness_values else 0,
+            "average_citation_coverage": round(
+                sum(citation_coverage_values) / len(citation_coverage_values), 4
+            ) if citation_coverage_values else 0,
+        }
         if config.provider == "client_api":
             metrics["api_error_count"] = _api_error_count(run_id)
         with get_conn() as conn:
@@ -351,6 +502,13 @@ def execute_run(project_id: int, config: RunCreate) -> dict:
                 "UPDATE runs SET status='completed', metrics_json=?, completed_at=? WHERE id=?",
                 (json.dumps(metrics), utc_now(), run_id),
             )
+        _trace(
+            config.trace_enabled,
+            run_id,
+            stage="run",
+            status="completed",
+            payload={"metrics": metrics},
+        )
     except Exception as exc:
         message = str(exc)
         if api_target and api_target.auth_env_var:
@@ -362,6 +520,13 @@ def execute_run(project_id: int, config: RunCreate) -> dict:
                 "UPDATE runs SET status='failed', metrics_json=?, completed_at=? WHERE id=?",
                 (json.dumps({"error": message}), utc_now(), run_id),
             )
+        _trace(
+            config.trace_enabled,
+            run_id,
+            stage="run",
+            status="failed",
+            payload={"error": str(exc)},
+        )
         if message != str(exc):
             raise RuntimeError(message) from exc
         raise
@@ -402,43 +567,112 @@ def _insert_result(
     rule_findings: list,
     evidence: list,
     api_call_meta: dict[str, Any] | None,
-) -> None:
+    control_policy: ControlPolicy | None = None,
+) -> tuple[int, ControlPolicy | None]:
+    """Persist a single grader result to the database.
+
+    If a control policy is provided, evaluates release controls and stores
+    the control report alongside the result. The needs_human_review flag is
+    set if either the grader or controls require it.
+
+    Args:
+        run_id: Database ID of the evaluation run.
+        case: Eval case dict with at minimum an "id" key.
+        output: Grader output including verdict, severity, claims, and confidence.
+        rule_findings: List of deterministic rule check results.
+        evidence: Retrieved evidence chunks.
+        api_call_meta: Optional metadata from a client API call.
+        control_policy: Optional control policy to evaluate release decisions.
+
+    Returns:
+        Tuple of (result_id, control_report). control_report is None if no policy
+        was provided.
+    """
     needs_review = bool(output.needs_human_review)
     review_status = ReviewStatus.PENDING.value
     raw = output.model_dump(mode="json")
     if api_call_meta is not None:
         raw["api_call"] = api_call_meta
-    with get_conn() as conn:
-        conn.execute(
-            """
-            INSERT INTO results(
-                run_id, case_id, verdict, severity, score, confidence, reason,
-                evidence_json, claims_json, rule_findings_json,
-                needs_human_review, review_status, raw_json
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            (
-                run_id,
-                case["id"],
-                output.verdict,
-                output.severity,
-                output.score,
-                output.confidence,
-                output.reason,
-                json.dumps(evidence, ensure_ascii=False),
-                json.dumps(
-                    [item.model_dump(mode="json") for item in output.claims],
-                    ensure_ascii=False,
-                ),
-                json.dumps(
-                    [item.model_dump(mode="json") for item in rule_findings],
-                    ensure_ascii=False,
-                ),
-                int(needs_review),
-                review_status,
-                json.dumps(raw, ensure_ascii=False),
-            ),
+    
+    # Evaluate controls if policy is provided
+    control_report = None
+    if control_policy is not None:
+        control_report = evaluate_controls(
+            output,
+            rule_findings,
+            evidence,
+            control_policy,
         )
+        raw["controls"] = control_report.model_dump(mode="json")
+        needs_review = bool(needs_review or control_report.needs_human_review)
+    
+    with get_conn() as conn:
+        if control_report is not None:
+            conn.execute(
+                """
+                INSERT INTO results(
+                    run_id, case_id, verdict, severity, score, confidence, reason,
+                    evidence_json, claims_json, rule_findings_json, controls_json,
+                    needs_human_review, review_status, raw_json
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    run_id,
+                    case["id"],
+                    output.verdict,
+                    output.severity,
+                    output.score,
+                    output.confidence,
+                    output.reason,
+                    json.dumps(evidence, ensure_ascii=False),
+                    json.dumps(
+                        [item.model_dump(mode="json") for item in output.claims],
+                        ensure_ascii=False,
+                    ),
+                    json.dumps(
+                        [item.model_dump(mode="json") for item in rule_findings],
+                        ensure_ascii=False,
+                    ),
+                    control_report.model_dump_json(),
+                    int(needs_review),
+                    review_status,
+                    json.dumps(raw, ensure_ascii=False),
+                ),
+            )
+        else:
+            conn.execute(
+                """
+                INSERT INTO results(
+                    run_id, case_id, verdict, severity, score, confidence, reason,
+                    evidence_json, claims_json, rule_findings_json,
+                    needs_human_review, review_status, raw_json
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    run_id,
+                    case["id"],
+                    output.verdict,
+                    output.severity,
+                    output.score,
+                    output.confidence,
+                    output.reason,
+                    json.dumps(evidence, ensure_ascii=False),
+                    json.dumps(
+                        [item.model_dump(mode="json") for item in output.claims],
+                        ensure_ascii=False,
+                    ),
+                    json.dumps(
+                        [item.model_dump(mode="json") for item in rule_findings],
+                        ensure_ascii=False,
+                    ),
+                    int(needs_review),
+                    review_status,
+                    json.dumps(raw, ensure_ascii=False),
+                ),
+            )
+        result_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
+    
+    return result_id, control_report
 
 
 def _api_error_count(run_id: int) -> int:

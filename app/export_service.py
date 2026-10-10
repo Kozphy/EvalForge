@@ -27,6 +27,11 @@ CSV_FIELDS = [
     "confidence",
     "needs_human_review",
     "review_status",
+    "control_action",
+    "release_allowed",
+    "groundedness",
+    "citation_coverage",
+    "retrieval_max_score",
     "reviewer_final_label",
     "reviewer_comment",
     "grader_provider",
@@ -40,16 +45,35 @@ CSV_FIELDS = [
     "deterministic_findings",
     "retrieved_evidence_ids",
     "claim_verdicts",
+    "control_findings",
 ]
 
 
 def _latest_decision(decisions: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """Return the most recent review decision.
+
+    Args:
+        decisions: List of review decision dicts.
+
+    Returns:
+        The most recent decision by updated_at/created_at timestamp, or None.
+    """
     if not decisions:
         return None
     return sorted(decisions, key=lambda item: item.get("updated_at") or item.get("created_at") or "")[-1]
 
 
 def _serialize_result(run: dict[str, Any], result: dict[str, Any], decisions: list[dict[str, Any]]) -> dict[str, Any]:
+    """Serialize a single result for export.
+
+    Args:
+        run: Run metadata dict.
+        result: Result dict from database.
+        decisions: List of review decisions for this result.
+
+    Returns:
+        Serialized result dict with flattened fields for export.
+    """
     config = run.get("config") or {}
     expected = result.get("expected_label")
     predicted = result.get("severity")
@@ -62,6 +86,7 @@ def _serialize_result(run: dict[str, Any], result: dict[str, Any], decisions: li
     evidence = result.get("evidence") or []
     claims = result.get("claims") or []
     findings = result.get("rule_findings") or []
+    controls = result.get("controls") or {}
     latest = _latest_decision(decisions)
     adjudicated = next((d for d in decisions if d.get("status") == "ADJUDICATED"), None)
     final_decision = adjudicated or latest
@@ -82,8 +107,16 @@ def _serialize_result(run: dict[str, Any], result: dict[str, Any], decisions: li
         "needs_human_review": bool(result.get("needs_human_review")),
         "review_status": result.get("review_status"),
         "human_review_flag": bool(result.get("needs_human_review")),
+        "control_action": controls.get("action"),
+        "release_allowed": controls.get("release_allowed"),
+        "groundedness": controls.get("groundedness"),
+        "citation_coverage": controls.get("citation_coverage"),
+        "retrieval_max_score": controls.get("retrieval_max_score"),
+        "control_findings": controls.get("findings") or [],
+        "controls": controls,
         "deterministic_findings": findings,
         "retrieved_evidence_ids": [item.get("chunk_id") for item in evidence if isinstance(item, dict)],
+        "retrieval_context": [item.get("text") for item in evidence if isinstance(item, dict)],
         "claim_verdicts": claims,
         "grader_provider": run.get("provider"),
         "model": run.get("model"),
@@ -109,6 +142,20 @@ def load_export_rows(
     predicted_label: str | None = None,
     incorrect_only: bool = False,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Load and filter results for export.
+
+    Args:
+        run_id: Database ID of the run to export.
+        review_required: Filter to only results requiring review (True) or not (False).
+        predicted_label: Filter to only results with this predicted label.
+        incorrect_only: Filter to only incorrect results.
+
+    Returns:
+        Tuple of (run metadata dict, list of serialized result dicts).
+
+    Raises:
+        LookupError: If the run ID does not exist.
+    """
     with get_conn() as conn:
         run = row_to_dict(conn.execute("SELECT * FROM runs WHERE id=?", (run_id,)).fetchone())
         if run is None:
@@ -161,6 +208,15 @@ def load_export_rows(
 
 
 def export_run_json(run: dict[str, Any], rows: list[dict[str, Any]]) -> str:
+    """Export a run as formatted JSON.
+
+    Args:
+        run: Run metadata dict.
+        rows: List of serialized result dicts.
+
+    Returns:
+        JSON string with run metadata and results.
+    """
     payload = {
         "run_id": run["id"],
         "project_id": run["project_id"],
@@ -177,11 +233,31 @@ def export_run_json(run: dict[str, Any], rows: list[dict[str, Any]]) -> str:
 
 
 def iter_export_jsonl(rows: list[dict[str, Any]]) -> Iterator[str]:
+    """Iterate over rows as JSONL lines.
+
+    Args:
+        rows: List of serialized result dicts.
+
+    Yields:
+        JSON strings, one per line.
+    """
     for row in rows:
         yield json.dumps(row, ensure_ascii=False) + "\n"
 
 
 def export_run_csv(rows: list[dict[str, Any]]) -> str:
+    """Export serialized result rows as a CSV string.
+
+    Serializes list-valued fields (deterministic_findings, retrieved_evidence_ids,
+    claim_verdicts, control_findings) to JSON strings so every cell is a scalar.
+    Column order follows CSV_FIELDS.
+
+    Args:
+        rows: List of serialized result dicts from load_export_rows.
+
+    Returns:
+        CSV string with a header row followed by one row per result.
+    """
     buffer = io.StringIO()
     writer = csv.DictWriter(buffer, fieldnames=CSV_FIELDS, extrasaction="ignore")
     writer.writeheader()
@@ -190,11 +266,20 @@ def export_run_csv(rows: list[dict[str, Any]]) -> str:
         flat["deterministic_findings"] = json.dumps(row.get("deterministic_findings") or [], ensure_ascii=False)
         flat["retrieved_evidence_ids"] = json.dumps(row.get("retrieved_evidence_ids") or [], ensure_ascii=False)
         flat["claim_verdicts"] = json.dumps(row.get("claim_verdicts") or [], ensure_ascii=False)
+        flat["control_findings"] = json.dumps(row.get("control_findings") or [], ensure_ascii=False)
         writer.writerow({key: flat.get(key) for key in CSV_FIELDS})
     return buffer.getvalue()
 
 
 def content_type_for(fmt: ExportFormat) -> str:
+    """Return the HTTP Content-Type header value for an export format.
+
+    Args:
+        fmt: Export format ("json", "jsonl", or "csv").
+
+    Returns:
+        MIME type string for the given format.
+    """
     if fmt == "json":
         return "application/json"
     if fmt == "jsonl":
@@ -203,4 +288,13 @@ def content_type_for(fmt: ExportFormat) -> str:
 
 
 def filename_for(run_id: int, fmt: ExportFormat) -> str:
+    """Return the suggested download filename for a run export.
+
+    Args:
+        run_id: Database ID of the run.
+        fmt: Export format ("json", "jsonl", or "csv").
+
+    Returns:
+        Filename string of the form ``evalforge-run-{run_id}.{fmt}``.
+    """
     return f"evalforge-run-{run_id}.{fmt}"
