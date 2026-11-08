@@ -10,14 +10,19 @@ from finance_eval.schema import CaseResult, RunMetrics
 from finance_eval.taxonomy import FinanceFailureCode as F
 from finance_eval.taxonomy import is_critical
 
-
-def _rate(n: int, d: int) -> float:
-    return 0.0 if d == 0 else n / d
+_NONE = F.FIN_NONE.value
 
 
-def bootstrap_ci(values: list[float], iterations: int = 1000, seed: int = 42) -> tuple[float, float]:
+def _rate(n: int, d: int) -> float | None:
+    """Return n/d, or None when the denominator is zero (never invent 0.0)."""
+    if d == 0:
+        return None
+    return n / d
+
+
+def bootstrap_ci(values: list[float], iterations: int = 1000, seed: int = 42) -> tuple[float, float] | None:
     if not values:
-        return (0.0, 0.0)
+        return None
     rng = random.Random(seed)
     n = len(values)
     samples: list[float] = []
@@ -30,7 +35,65 @@ def bootstrap_ci(values: list[float], iterations: int = 1000, seed: int = 42) ->
     return (lo, hi)
 
 
-def aggregate_metrics(results: list[CaseResult]) -> RunMetrics:
+def planted_detection_counts(
+    results: list[CaseResult],
+) -> tuple[int, int, int, int] | None:
+    """Confusion matrix for grader-fail vs planted_failure labels.
+
+    Positive class = material failure.
+    - planted positive: planted_failure is set and not FIN-NONE
+    - predicted positive: deterministic grader did not pass
+
+    Returns (tp, fp, tn, fn), or None when any result lacks a planted label.
+    """
+    if not results or any(r.planted_failure is None for r in results):
+        return None
+    tp = fp = tn = fn = 0
+    for r in results:
+        planted_fail = r.planted_failure != _NONE
+        graded_fail = not r.passed
+        if planted_fail and graded_fail:
+            tp += 1
+        elif (not planted_fail) and graded_fail:
+            fp += 1
+        elif (not planted_fail) and (not graded_fail):
+            tn += 1
+        else:
+            fn += 1
+    return tp, fp, tn, fn
+
+
+def detection_rates(
+    tp: int, fp: int, tn: int, fn: int
+) -> tuple[float | None, float | None, float | None, float | None]:
+    """Precision, recall, F1, and false-positive rate from detection counts.
+
+    F1 is 0.0 when precision or recall is a defined 0; None when either side is None.
+    """
+    precision = _rate(tp, tp + fp)
+    recall = _rate(tp, tp + fn)
+    if precision is None or recall is None:
+        f1 = None
+    elif precision == 0.0 or recall == 0.0:
+        f1 = 0.0
+    else:
+        f1 = 2 * precision * recall / (precision + recall)
+    fpr = _rate(fp, fp + tn)
+    return precision, recall, f1, fpr
+
+
+def aggregate_metrics(
+    results: list[CaseResult],
+    *,
+    compute_planted_detection: bool = False,
+) -> RunMetrics:
+    """Aggregate run metrics.
+
+    ``precision`` / ``recall`` / ``f1`` / ``false_positive_rate`` are
+    grader-vs-planted detection metrics when ``compute_planted_detection`` is
+    True and every result carries ``planted_failure``. Otherwise they are
+    ``None`` — never filled with tautological self-comparisons.
+    """
     n = len(results)
     passed = sum(1 for r in results if r.passed)
     failure_counts: dict[str, int] = {}
@@ -69,40 +132,23 @@ def aggregate_metrics(results: list[CaseResult]) -> RunMetrics:
             cost += r.estimated_cost_usd
             has_cost = True
 
-    # Deterministic grading compares response to gold; precision/recall here reflect
-    # pass prediction consistency (pred == gold label from grade). Useful as sanity
-    # metrics; accuracy remains the primary headline.
-    tp = fp = tn = fn = 0
-    for r in results:
-        gold_pass = r.passed
-        pred_pass = r.passed
-        if gold_pass and pred_pass:
-            tp += 1
-        elif (not gold_pass) and pred_pass:
-            fp += 1
-        elif (not gold_pass) and (not pred_pass):
-            tn += 1
-        else:
-            fn += 1
-
-    precision = _rate(tp, tp + fp) if (tp + fp) else None
-    recall = _rate(tp, tp + fn) if (tp + fn) else None
-    f1 = None
-    if precision is not None and recall is not None and (precision + recall) > 0:
-        f1 = 2 * precision * recall / (precision + recall)
-    fpr = _rate(fp, fp + tn) if (fp + tn) else None
+    precision = recall = f1 = fpr = None
+    if compute_planted_detection:
+        counts = planted_detection_counts(results)
+        if counts is not None:
+            precision, recall, f1, fpr = detection_rates(*counts)
 
     return RunMetrics(
         n_cases=n,
         n_passed=passed,
-        accuracy=_rate(passed, n),
-        pass_rate=_rate(passed, n),
-        hallucination_rate=_rate(hall, n),
-        calculation_error_rate=_rate(calc, n),
-        reasoning_error_rate=_rate(reason, n),
-        citation_evidence_failure_rate=_rate(evid, n),
-        instruction_following_failure_rate=_rate(inst, n),
-        critical_error_rate=_rate(crit, n),
+        accuracy=_rate(passed, n) if n else 0.0,
+        pass_rate=_rate(passed, n) if n else 0.0,
+        hallucination_rate=_rate(hall, n) if n else 0.0,
+        calculation_error_rate=_rate(calc, n) if n else 0.0,
+        reasoning_error_rate=_rate(reason, n) if n else 0.0,
+        citation_evidence_failure_rate=_rate(evid, n) if n else 0.0,
+        instruction_following_failure_rate=_rate(inst, n) if n else 0.0,
+        critical_error_rate=_rate(crit, n) if n else 0.0,
         mean_latency_ms=(sum(latencies) / len(latencies)) if latencies else None,
         total_tokens=tokens or None,
         estimated_cost_usd=cost if has_cost else None,

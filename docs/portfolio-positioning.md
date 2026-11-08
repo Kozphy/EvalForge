@@ -69,7 +69,7 @@ users, and no real-model benchmark results.
 |----------------------------|----------------------|
 | "Evaluates real models" | No recorded run against OpenAI/Anthropic; only mock + MockTransport |
 | "Judge–human agreement 0.95" | **Constructed:** both sides copy the deterministic result; one disagreement is forced in code. Removed from README headline. |
-| Precision/recall/F1 in reports | **Tautological** (compares `passed` to itself); always 1.0. Open defect. |
+| Precision/recall/F1 in reports | **Fixed for candidate mode:** grader-vs-`planted_failure` detection metrics. Gold/live leave them `null`. Not a measure of live-model quality. |
 | Grader validity on unseen responses | Graders were only tested on responses from the same author |
 | Durable, tamper-evident audit trail | Evidence is plain files; control-plane evidence is in-memory |
 | Observability (structured logs, correlation IDs, metrics) | Not implemented |
@@ -78,8 +78,8 @@ users, and no real-model benchmark results.
 
 ### Planned (next, in order)
 
-1. Replace tautological precision/recall with grader-vs-planted detection metrics.
-2. Runner verifies dataset sha256 against `MANIFEST.json` before grading (fail closed).
+1. ~~Replace tautological precision/recall with grader-vs-planted detection metrics.~~ **Done** (`finance_eval/metrics.py`, candidate mode only).
+2. ~~Runner verifies dataset sha256 against `MANIFEST.json` before grading (fail closed).~~ **Done** (`finance_eval/runner.py::verify_dataset_integrity`).
 3. Benchmark harness with fixtures only (`benchmarks/`), no invented numbers.
 4. Failure evidence directory and failure taxonomy write-up.
 5. One real-provider run under a hard cost cap, recorded as **production-like**, only if API

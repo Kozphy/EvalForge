@@ -73,6 +73,10 @@ def write_report(result: dict[str, Any], out_path: Path) -> Path:
         "",
         "## Metrics",
         "",
+        "On offline **candidate** runs, `precision` / `recall` / `f1` / `false_positive_rate` "
+        "are grader-vs-`planted_failure` detection metrics (positive class = material failure). "
+        "On gold or live runs they are `null` — they are never filled by comparing a grade to itself.",
+        "",
         "```json",
         json.dumps(m, indent=2),
         "```",

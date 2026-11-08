@@ -82,6 +82,9 @@ class CaseResult(BaseModel):
     deterministic_detail: dict[str, Any] = Field(default_factory=dict)
     judge: dict[str, Any] | None = None
     human_review: dict[str, Any] | None = None
+    # Fixture label from the case record. Used only for offline candidate
+    # detection metrics; never treated as a live-model ground truth.
+    planted_failure: str | None = None
     latency_ms: float | None = None
     prompt_tokens: int | None = None
     completion_tokens: int | None = None

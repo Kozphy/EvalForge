@@ -25,12 +25,91 @@ from finance_eval.taxonomy import FinanceFailureCode as F
 
 ROOT = Path(__file__).resolve().parent
 DEFAULT_DATASET = ROOT / "dataset" / "finance_accounting_v1.jsonl"
+DEFAULT_MANIFEST = ROOT / "dataset" / "MANIFEST.json"
 DEFAULT_BASELINE = ROOT / "baselines" / "baseline_metrics.json"
 DEFAULT_EVIDENCE = ROOT / "output" / "evidence"
 DEFAULT_REVIEWS = ROOT / "output" / "human_reviews.jsonl"
 DEFAULT_LIVE_SUMMARY = ROOT / "baselines" / "live_run_summary.example.json"
 
 ResponseFn = Callable[[FinanceCase], str | ModelCallResult]
+
+
+class DatasetIntegrityError(RuntimeError):
+    """Raised when the dataset on disk does not match its pinned MANIFEST hash."""
+
+
+def resolve_dataset_manifest(dataset_path: Path, manifest_path: Path | None = None) -> Path:
+    """Locate the integrity manifest for a dataset (fail closed if none)."""
+    dataset_path = dataset_path.resolve()
+    if manifest_path is not None:
+        return manifest_path.resolve()
+    sibling = dataset_path.parent / "MANIFEST.json"
+    if sibling.is_file():
+        return sibling.resolve()
+    if dataset_path == DEFAULT_DATASET.resolve() and DEFAULT_MANIFEST.is_file():
+        return DEFAULT_MANIFEST.resolve()
+    raise DatasetIntegrityError(
+        f"No MANIFEST.json found for dataset {dataset_path}; refuse to grade unpinned data"
+    )
+
+
+def verify_dataset_integrity(
+    dataset_path: Path,
+    *,
+    manifest_path: Path | None = None,
+) -> dict[str, Any]:
+    """Fail closed: refuse to grade unless file sha256 matches the pinned MANIFEST.
+
+    Returns a small audit record suitable for the evidence manifest.
+    """
+    dataset_path = dataset_path.resolve()
+    if not dataset_path.is_file():
+        raise DatasetIntegrityError(f"Dataset file not found: {dataset_path}")
+
+    pinned_path = resolve_dataset_manifest(dataset_path, manifest_path)
+    if not pinned_path.is_file():
+        raise DatasetIntegrityError(f"MANIFEST not found: {pinned_path}")
+
+    try:
+        pinned = json.loads(pinned_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise DatasetIntegrityError(f"MANIFEST is not valid JSON: {pinned_path}") from exc
+
+    expected = pinned.get("sha256")
+    if not isinstance(expected, str) or not expected.strip():
+        raise DatasetIntegrityError(f"MANIFEST missing sha256: {pinned_path}")
+
+    observed = sha256_file(dataset_path)
+    if observed != expected:
+        raise DatasetIntegrityError(
+            "Dataset sha256 does not match MANIFEST "
+            f"(expected={expected}, observed={observed}, dataset={dataset_path}, "
+            f"manifest={pinned_path})"
+        )
+
+    pinned_version = pinned.get("dataset_version")
+    if pinned_version and pinned_version != DATASET_VERSION:
+        raise DatasetIntegrityError(
+            f"MANIFEST dataset_version {pinned_version!r} does not match "
+            f"package DATASET_VERSION {DATASET_VERSION!r}"
+        )
+
+    n_cases = pinned.get("n_cases")
+    if isinstance(n_cases, int):
+        line_count = sum(1 for line in dataset_path.read_text(encoding="utf-8").splitlines() if line.strip())
+        if line_count != n_cases:
+            raise DatasetIntegrityError(
+                f"Dataset case count {line_count} does not match MANIFEST n_cases {n_cases}"
+            )
+
+    return {
+        "verified": True,
+        "dataset_path": str(dataset_path.as_posix()),
+        "manifest_path": str(pinned_path.as_posix()),
+        "dataset_sha256": observed,
+        "dataset_version": pinned_version,
+        "n_cases": n_cases,
+    }
 
 
 def load_dataset(path: Path = DEFAULT_DATASET) -> list[FinanceCase]:
@@ -60,6 +139,7 @@ def _normalize_call(raw: str | ModelCallResult) -> ModelCallResult:
 def run_evaluation(
     *,
     dataset_path: Path = DEFAULT_DATASET,
+    manifest_path: Path | None = None,
     model: str = "offline-candidate-fixture",
     model_version: str = "v1",
     prompt_version: str = PROMPT_VERSION,
@@ -76,6 +156,9 @@ def run_evaluation(
 ) -> dict[str, Any]:
     stopped_reason: str | None = None
     live_budget_info: dict[str, Any] | None = None
+
+    # Fail closed before any grading or model calls.
+    integrity = verify_dataset_integrity(dataset_path, manifest_path=manifest_path)
 
     if live_client is not None:
         response_fn = live_client.complete
@@ -127,6 +210,9 @@ def run_evaluation(
             score=0.0 if (call.error and not call.text.strip()) else float(graded["score"]),
             failure_codes=failure_codes if not (call.error and not call.text.strip()) else [F.FIN_INST_014.value],
             deterministic_detail=detail,
+            # Always record the fixture label for audit; detection metrics use it
+            # only when scoring the offline candidate responses (see below).
+            planted_failure=case.planted_failure,
             latency_ms=call.latency_ms,
             prompt_tokens=call.prompt_tokens,
             completion_tokens=call.completion_tokens,
@@ -139,7 +225,10 @@ def run_evaluation(
         live_budget_info = live_budget_info or {}
         live_budget_info["spent_usd"] = live_client.budget.spent_usd
 
-    metrics = aggregate_metrics(results)
+    # Planted-detection metrics are meaningful only for offline candidate fixtures:
+    # the labels describe the embedded candidate_response, not gold or live answers.
+    compute_detection = live_client is None and mode == "candidate"
+    metrics = aggregate_metrics(results, compute_planted_detection=compute_detection)
     metrics_dict = metrics_to_dict(metrics)
     result_dicts = [r.model_dump() for r in results]
 
@@ -164,9 +253,11 @@ def run_evaluation(
 
     policy = evaluate_policy(metrics, regression)
     human_status = "SEEDED_PARTIAL" if reviews else "NONE"
-    dataset_hash = sha256_file(dataset_path) if dataset_path.exists() else ""
+    dataset_hash = integrity["dataset_sha256"]
 
-    extra_manifest: dict[str, Any] = {}
+    extra_manifest: dict[str, Any] = {
+        "dataset_integrity": integrity,
+    }
     if live_budget_info is not None:
         extra_manifest["live_budget"] = {
             **live_budget_info,
