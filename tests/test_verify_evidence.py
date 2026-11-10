@@ -63,4 +63,4 @@ def test_invalid_run_id_rejected(tmp_path):
 def test_missing_results_fails(tmp_path):
     manifest, dataset, pin, run_id = _fixture(tmp_path)
     (manifest.parent / (run_id + ".results.jsonl")).unlink()
-    assert any("Cannot read results JSONL" in issue for issue in verify_bundle(manifest, dataset, pin)
+    assert any("Cannot read results JSONL" in issue for issue in verify_bundle(manifest, dataset, pin))
