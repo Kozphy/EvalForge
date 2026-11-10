@@ -188,6 +188,7 @@ docker-compose.override.yml
 # local leftover personal material
 output/
 finance_eval/output/
+agent_reliability/output/
 
 
 # -----------------------------------------------------------------------------

@@ -113,6 +113,28 @@ python -m scripts.regression_gate run.json \
 
 Exit code `0` means the run passed all supplied thresholds. Exit code `1` means at least one regression threshold failed.
 
+## Agent Reliability bridge (ci-failure-orchestrator)
+
+EvalForge and [`Kozphy/ci-failure-orchestrator`](https://github.com/Kozphy/ci-failure-orchestrator)
+cooperate through a **versioned JSON interface** (`agent_reliability/interface_v1.py`).
+Repositories are **not** merged; `ci-failure-orchestrator` is **not** a pip dependency.
+
+| EvalForge gate | Peer policy outcome |
+|---|---|
+| `PASS` | `APPROVE` |
+| `WARN` | `ESCALATE` |
+| `BLOCK` | `REJECT` |
+
+Local offline fixture (no network, no merge, no deploy):
+
+```bash
+python -m agent_reliability --scenario good
+pytest -q tests/test_agent_reliability.py
+```
+
+Inventory: [`docs/architecture/agent-reliability-audit.md`](architecture/agent-reliability-audit.md).  
+Future NVIDIA AIPerf adapter (design only): [`docs/architecture/aiperf-adapter-design.md`](architecture/aiperf-adapter-design.md).
+
 ## Human review remains authoritative
 
 External metrics, built-in heuristic scores, and LLM graders are evidence—not final truth. `review` and `block` results remain available through the existing review queue and adjudication endpoints:
