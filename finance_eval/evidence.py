@@ -52,7 +52,7 @@ def write_evidence_bundle(
     maturity = {
         "deterministic_grading": "implemented",
         "llm_judge": "simulated",
-        "human_review_seed": "curated_seed",
+        "human_review_seed": "seeded_demo_not_human",
         "evidence_store": "file_append",
     }
     manifest: dict[str, Any] = {

@@ -15,7 +15,15 @@ import httpx
 
 from finance_eval.schema import FinanceCase
 
-ProviderName = Literal["openai", "anthropic", "mock"]
+ProviderName = Literal["openai", "anthropic", "mock", "ollama", "replay"]
+
+PAID_PROVIDERS = frozenset({"openai", "anthropic"})
+LOCAL_HOSTS = ("localhost", "127.0.0.1", "::1")
+ALLOW_PAID_ENV = "EVALFORGE_ALLOW_PAID"
+
+
+class PaidCallNotAuthorized(RuntimeError):
+    """A paid provider was requested without the explicit two-step opt-in."""
 
 SYSTEM_PROMPT = (
     "You are being evaluated on finance and accounting tasks. "
@@ -81,6 +89,15 @@ class LiveRunBudget:
     timeout_s: float = 60.0
     limit: int | None = None
     spent_usd: float = 0.0
+    max_output_tokens: int = 1024
+
+    def reserve(self, model: str, prompt_chars: int) -> None:
+        """Refuse a call *before* it is made if its worst-case cost could breach the cap."""
+        worst = estimate_cost_usd(model, max(1, prompt_chars // 3), self.max_output_tokens)
+        if self.spent_usd + worst > self.max_cost_usd:
+            raise CostCapExceeded(
+                f"Worst-case next call ${worst:.4f} would exceed cap ${self.max_cost_usd:.4f} (spent ${self.spent_usd:.4f})"
+            )
 
     def charge(self, amount: float | None) -> None:
         if amount is None:
@@ -107,14 +124,42 @@ class LiveModelClient:
         budget: LiveRunBudget | None = None,
         transport: httpx.BaseTransport | None = None,
         sleep_fn: Callable[[float], None] = time.sleep,
+        allow_paid: bool = False,
+        base_url: str | None = None,
+        replay_path: Any = None,
+        recorder: Any = None,
     ) -> None:
         self.provider = provider
+        self.recorder = recorder
+        self.base_url = base_url or "http://localhost:11434"
+        # Paid endpoints over the real network need BOTH allow_paid=True and EVALFORGE_ALLOW_PAID=1.
+        # Tests that inject an httpx transport never reach the network and are exempt.
+        if provider in PAID_PROVIDERS and transport is None:
+            if not (allow_paid and os.getenv(ALLOW_PAID_ENV) == "1"):
+                raise PaidCallNotAuthorized(
+                    f"provider={provider} is paid: pass --allow-paid and set {ALLOW_PAID_ENV}=1"
+                )
+            if budget is None or budget.limit is None:
+                raise PaidCallNotAuthorized("paid runs require an explicit --limit")
+        if provider == "ollama" and transport is None:
+            from urllib.parse import urlparse
+
+            if urlparse(self.base_url).hostname not in LOCAL_HOSTS:
+                raise ValueError("ollama base_url must be local (localhost/127.0.0.1)")
+        self.replay: dict[str, Any] = {}
+        self.replay_sha256: str | None = None
+        if provider == "replay":
+            from finance_eval.recording import load_record
+
+            header, calls, digest = load_record(replay_path)
+            self.replay, self.replay_sha256 = calls, digest
+            self.replay_header = header
         self.model = model
         self.budget = budget or LiveRunBudget()
         self.transport = transport
         self.sleep_fn = sleep_fn
         self.api_key = api_key or self._resolve_api_key(provider)
-        if provider != "mock" and not self.api_key:
+        if provider in PAID_PROVIDERS and not self.api_key:
             env = "OPENAI_API_KEY" if provider == "openai" else "ANTHROPIC_API_KEY"
             raise RuntimeError(f"{env} is required for provider={provider}")
 
@@ -124,15 +169,18 @@ class LiveModelClient:
             return os.getenv("OPENAI_API_KEY") or None
         if provider == "anthropic":
             return os.getenv("ANTHROPIC_API_KEY") or None
-        return "mock"
+        return None
 
     def complete(self, case: FinanceCase) -> ModelCallResult:
         last_error: str | None = None
         for attempt in range(self.budget.max_retries + 1):
             try:
+                if self.provider in PAID_PROVIDERS:
+                    self.budget.reserve(self.model, len(SYSTEM_PROMPT) + len(build_user_prompt(case)))
                 result = self._complete_once(case)
                 result.retries = attempt
                 self.budget.charge(result.estimated_cost_usd)
+                self._record(case, result)
                 return result
             except CostCapExceeded:
                 raise
@@ -141,12 +189,29 @@ class LiveModelClient:
                 if attempt >= self.budget.max_retries:
                     break
                 self.sleep_fn(min(2**attempt, 8))
-        return ModelCallResult(
+        failed = ModelCallResult(
             text="",
             error=last_error or "unknown provider error",
             retries=self.budget.max_retries,
             provider=self.provider,
             model=self.model,
+        )
+        self._record(case, failed)
+        return failed
+
+    def _record(self, case: FinanceCase, result: ModelCallResult) -> None:
+        if self.recorder is None:
+            return
+        self.recorder.record(
+            case_id=case.case_id,
+            prompt=SYSTEM_PROMPT + "\n\n" + build_user_prompt(case),
+            response_text=result.text,
+            latency_ms=result.latency_ms,
+            prompt_tokens=result.prompt_tokens,
+            completion_tokens=result.completion_tokens,
+            estimated_cost_usd=result.estimated_cost_usd,
+            error=result.error,
+            retries=result.retries,
         )
 
     def _complete_once(self, case: FinanceCase) -> ModelCallResult:
@@ -156,6 +221,10 @@ class LiveModelClient:
             return self._openai_complete(case)
         if self.provider == "anthropic":
             return self._anthropic_complete(case)
+        if self.provider == "ollama":
+            return self._ollama_complete(case)
+        if self.provider == "replay":
+            return self._replay_complete(case)
         raise ValueError(f"unsupported provider: {self.provider}")
 
     def _mock_complete(self, case: FinanceCase) -> ModelCallResult:
@@ -170,6 +239,51 @@ class LiveModelClient:
             completion_tokens=completion_tokens,
             estimated_cost_usd=estimate_cost_usd(self.model, prompt_tokens, completion_tokens),
             provider="mock",
+            model=self.model,
+        )
+
+    def _ollama_complete(self, case: FinanceCase) -> ModelCallResult:
+        """Local open-weight model via Ollama's /api/chat. No API key, cost 0."""
+        started = time.perf_counter()
+        body = {
+            "model": self.model,
+            "stream": False,
+            "messages": [
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": build_user_prompt(case)},
+            ],
+            "options": {"temperature": 0, "seed": 0, "num_predict": self.budget.max_output_tokens},
+        }
+        with httpx.Client(timeout=self.budget.timeout_s, transport=self.transport) as client:
+            res = client.post(f"{self.base_url.rstrip('/')}/api/chat", json=body)
+            res.raise_for_status()
+            payload = res.json()
+        return ModelCallResult(
+            text=((payload.get("message") or {}).get("content") or "").strip(),
+            latency_ms=(time.perf_counter() - started) * 1000.0,
+            prompt_tokens=payload.get("prompt_eval_count"),
+            completion_tokens=payload.get("eval_count"),
+            estimated_cost_usd=0.0,
+            provider="ollama",
+            model=self.model,
+        )
+
+    def _replay_complete(self, case: FinanceCase) -> ModelCallResult:
+        from finance_eval.recording import sha256_text
+
+        rec = self.replay.get(case.case_id)
+        if rec is None:
+            raise KeyError(f"case {case.case_id} not in replay record")
+        if rec.prompt_sha256 != sha256_text(SYSTEM_PROMPT + "\n\n" + build_user_prompt(case)):
+            raise ValueError(f"prompt drift for {case.case_id}: recorded prompt differs from current prompt")
+        return ModelCallResult(
+            text=rec.response_text,
+            latency_ms=rec.latency_ms,
+            prompt_tokens=rec.prompt_tokens,
+            completion_tokens=rec.completion_tokens,
+            estimated_cost_usd=0.0,
+            error=rec.error,
+            provider="replay",
             model=self.model,
         )
 

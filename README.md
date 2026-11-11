@@ -10,10 +10,11 @@
 | Offline candidate accuracy | **79.9%** vs gold baseline **100%** |
 | Policy decision | **FAIL** (`critical_error_rate > 0.05`) |
 | Grader catches planted errors | **31/31** valid cases, 0 false alarms (synthetic, self-authored) |
-| Tests | **71** pytest |
+| Tests | **186 passed, 1 skipped** (optional torch module; `pytest --collect-only` reports 186 tests). Python 3.12.3, pytest 9.2.0, offline, 2026-11-11. See [`docs/evidence-matrix.md`](docs/evidence-matrix.md) |
 
 All numbers are **local benchmarks on synthetic data** — no production use, no real-model results.
 What is and is not proven: [`docs/portfolio-positioning.md`](docs/portfolio-positioning.md) · verified run: [`docs/end-to-end-flow.md`](docs/end-to-end-flow.md)
+Claim-by-claim evidence and open defects: [`docs/evidence-matrix.md`](docs/evidence-matrix.md) · offline walkthrough: [`docs/reports/reproducible-case-study.md`](docs/reports/reproducible-case-study.md)
 
 ```bash
 python -m venv .venv && .venv\Scripts\Activate.ps1   # or source .venv/bin/activate
@@ -100,7 +101,7 @@ python -m finance_eval run --mode live --provider openai --live-model gpt-4o-min
 python -m finance_eval run --mode live --provider anthropic --live-model claude-3-5-haiku-latest --limit 20 --max-cost-usd 1.0
 ```
 
-Writes a **redacted** metrics-only summary to `finance_eval/baselines/live_run_summary.example.json` (no prompts/responses). Costs are **estimated** from a static price table, not invoices.
+Writes a **redacted** metrics-only summary (no prompts/responses). With `--provider mock`, it goes to the gitignored `finance_eval/output/live_run_summary.mock.json`. With a real provider, it goes to `finance_eval/baselines/live_run_summary.example.json`. Use `--live-summary PATH` to choose another path. Costs are **estimated** from a static price table, not invoices.
 
 ---
 
@@ -112,7 +113,12 @@ finance_eval/
   dataset/MANIFEST.json                 # version + sha256
   baselines/baseline_metrics.json       # gold oracle baseline
   taxonomy.py  graders.py  runner.py  policy.py  evidence.py  report.py
+annotation_eval/                        # label provenance, kappa, adjudication, rubric
+  data/*.jsonl + MANIFEST.json          # SYNTHETIC fixtures only (not human labels)
+  baselines.py                          # rule-based sentiment / moderation baselines
 ```
+
+See [docs/annotation-eval.md](docs/annotation-eval.md) for provenance rules and limits.
 
 Deterministic evaluation is authoritative. Judges never override failing deterministic checks in CI.
 

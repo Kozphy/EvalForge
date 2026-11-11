@@ -16,6 +16,7 @@
   "recall": 1.0,
   "f1": 1.0,
   "false_positive_rate": null,
+  "reference_label_source": "gold mode: every expected answer is labeled as should-pass",
   "accuracy_ci95": [
     1.0,
     1.0

@@ -93,11 +93,11 @@ consistency check, not an independent validation.
 
 | Defect | Impact | Status |
 |--------|--------|--------|
-| `precision`/`recall`/`f1`/`false_positive_rate` in `metrics.py` compare `r.passed` to itself | Always 1.0 / 1.0 / 1.0 / 0.0 for any run — carries no information but appears in the report JSON | **Open.** Proposed: replace with grader-vs-`planted_failure` detection metrics (above) in candidate mode, `null` otherwise. |
+| `precision`/`recall`/`f1`/`false_positive_rate` in `metrics.py` compare `r.passed` to itself | Always 1.0 / 1.0 / 1.0 / 0.0 for any run — carries no information but appears in the report JSON | **Fixed locally (uncommitted):** compares results with the `planted_failure` labels in candidate mode, uses all-pass labels in gold mode, and reports `null` otherwise. |
 | Judge–human agreement 0.95 is constructed: judge mirrors deterministic result; seeded "human" rows mirror it too except one disagreement forced in `human_review.py` | Number is determined by the seeding code, not by any judgment | README headline corrected; code **open** (needs real reviews or removal). |
 | `PY-015` golden/candidate are both `1` | Planted-failure count overstated by 1 | **Open.** Fixing changes the dataset sha256 → requires a `v1.1` dataset bump, not an in-place edit. |
-| `core.autocrlf=true` checkout converted dataset to CRLF → recorded sha256 would diverge from `MANIFEST.json` silently | Reproducibility | **Fixed** in `76b8fde` (`.gitattributes` `eol=lf`). Runner still does not *verify* the hash — open. |
-| Running the flow rewrites tracked files (`docs/reports/finance-evaluation-report.md`, `baselines/live_run_summary.example.json`) and tests regenerate `dataset/*.jsonl` | Noisy diffs; tests mutate versioned data | Open. |
+| `core.autocrlf=true` checkout converted dataset to CRLF → recorded sha256 would diverge from `MANIFEST.json` silently | Reproducibility | **Fixed** in `76b8fde` (`.gitattributes` `eol=lf`). Runner hash verification (fail closed): **fixed locally (uncommitted).** |
+| Running the flow rewrites tracked files (`docs/reports/finance-evaluation-report.md`, `baselines/live_run_summary.example.json`) and tests regenerate `dataset/*.jsonl` | Noisy diffs; tests mutate versioned data | Partly fixed locally (uncommitted): mock runs now write to the gitignored `finance_eval/output/`. `report` and dataset regeneration still write tracked files. |
 | `evidence_index.jsonl` stores absolute, machine-specific paths | Evidence bundle not relocatable | Open. |
 
 ## What this flow does **not** prove

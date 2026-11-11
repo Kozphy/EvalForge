@@ -106,6 +106,9 @@ class RunMetrics(BaseModel):
     recall: float | None = None
     f1: float | None = None
     false_positive_rate: float | None = None
+    # Provenance of the labels behind precision/recall/F1 (None = no reference labels supplied,
+    # so those metrics are unavailable rather than perfect).
+    reference_label_source: str | None = None
     accuracy_ci95: tuple[float, float] | None = None
     failure_counts: dict[str, int] = Field(default_factory=dict)
 

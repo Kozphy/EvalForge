@@ -69,7 +69,7 @@ users, and no real-model benchmark results.
 |----------------------------|----------------------|
 | "Evaluates real models" | No recorded run against OpenAI/Anthropic; only mock + MockTransport |
 | "Judge–human agreement 0.95" | **Constructed:** both sides copy the deterministic result; one disagreement is forced in code. Removed from README headline. |
-| Precision/recall/F1 in reports | **Tautological** (compares `passed` to itself); always 1.0. Open defect. |
+| Precision/recall/F1 in reports | Previously tautological (compared `passed` to itself). Fixed locally (uncommitted): it now compares results with the dataset's `planted_failure` labels, giving candidate precision 0.9919, recall 1.0, F1 0.9959. Those labels are author-written, not independent. |
 | Grader validity on unseen responses | Graders were only tested on responses from the same author |
 | Durable, tamper-evident audit trail | Evidence is plain files; control-plane evidence is in-memory |
 | Observability (structured logs, correlation IDs, metrics) | Not implemented |
@@ -78,8 +78,8 @@ users, and no real-model benchmark results.
 
 ### Planned (next, in order)
 
-1. Replace tautological precision/recall with grader-vs-planted detection metrics.
-2. Runner verifies dataset sha256 against `MANIFEST.json` before grading (fail closed).
+1. Replace tautological precision/recall with grader-vs-planted detection metrics. *(Done locally, uncommitted.)*
+2. Runner verifies dataset sha256 against `MANIFEST.json` before grading (fail closed). *(Done locally, uncommitted.)*
 3. Benchmark harness with fixtures only (`benchmarks/`), no invented numbers.
 4. Failure evidence directory and failure taxonomy write-up.
 5. One real-provider run under a hard cost cap, recorded as **production-like**, only if API
@@ -99,7 +99,7 @@ users, and no real-model benchmark results.
 
 ```bash
 pip install -r requirements.txt
-pytest -q                                   # expect 71 passed
+pytest -q                                   # expect 119 passed, 1 skipped
 python -m finance_eval run --mode gold --write-baseline
 python -m finance_eval run --mode candidate # expect accuracy ~0.799, policy FAIL
 ```

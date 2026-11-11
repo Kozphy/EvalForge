@@ -144,6 +144,9 @@ def test_end_to_end_offline_pipeline(tmp_path: Path) -> None:
         seed_reviews=True,
         mode="candidate",
     )
+    assert candidate["n_human_reviews"] == 0
+    assert candidate["n_seeded_demo_reviews"] == 20
+    assert candidate["judge_human_agreement"] is None
     assert candidate["n_cases"] >= 100
     assert candidate["metrics"]["accuracy"] < gold["metrics"]["accuracy"]
     assert candidate["regression"] is not None
