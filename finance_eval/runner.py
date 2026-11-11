@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 from typing import Any, Callable
 
 from finance_eval import DATASET_VERSION, PROMPT_VERSION
-from finance_eval.evidence import sha256_file, write_evidence_bundle
+from finance_eval.evidence import write_evidence_bundle
 from finance_eval.graders import grade_case
 from finance_eval.human_review import agreement_rate, load_reviews, seed_human_reviews
 from finance_eval.judge import attach_judge
@@ -29,16 +30,59 @@ DEFAULT_BASELINE = ROOT / "baselines" / "baseline_metrics.json"
 DEFAULT_EVIDENCE = ROOT / "output" / "evidence"
 DEFAULT_REVIEWS = ROOT / "output" / "human_reviews.jsonl"
 DEFAULT_LIVE_SUMMARY = ROOT / "baselines" / "live_run_summary.example.json"
+# Mock-provider runs are plumbing checks, not live-model evidence: keep their summary in the
+# gitignored output directory so they never rewrite the tracked example above.
+DEFAULT_MOCK_LIVE_SUMMARY = ROOT / "output" / "live_run_summary.mock.json"
+
+PLANTED_LABEL_SOURCE = (
+    "dataset planted_failure field (author-defined expected outcome per case; "
+    "independent of grader output, not independent human labels)"
+)
+GOLD_LABEL_SOURCE = "gold mode: every expected answer is labeled as should-pass"
 
 ResponseFn = Callable[[FinanceCase], str | ModelCallResult]
 
 
+class DatasetIntegrityError(ValueError):
+    """Dataset bytes, manifest, or case list failed verification; nothing was evaluated."""
+
+
+def _load_dataset_snapshot(path: Path) -> tuple[list[FinanceCase], str]:
+    """Verify the pinned manifest before parsing or making any model calls.
+
+    A checked-in manifest is a consistency anchor, not a signature or proof that
+    dataset and manifest were not both replaced by an actor with write access.
+    """
+    raw = path.read_bytes()
+    digest = hashlib.sha256(raw).hexdigest()
+    manifest_path = path.with_name("MANIFEST.json")
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except FileNotFoundError as exc:
+        raise DatasetIntegrityError(f"missing dataset manifest: {manifest_path}") from exc
+    except json.JSONDecodeError as exc:
+        raise DatasetIntegrityError(f"malformed dataset manifest: {manifest_path}") from exc
+    if not isinstance(manifest, dict) or manifest.get("sha256") != digest:
+        raise DatasetIntegrityError("dataset SHA-256 does not match MANIFEST.json")
+    if manifest.get("dataset_version") != DATASET_VERSION:
+        raise DatasetIntegrityError("unsupported dataset version")
+    cases = [
+        FinanceCase.model_validate_json(line)
+        for line in raw.decode("utf-8").splitlines()
+        if line.strip()
+    ]
+    if type(manifest.get("n_cases")) is not int or manifest["n_cases"] != len(cases):
+        raise DatasetIntegrityError("dataset count does not match MANIFEST.json")
+    if any(case.dataset_version != manifest["dataset_version"] for case in cases):
+        raise DatasetIntegrityError("case dataset version does not match MANIFEST.json")
+    if len({case.case_id for case in cases}) != len(cases):
+        raise DatasetIntegrityError("duplicate dataset case ids")
+    return cases, digest
+
+
 def load_dataset(path: Path = DEFAULT_DATASET) -> list[FinanceCase]:
-    cases: list[FinanceCase] = []
-    for line in path.read_text(encoding="utf-8").splitlines():
-        if line.strip():
-            cases.append(FinanceCase.model_validate_json(line))
-    return cases
+    """Load a dataset only when its sibling manifest matches the exact bytes."""
+    return _load_dataset_snapshot(path)[0]
 
 
 def offline_candidate(case: FinanceCase) -> str:
@@ -75,6 +119,9 @@ def run_evaluation(
     live_summary_path: Path | None = None,
 ) -> dict[str, Any]:
     stopped_reason: str | None = None
+    # Reference labels exist only for the built-in offline fixtures, whose responses the
+    # dataset describes. Live, mock and custom response functions get no labels.
+    reference_mode: str | None = None
     live_budget_info: dict[str, Any] | None = None
 
     if live_client is not None:
@@ -90,12 +137,13 @@ def run_evaluation(
             "pricing_note": "estimated USD from static PRICE_PER_1M table — not invoices",
         }
     elif response_fn is None:
+        reference_mode = "gold" if mode == "gold" else "planted"
         response_fn = gold_candidate if mode == "gold" else offline_candidate
         if mode == "gold":
             model = "oracle-expected-answer"
             model_version = "gold"
 
-    cases = load_dataset(dataset_path)
+    cases, dataset_hash = _load_dataset_snapshot(dataset_path)
     if limit is not None:
         cases = cases[: max(0, limit)]
 
@@ -139,7 +187,17 @@ def run_evaluation(
         live_budget_info = live_budget_info or {}
         live_budget_info["spent_usd"] = live_client.budget.spent_usd
 
-    metrics = aggregate_metrics(results)
+    reference_pass: dict[str, bool] | None = None
+    label_source: str | None = None
+    if reference_mode is not None:
+        by_id = {case.case_id: case for case in cases}
+        if reference_mode == "gold":
+            reference_pass = {r.case_id: True for r in results}
+            label_source = GOLD_LABEL_SOURCE
+        else:
+            reference_pass = {r.case_id: by_id[r.case_id].planted_failure == F.FIN_NONE.value for r in results}
+            label_source = PLANTED_LABEL_SOURCE
+    metrics = aggregate_metrics(results, reference_pass=reference_pass, reference_label_source=label_source)
     metrics_dict = metrics_to_dict(metrics)
     result_dicts = [r.model_dump() for r in results]
 
@@ -164,7 +222,6 @@ def run_evaluation(
 
     policy = evaluate_policy(metrics, regression)
     human_status = "SEEDED_PARTIAL" if reviews else "NONE"
-    dataset_hash = sha256_file(dataset_path) if dataset_path.exists() else ""
 
     extra_manifest: dict[str, Any] = {}
     if live_budget_info is not None:
@@ -227,6 +284,7 @@ def run_evaluation(
     if live_summary_path is not None:
         write_redacted_live_summary(live_summary_path, out)
     elif live_client is not None:
-        write_redacted_live_summary(DEFAULT_LIVE_SUMMARY, out)
+        default_summary = DEFAULT_MOCK_LIVE_SUMMARY if live_client.provider == "mock" else DEFAULT_LIVE_SUMMARY
+        write_redacted_live_summary(default_summary, out)
 
     return out

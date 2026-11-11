@@ -10,7 +10,14 @@ from pathlib import Path
 from finance_eval.generate_dataset import write_dataset
 from finance_eval.live import LiveModelClient, LiveRunBudget
 from finance_eval.report import write_report
-from finance_eval.runner import DEFAULT_BASELINE, DEFAULT_DATASET, DEFAULT_LIVE_SUMMARY, run_evaluation
+from finance_eval.runner import (
+    DEFAULT_BASELINE,
+    DEFAULT_DATASET,
+    DEFAULT_LIVE_SUMMARY,
+    DEFAULT_MOCK_LIVE_SUMMARY,
+    DatasetIntegrityError,
+    run_evaluation,
+)
 from finance_eval.taxonomy import taxonomy_catalog
 
 
@@ -35,13 +42,30 @@ def main(argv: list[str] | None = None) -> int:
     run_p.add_argument("--max-cost-usd", type=float, default=1.0)
     run_p.add_argument("--max-retries", type=int, default=2)
     run_p.add_argument("--timeout-s", type=float, default=60.0)
-    run_p.add_argument("--live-summary", type=Path, default=DEFAULT_LIVE_SUMMARY)
+    run_p.add_argument(
+        "--live-summary",
+        type=Path,
+        default=None,
+        help=(
+            "Redacted summary path. Default: finance_eval/baselines/live_run_summary.example.json for "
+            "openai/anthropic; gitignored finance_eval/output/live_run_summary.mock.json for --provider mock"
+        ),
+    )
 
     rep = sub.add_parser("report", help="Run evaluation and write markdown report")
     rep.add_argument("--out", type=Path, default=Path("docs/reports/finance-evaluation-report.md"))
     rep.add_argument("--write-baseline", action="store_true")
 
     args = parser.parse_args(argv)
+    try:
+        return _dispatch(args)
+    except DatasetIntegrityError as exc:
+        # Fail closed: no responses were requested and no evidence or baseline was written.
+        print(f"error: dataset integrity check failed: {exc}", file=sys.stderr)
+        return 2
+
+
+def _dispatch(args: argparse.Namespace) -> int:
 
     if args.cmd == "generate-dataset":
         print(json.dumps(write_dataset(), indent=2))
@@ -78,7 +102,12 @@ def main(argv: list[str] | None = None) -> int:
                 ),
             )
             kwargs["live_client"] = client
-            kwargs["live_summary_path"] = args.live_summary
+            if args.live_summary is not None:
+                kwargs["live_summary_path"] = args.live_summary
+            else:
+                kwargs["live_summary_path"] = (
+                    DEFAULT_MOCK_LIVE_SUMMARY if args.provider == "mock" else DEFAULT_LIVE_SUMMARY
+                )
             kwargs.pop("mode", None)
         result = run_evaluation(**kwargs)
         print(

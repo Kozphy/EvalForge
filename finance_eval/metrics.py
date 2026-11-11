@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import math
 import random
-from typing import Any
+from typing import Any, Mapping
 
 from finance_eval.schema import CaseResult, RunMetrics
 from finance_eval.taxonomy import FinanceFailureCode as F
@@ -30,7 +30,18 @@ def bootstrap_ci(values: list[float], iterations: int = 1000, seed: int = 42) ->
     return (lo, hi)
 
 
-def aggregate_metrics(results: list[CaseResult]) -> RunMetrics:
+def aggregate_metrics(
+    results: list[CaseResult],
+    *,
+    reference_pass: Mapping[str, bool] | None = None,
+    reference_label_source: str | None = None,
+) -> RunMetrics:
+    """Aggregate grader outcomes; optional reference labels use PASS as positive.
+
+    Reference labels must be independently adjudicated for these exact responses.
+    No labels means classifier metrics are unavailable, not perfect. This function
+    validates coverage, not the real-world independence/provenance of supplied labels.
+    """
     n = len(results)
     passed = sum(1 for r in results if r.passed)
     failure_counts: dict[str, int] = {}
@@ -69,30 +80,34 @@ def aggregate_metrics(results: list[CaseResult]) -> RunMetrics:
             cost += r.estimated_cost_usd
             has_cost = True
 
-    # Deterministic grading compares response to gold; precision/recall here reflect
-    # pass prediction consistency (pred == gold label from grade). Useful as sanity
-    # metrics; accuracy remains the primary headline.
-    tp = fp = tn = fn = 0
-    for r in results:
-        gold_pass = r.passed
-        pred_pass = r.passed
-        if gold_pass and pred_pass:
-            tp += 1
-        elif (not gold_pass) and pred_pass:
-            fp += 1
-        elif (not gold_pass) and (not pred_pass):
-            tn += 1
-        else:
-            fn += 1
-
-    precision = _rate(tp, tp + fp) if (tp + fp) else None
-    recall = _rate(tp, tp + fn) if (tp + fn) else None
-    f1 = None
-    if precision is not None and recall is not None and (precision + recall) > 0:
-        f1 = 2 * precision * recall / (precision + recall)
-    fpr = _rate(fp, fp + tn) if (fp + tn) else None
+    precision = recall = f1 = fpr = None
+    if reference_pass is not None:
+        ids = [r.case_id for r in results]
+        if len(set(ids)) != len(ids):
+            raise ValueError("duplicate case ids cannot be independently labeled")
+        if set(reference_pass) != set(ids):
+            raise ValueError("reference labels must cover exactly the evaluated cases")
+        if any(type(value) is not bool for value in reference_pass.values()):
+            raise ValueError("reference labels must be boolean")
+        tp = fp = tn = fn = 0
+        for r in results:
+            gold_pass = reference_pass[r.case_id]
+            if gold_pass and r.passed:
+                tp += 1
+            elif not gold_pass and r.passed:
+                fp += 1
+            elif not gold_pass and not r.passed:
+                tn += 1
+            else:
+                fn += 1
+        precision = _rate(tp, tp + fp) if tp + fp else None
+        recall = _rate(tp, tp + fn) if tp + fn else None
+        if precision is not None and recall is not None:
+            f1 = _rate(2 * precision * recall, precision + recall)
+        fpr = _rate(fp, fp + tn) if fp + tn else None
 
     return RunMetrics(
+        reference_label_source=reference_label_source if reference_pass is not None else None,
         n_cases=n,
         n_passed=passed,
         accuracy=_rate(passed, n),

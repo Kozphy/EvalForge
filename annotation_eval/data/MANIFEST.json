@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0",
+  "statement": "All datasets in this directory are SYNTHETIC fixtures written by an AI coding assistant for unit tests. They are not human annotations, not sampled from real users, and not a benchmark. Agreement data uses scripted simulated annotators.",
+  "license": "Same license as the EvalForge repository",
+  "datasets": {
+    "sentiment_synthetic_v1": {
+      "file": "sentiment_synthetic_v1.jsonl",
+      "kind": "labeled_items",
+      "rows": 20,
+      "labels": [
+        "negative",
+        "neutral",
+        "positive"
+      ],
+      "provenance": "synthetic_author",
+      "sha256": "5dd647dfb5865865eb79bc730f236bae6834e656f7aceae862c3b65da294aff0"
+    },
+    "moderation_synthetic_v1": {
+      "file": "moderation_synthetic_v1.jsonl",
+      "kind": "labeled_items",
+      "rows": 20,
+      "labels": [
+        "allow",
+        "harassment",
+        "spam",
+        "personal_data"
+      ],
+      "provenance": "synthetic_author",
+      "sha256": "050aecb28e4cdcc156b7ab88da535ed4eba8cb728dbf4a17d9bd51aa0ed830da"
+    },
+    "agreement_simulated_v1": {
+      "file": "agreement_simulated_v1.jsonl",
+      "kind": "annotations",
+      "rows": 24,
+      "labels": [
+        "negative",
+        "neutral",
+        "positive"
+      ],
+      "provenance": "simulated_annotator",
+      "sha256": "a7d30cc11011b0304c1e634c5ff71159edd86648499d19d9d6917c7ed0267def"
+    }
+  }
+}

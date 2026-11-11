@@ -1,7 +1,7 @@
 # Finance + Accounting LLM Evaluation Report
 
 **Dataset:** `finance-accounting-v1` · **Prompt version:** `finance-eval-prompt-v1`  
-**Run ID:** `finrun_2f228ff6366e` · **Model:** `offline-candidate-fixture` `v1`  
+**Run ID:** `finrun_04c7a1f1bce3` · **Model:** `offline-candidate-fixture` `v1`  
 **Policy decision:** `FAIL` · **Human review status:** `SEEDED_PARTIAL`
 
 ## Executive Summary
@@ -58,10 +58,11 @@ Input → Candidate Response → Parser → Deterministic Metrics
   "mean_latency_ms": null,
   "total_tokens": null,
   "estimated_cost_usd": null,
-  "precision": 1.0,
+  "precision": 0.991869918699187,
   "recall": 1.0,
-  "f1": 1.0,
-  "false_positive_rate": 0.0,
+  "f1": 0.9959183673469388,
+  "false_positive_rate": 0.03125,
+  "reference_label_source": "dataset planted_failure field (author-defined expected outcome per case; independent of grader output, not independent human labels)",
   "accuracy_ci95": [
     0.7402597402597403,
     0.8571428571428571
