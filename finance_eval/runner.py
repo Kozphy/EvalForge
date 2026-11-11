@@ -10,8 +10,8 @@ from typing import Any, Callable
 from finance_eval import DATASET_VERSION, PROMPT_VERSION
 from finance_eval.evidence import write_evidence_bundle
 from finance_eval.graders import grade_case
-from finance_eval.human_review import agreement_rate, load_reviews, seed_human_reviews
-from finance_eval.judge import attach_judge
+from finance_eval.human_review import agreement_rate, is_independent_human, load_reviews, seed_demo_reviews
+from finance_eval.judge import IndependentJudgeFn, attach_judge, judge_is_independent
 from finance_eval.live import (
     CostCapExceeded,
     LiveModelClient,
@@ -111,12 +111,13 @@ def run_evaluation(
     baseline_path: Path | None = DEFAULT_BASELINE,
     evidence_dir: Path = DEFAULT_EVIDENCE,
     reviews_path: Path = DEFAULT_REVIEWS,
-    seed_reviews: bool = True,
+    seed_reviews: bool = False,
     write_baseline: bool = False,
     mode: str = "candidate",
     limit: int | None = None,
     live_client: LiveModelClient | None = None,
     live_summary_path: Path | None = None,
+    judge_fn: IndependentJudgeFn | None = None,
 ) -> dict[str, Any]:
     stopped_reason: str | None = None
     # Reference labels exist only for the built-in offline fixtures, whose responses the
@@ -130,6 +131,9 @@ def run_evaluation(
         model_version = f"{live_client.provider}:{live_client.model}"
         limit = limit if limit is not None else live_client.budget.limit
         live_budget_info = {
+            "provider": live_client.provider,
+            "paid": live_client.provider in {"openai", "anthropic"},
+            "replayed_from_sha256": live_client.replay_sha256,
             "max_cost_usd": live_client.budget.max_cost_usd,
             "max_retries": live_client.budget.max_retries,
             "timeout_s": live_client.budget.timeout_s,
@@ -180,7 +184,7 @@ def run_evaluation(
             completion_tokens=call.completion_tokens,
             estimated_cost_usd=call.estimated_cost_usd,
         )
-        item = attach_judge(case, call.text, item)
+        item = attach_judge(case, call.text, item, judge_fn=judge_fn)
         results.append(item)
 
     if live_client is not None:
@@ -202,18 +206,25 @@ def run_evaluation(
     result_dicts = [r.model_dump() for r in results]
 
     if seed_reviews:
-        seed_human_reviews(result_dicts, reviews_path, sample_n=min(20, len(result_dicts)))
+        seed_demo_reviews(result_dicts, reviews_path, sample_n=min(20, len(result_dicts)))
     reviews = load_reviews(reviews_path)
     pairs: list[tuple[str, str]] = []
     for r in result_dicts:
         human = reviews.get(r["case_id"])
         if not human:
             continue
+        if not is_independent_human(human):
+            r["demo_review"] = human
+            continue
         r["human_review"] = human
-        judge_dec = (r.get("judge") or {}).get("decision")
-        if judge_dec and human.get("decision"):
+        judge = r.get("judge") or {}
+        judge_dec = judge.get("decision")
+        # Agreement with a judge that copies the grader carries no information.
+        if judge_dec and human.get("decision") and judge_is_independent(judge):
             pairs.append((str(judge_dec), str(human["decision"])))
     agree = agreement_rate(pairs)
+    judge_independent = bool(result_dicts) and all(judge_is_independent(r.get("judge")) for r in result_dicts)
+    agreement_note = None if judge_independent else "not computed: judge is not independent of the deterministic grader"
 
     regression = None
     if baseline_path and baseline_path.exists():
@@ -221,7 +232,14 @@ def run_evaluation(
         regression = compare_to_baseline(metrics, baseline)
 
     policy = evaluate_policy(metrics, regression)
-    human_status = "SEEDED_PARTIAL" if reviews else "NONE"
+    n_independent = sum(1 for row in reviews.values() if is_independent_human(row))
+    n_seeded = len(reviews) - n_independent
+    if n_independent:
+        human_status = "INDEPENDENT_PARTIAL"
+    elif n_seeded:
+        human_status = "SEEDED_DEMO_ONLY_NO_HUMAN_REVIEW"
+    else:
+        human_status = "NONE"
 
     extra_manifest: dict[str, Any] = {}
     if live_budget_info is not None:
@@ -275,7 +293,10 @@ def run_evaluation(
         "policy": policy,
         "regression": regression,
         "judge_human_agreement": agree,
-        "n_human_reviews": len(reviews),
+        "judge_independent": judge_independent,
+        "judge_human_agreement_note": agreement_note,
+        "n_human_reviews": n_independent,
+        "n_seeded_demo_reviews": n_seeded,
         "n_cases": len(results),
         "live_budget": live_budget_info,
         "stopped_reason": stopped_reason,
@@ -283,8 +304,5 @@ def run_evaluation(
 
     if live_summary_path is not None:
         write_redacted_live_summary(live_summary_path, out)
-    elif live_client is not None:
-        default_summary = DEFAULT_MOCK_LIVE_SUMMARY if live_client.provider == "mock" else DEFAULT_LIVE_SUMMARY
-        write_redacted_live_summary(default_summary, out)
 
     return out

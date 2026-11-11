@@ -10,7 +10,7 @@
 | Offline candidate accuracy | **79.9%** vs gold baseline **100%** |
 | Policy decision | **FAIL** (`critical_error_rate > 0.05`) |
 | Grader catches planted errors | **31/31** valid cases, 0 false alarms (synthetic, self-authored) |
-| Tests | **120** collected: 119 passed, 1 skipped (optional torch). Local run on 2026-11-11 with uncommitted fixes for the metric, manifest, and mock-output defects, see [`docs/evidence-matrix.md`](docs/evidence-matrix.md) |
+| Tests | **186 passed, 1 skipped** (optional torch module; `pytest --collect-only` reports 186 tests). Python 3.12.3, pytest 9.2.0, offline, 2026-11-11. See [`docs/evidence-matrix.md`](docs/evidence-matrix.md) |
 
 All numbers are **local benchmarks on synthetic data** — no production use, no real-model results.
 What is and is not proven: [`docs/portfolio-positioning.md`](docs/portfolio-positioning.md) · verified run: [`docs/end-to-end-flow.md`](docs/end-to-end-flow.md)

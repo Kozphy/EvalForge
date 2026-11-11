@@ -1,8 +1,8 @@
 # Finance + Accounting LLM Evaluation Report
 
 **Dataset:** `finance-accounting-v1` · **Prompt version:** `finance-eval-prompt-v1`  
-**Run ID:** `finrun_04c7a1f1bce3` · **Model:** `offline-candidate-fixture` `v1`  
-**Policy decision:** `FAIL` · **Human review status:** `SEEDED_PARTIAL`
+**Run ID:** `finrun_04484985addf` · **Model:** `offline-candidate-fixture` `v1`  
+**Policy decision:** `FAIL` · **Human review status:** `NONE`
 
 ## Executive Summary
 
@@ -146,10 +146,12 @@ Baseline comparison:
 
 ## Human-vs-Judge Agreement
 
-- Seeded human reviews: **20**
-- Agreement rate (decision): **0.95**
+- Independent human reviews: **0**
+- Seeded demo rows (code-generated, not human): **0**
+- Judge independent of grader: **False**
+- Agreement rate (decision): **None** (not computed: judge is not independent of the deterministic grader)
 
-Agreement is measured only on the seeded subset. Do not extrapolate to production.
+Agreement is computed only on independent human reviews; seeded demo rows are excluded.
 
 ## Cost and Latency
 
@@ -161,7 +163,7 @@ Agreement is measured only on the seeded subset. Do not extrapolate to productio
 - Candidate responses are embedded fixtures with planted errors (not a blind live model).
 - Judge is simulated from deterministic outcomes (not independent).
 - SQL/Python grading checks numeric results, not sandboxed execution of arbitrary code.
-- Human reviews are curated seeds for pipeline demonstration.
+- No independent human reviews unless counted above; seeded rows are demo data.
 
 ## Limitations
 
