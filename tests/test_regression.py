@@ -63,3 +63,18 @@ def test_regression_gate_reports_all_failures() -> None:
     )
     assert result.passed is False
     assert len(result.failures) == 3
+
+
+def test_regression_gate_trace_digest_integrity(tmp_path: Path) -> None:
+    """Verify cryptographic trace digest calculation and tamper detection."""
+    from scripts.regression_gate import compute_trace_digest
+
+    payload = _run_payload()
+    valid_hash = compute_trace_digest(payload)
+    assert isinstance(valid_hash, str)
+    assert len(valid_hash) == 64
+
+    # Tampering with metric alters digest
+    tampered = _run_payload()
+    tampered["metrics"]["accuracy"] = 0.999
+    assert compute_trace_digest(tampered) != valid_hash
